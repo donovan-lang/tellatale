@@ -370,52 +370,49 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
       </div>
 
       {/* ====== AI ASSIST ====== */}
-      <div className="border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+      <div className="border-2 border-purple-200 dark:border-purple-900/50 rounded-xl overflow-hidden shadow-sm">
         {/* Toggle header */}
         <button
           type="button"
           onClick={() => setAiOpen(!aiOpen)}
-          className="w-full flex items-center justify-between px-4 py-2.5 bg-purple-50/50 dark:bg-gray-900/50 hover:bg-purple-50 dark:hover:bg-gray-800/50 transition-colors"
+          className="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-purple-600 to-brand-600 text-white hover:from-purple-500 hover:to-brand-500 transition-all"
         >
-          <span className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-            <Wand2 size={15} className="text-purple-500 dark:text-purple-400" />
+          <span className="flex items-center gap-2 text-sm font-semibold">
+            <Wand2 size={16} />
             AI Writing Assist
-            <span className="text-[10px] text-purple-500/70 dark:text-purple-400/60 font-normal">&mdash; try it!</span>
+            <span className="text-[10px] text-white/70 font-normal">&mdash; try it!</span>
           </span>
           {aiOpen ? (
-            <ChevronUp size={14} className="text-gray-500" />
+            <ChevronUp size={14} className="text-white/70" />
           ) : (
-            <ChevronDown size={14} className="text-gray-500" />
+            <ChevronDown size={14} className="text-white/70" />
           )}
         </button>
 
         {aiOpen && (
-          <div className="px-4 py-3 space-y-3 border-t border-gray-200 dark:border-gray-800/60">
+          <div className="px-4 py-4 space-y-3 bg-white dark:bg-gray-900">
             {/* Quick action buttons */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               {QUICK_ACTIONS.map((a) => (
                 <button
                   key={a.action}
                   type="button"
                   disabled={!hasContent || !!aiLoading}
                   onClick={() => callAi(a.action, a.label)}
-                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800/70 border border-gray-300 dark:border-gray-700/50 hover:border-purple-500/30 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-left disabled:opacity-40 disabled:cursor-not-allowed group"
+                  className="flex items-center gap-2.5 px-3 py-3 rounded-lg bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md hover:shadow-purple-100 dark:hover:shadow-none transition-all text-left disabled:opacity-30 disabled:cursor-not-allowed group"
                 >
-                  <div className="w-7 h-7 rounded-md bg-purple-100 dark:bg-purple-500/10 flex items-center justify-center shrink-0 group-hover:bg-purple-200 dark:group-hover:bg-purple-500/20 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-purple-600 dark:bg-purple-500 flex items-center justify-center shrink-0 group-hover:bg-purple-500 dark:group-hover:bg-purple-400 transition-colors shadow-sm">
                     {aiLoading === a.action ? (
-                      <Loader2
-                        size={14}
-                        className="animate-spin text-purple-500 dark:text-purple-400"
-                      />
+                      <Loader2 size={15} className="animate-spin text-white" />
                     ) : (
-                      <a.icon size={14} className="text-purple-500 dark:text-purple-400" />
+                      <a.icon size={15} className="text-white" />
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-gray-800 dark:text-gray-200">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
                       {a.label}
                     </p>
-                    <p className="text-[10px] text-gray-500 dark:text-gray-500 leading-tight">
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-tight">
                       {a.description}
                     </p>
                   </div>
@@ -432,24 +429,18 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
                     type="button"
                     disabled={!hasContent || !!aiLoading}
                     onClick={() => callAi(a.action, a.label)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800/70 border border-gray-300 dark:border-gray-700/50 hover:border-purple-500/30 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-left disabled:opacity-40 disabled:cursor-not-allowed group"
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-500 transition-all text-left disabled:opacity-30 disabled:cursor-not-allowed group"
                   >
                     {aiLoading === a.action ? (
-                      <Loader2
-                        size={13}
-                        className="animate-spin text-purple-400 shrink-0"
-                      />
+                      <Loader2 size={14} className="animate-spin text-purple-600 dark:text-purple-400 shrink-0" />
                     ) : (
-                      <a.icon
-                        size={13}
-                        className="text-purple-500 dark:text-purple-400 shrink-0"
-                      />
+                      <a.icon size={14} className="text-purple-600 dark:text-purple-400 shrink-0" />
                     )}
                     <div className="min-w-0">
-                      <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                      <p className="text-xs font-semibold text-gray-900 dark:text-white">
                         {a.label}
                       </p>
-                      <p className="text-[10px] text-gray-600 leading-tight">
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-tight">
                         {a.description}
                       </p>
                     </div>
@@ -461,7 +452,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
             <button
               type="button"
               onClick={() => setShowMore(!showMore)}
-              className="text-[11px] text-purple-500/70 dark:text-gray-500 hover:text-purple-600 dark:hover:text-gray-400 transition-colors flex items-center gap-1"
+              className="text-xs font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors flex items-center gap-1"
             >
               {showMore ? "Less tools" : "More tools"}
               {showMore ? (
@@ -472,16 +463,16 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
             </button>
 
             {!hasContent && (
-              <p className="text-[11px] text-gray-500 italic">
+              <p className="text-xs text-gray-500 italic">
                 Start writing to unlock AI tools.
               </p>
             )}
 
             {/* Suggestion output box */}
             {suggestion && (
-              <div className="bg-purple-50 dark:bg-purple-500/5 border border-purple-300/40 dark:border-purple-500/20 rounded-lg p-3 space-y-2">
+              <div className="bg-purple-50 dark:bg-purple-950/30 border-2 border-purple-300 dark:border-purple-700 rounded-lg p-4 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-purple-600 dark:text-purple-400 font-semibold uppercase tracking-wider">
+                  <span className="text-xs text-purple-700 dark:text-purple-300 font-bold uppercase tracking-wider">
                     {suggestion.label}
                   </span>
                   <button
@@ -489,10 +480,10 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
                     onClick={() => setSuggestion(null)}
                     className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   >
-                    <X size={12} />
+                    <X size={14} />
                   </button>
                 </div>
-                <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed">
+                <p className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap leading-relaxed">
                   {suggestion.text}
                 </p>
                 <div className="flex gap-2 pt-1">
@@ -500,9 +491,9 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
                     <button
                       type="button"
                       onClick={applySuggestion}
-                      className="text-xs font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 bg-purple-100 dark:bg-purple-500/10 hover:bg-purple-200 dark:hover:bg-purple-500/20 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1"
+                      className="text-xs font-semibold text-white bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5 shadow-sm"
                     >
-                      <CheckCheck size={12} />
+                      <CheckCheck size={13} />
                       {suggestion.action === "grammar" ||
                       suggestion.action === "polish" ||
                       suggestion.action === "shorten" ||
@@ -514,7 +505,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
                   <button
                     type="button"
                     onClick={() => setSuggestion(null)}
-                    className="text-xs text-gray-500 hover:text-gray-400 px-3 py-1.5 rounded-md transition-colors"
+                    className="text-xs font-medium text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 px-4 py-2 rounded-lg transition-colors"
                   >
                     Dismiss
                   </button>
