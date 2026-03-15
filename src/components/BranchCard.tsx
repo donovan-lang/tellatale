@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown, Flag } from "lucide-react";
 import type { Story } from "@/types";
+import { toAuthorSlug } from "@/lib/utils";
 
 const RANK_COLORS = [
   "border-l-yellow-500",   // gold
@@ -101,7 +102,13 @@ export default function BranchCard({
         <p className="text-sm text-gray-300 line-clamp-2">
           {story.teaser || story.content}
         </p>
-        <p className="text-[10px] text-gray-600 mt-1">{story.author_name}</p>
+        {story.author_id ? (
+          <a href={`/author/${toAuthorSlug(story.author_name)}`} onClick={(e) => e.stopPropagation()} className="text-[10px] text-gray-600 mt-1 hover:text-brand-400 transition-colors">
+            {story.author_name}
+          </a>
+        ) : (
+          <p className="text-[10px] text-gray-600 mt-1">{story.author_name}</p>
+        )}
       </div>
 
       {/* Ending badge */}

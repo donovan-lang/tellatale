@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
+import { toAuthorSlug } from "@/lib/utils";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
@@ -97,6 +98,16 @@ export async function PATCH(req: NextRequest) {
         );
       }
       profileUpdates.pen_name = name;
+      // Regenerate slug
+      let slug = toAuthorSlug(name);
+      const { data: existing } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("slug", slug)
+        .neq("id", user.id)
+        .single();
+      if (existing) slug += "-" + Math.random().toString(36).slice(2, 6);
+      profileUpdates.slug = slug;
     }
     if (body.bio !== undefined) {
       profileUpdates.bio = (body.bio || "").slice(0, 300);

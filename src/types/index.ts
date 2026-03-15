@@ -1,10 +1,19 @@
 export interface Profile {
   id: string;
   pen_name: string;
+  slug: string | null;
   avatar_url: string | null;
   bio: string | null;
   wallet_address: string | null;
   created_at: string;
+}
+
+export interface AuthorProfile extends Profile {
+  stats: {
+    total_seeds: number;
+    total_branches: number;
+    total_votes: number;
+  };
 }
 
 export interface Story {

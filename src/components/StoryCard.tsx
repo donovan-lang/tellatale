@@ -5,6 +5,7 @@ import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { ChevronUp, ChevronDown, GitFork, MessageSquare } from "lucide-react";
 import type { Story } from "@/types";
+import { toAuthorSlug } from "@/lib/utils";
 import DonateButton from "./DonateButton";
 
 export default function StoryCard({ story }: { story: Story }) {
@@ -125,7 +126,13 @@ export default function StoryCard({ story }: { story: Story }) {
 
         {/* Meta row */}
         <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
-          <span>{story.author_name}</span>
+          {story.author_id ? (
+            <a href={`/author/${toAuthorSlug(story.author_name)}`} className="hover:text-brand-400 transition-colors">
+              {story.author_name}
+            </a>
+          ) : (
+            <span>{story.author_name}</span>
+          )}
           <span>{formatDistanceToNow(new Date(story.created_at), { addSuffix: true })}</span>
           {story.depth > 0 && (
             <span className="flex items-center gap-1">
