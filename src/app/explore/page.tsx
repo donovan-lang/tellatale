@@ -18,7 +18,9 @@ import {
   Pen,
   ChevronRight,
   Loader2,
+  X,
 } from "lucide-react";
+import { STORY_CATEGORIES } from "@/lib/demo-data";
 import type { Story } from "@/types";
 
 type FeedTab = "trending" | "new" | "foryou";
@@ -39,6 +41,7 @@ export default function ExplorePage() {
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<FeedTab>("trending");
+  const [filterTag, setFilterTag] = useState<string | null>(null);
 
   const penName =
     user?.user_metadata?.pen_name ||
@@ -68,8 +71,22 @@ export default function ExplorePage() {
   // "For you" is just a shuffle for now — personalization later
   const forYou = [...stories].sort(() => 0.5 - Math.random());
 
-  const feed =
+  const sorted =
     tab === "trending" ? trending : tab === "new" ? newest : forYou;
+
+  const feed = filterTag
+    ? sorted.filter((s) => s.tags && s.tags.includes(filterTag))
+    : sorted;
+
+  // Tag counts from stories
+  const tagCounts: Record<string, number> = {};
+  for (const s of stories) {
+    if (s.tags) {
+      for (const t of s.tags) {
+        tagCounts[t] = (tagCounts[t] || 0) + 1;
+      }
+    }
+  }
 
   // Fake "active writers" from story author names
   const activeWriters = Array.from(
@@ -235,6 +252,22 @@ export default function ExplorePage() {
             ))}
           </div>
 
+          {/* Active filter badge (mobile — tag cloud is in right sidebar on xl) */}
+          {filterTag && (
+            <div className="mb-4 flex items-center gap-2">
+              <span className="text-xs text-gray-500">Filtered:</span>
+              <span className="text-xs bg-brand-500/20 text-brand-300 px-2.5 py-1 rounded-full border border-brand-500/40">
+                {filterTag}
+              </span>
+              <button
+                onClick={() => setFilterTag(null)}
+                className="text-xs text-gray-600 hover:text-gray-400"
+              >
+                <X size={12} />
+              </button>
+            </div>
+          )}
+
           {/* Stories */}
           {loading ? (
             <div className="flex justify-center py-20">
@@ -262,6 +295,45 @@ export default function ExplorePage() {
         {/* ====== RIGHT SIDEBAR ====== */}
         <aside className="hidden xl:block w-[260px] shrink-0">
           <div className="sticky top-20 space-y-5">
+            {/* Tag Cloud */}
+            <div className="card p-4">
+              <h3 className="text-sm font-semibold mb-3">Browse by Genre</h3>
+              <div className="flex flex-wrap gap-1.5">
+                {STORY_CATEGORIES.map((cat) => {
+                  const count = tagCounts[cat] || 0;
+                  const active = filterTag === cat;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() =>
+                        setFilterTag(active ? null : cat)
+                      }
+                      className={`px-2 py-1 rounded-full transition-colors ${
+                        active
+                          ? "bg-brand-500/20 text-brand-300 border border-brand-500/40 text-xs font-medium"
+                          : count > 0
+                          ? "bg-gray-800/70 text-gray-400 border border-gray-700/50 hover:text-gray-200 hover:border-gray-600 text-xs"
+                          : "bg-gray-800/30 text-gray-600 border border-gray-800/50 text-xs"
+                      }`}
+                    >
+                      {cat}
+                      {count > 0 && (
+                        <span className="ml-1 text-gray-600">{count}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              {filterTag && (
+                <button
+                  onClick={() => setFilterTag(null)}
+                  className="mt-2 text-[11px] text-gray-500 hover:text-gray-400"
+                >
+                  Clear filter
+                </button>
+              )}
+            </div>
+
             {/* Active Writers */}
             <div className="card p-4">
               <h3 className="text-sm font-semibold flex items-center gap-2 mb-3">

@@ -6,6 +6,8 @@ ALTER TABLE stories ALTER COLUMN title DROP NOT NULL;
 ALTER TABLE stories ADD COLUMN IF NOT EXISTS story_type text NOT NULL DEFAULT 'seed';
 ALTER TABLE stories ADD COLUMN IF NOT EXISTS is_ending boolean NOT NULL DEFAULT false;
 
+ALTER TABLE stories ADD COLUMN IF NOT EXISTS tags text[] DEFAULT NULL;
+
 -- Backfill: existing stories with parent_id are branches
 UPDATE stories SET story_type = 'branch' WHERE parent_id IS NOT NULL;
 

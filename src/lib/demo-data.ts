@@ -9,6 +9,7 @@ export const DEMO_STORIES: Story[] = [
     title: "The Last Lighthouse Keeper",
     story_type: "seed",
     is_ending: false,
+    tags: ["Horror", "Mystery"],
     content:
       "On the edge of a crumbling cliff, the last lighthouse keeper wound the mechanism for the final time. The ships had stopped coming years ago, but something else watched from the deep — something that feared the light. What does the keeper do when the bulb finally dies?",
     image_url: null,
@@ -28,6 +29,7 @@ export const DEMO_STORIES: Story[] = [
     title: "Seeds of the Machine Garden",
     story_type: "seed",
     is_ending: false,
+    tags: ["Sci-Fi", "Fantasy"],
     content:
       "Nobody remembered who planted the first silicon seed. But by spring, the garden had grown circuit-boards instead of flowers, and the bees that visited them hummed at exactly 440 Hz. What grows next season?",
     image_url: null,
@@ -46,6 +48,7 @@ export const DEMO_STORIES: Story[] = [
     title: "The Color That Doesn't Exist",
     story_type: "seed",
     is_ending: false,
+    tags: ["Horror", "Surreal"],
     content:
       "The painter discovered it by accident — a pigment that shouldn't be possible, a color the human eye wasn't built to see. But once you saw it, you couldn't unsee it. And neither could the things that lived inside it. Do you look away, or lean closer?",
     image_url: null,
@@ -65,6 +68,7 @@ export const DEMO_STORIES: Story[] = [
     title: "The Library at the Bottom of the Lake",
     story_type: "seed",
     is_ending: false,
+    tags: ["Adventure", "Mystery"],
     content:
       "The divers found it at 200 meters — shelves of stone tablets, perfectly preserved, in a language that predated every known civilization by ten thousand years. The translations started making people forget things. Do you keep translating?",
     image_url: null,
@@ -84,6 +88,7 @@ export const DEMO_STORIES: Story[] = [
     title: "Eleven Minutes After Midnight",
     story_type: "seed",
     is_ending: false,
+    tags: ["Thriller", "Horror"],
     content:
       "Every night at 12:11, the radio in apartment 4B turns itself on. Static, mostly. But last Thursday, someone answered when she said hello. Do you answer back tonight?",
     image_url: null,
@@ -102,6 +107,7 @@ export const DEMO_STORIES: Story[] = [
     title: "The Cartographer's Last Map",
     story_type: "seed",
     is_ending: false,
+    tags: ["Adventure", "Fantasy"],
     content:
       "She'd mapped every continent, every coastline, every forgotten island. But the final map — the one she drew on her deathbed — showed a place that didn't exist. Until someone went looking for it. Do you follow the map?",
     image_url: null,
@@ -125,6 +131,7 @@ export const DEMO_BRANCHES: Record<string, Story[]> = {
       title: null,
       story_type: "branch",
       is_ending: false,
+      tags: null,
       content:
         "He descends the spiral stairs, clutching a lantern, to face whatever waits in the tide pools below.",
       image_url: null,
@@ -142,6 +149,7 @@ export const DEMO_BRANCHES: Record<string, Story[]> = {
       title: null,
       story_type: "branch",
       is_ending: false,
+      tags: null,
       content:
         "He lets the light die. The cliff falls into darkness, and from below he hears a sigh of relief — then scratching.",
       image_url: null,
@@ -159,6 +167,7 @@ export const DEMO_BRANCHES: Record<string, Story[]> = {
       title: null,
       story_type: "branch",
       is_ending: true,
+      tags: null,
       content:
         "He smashes the lens, scattering glass into the sea. The last light dies with him, and the deep things finally rest.",
       image_url: null,
@@ -178,6 +187,7 @@ export const DEMO_BRANCHES: Record<string, Story[]> = {
       title: null,
       story_type: "branch",
       is_ending: false,
+      tags: null,
       content:
         "The bees start building a queen — not of wax, but of copper wire and tiny capacitors. She hums at 880 Hz.",
       image_url: null,
@@ -190,6 +200,23 @@ export const DEMO_BRANCHES: Record<string, Story[]> = {
   ],
   "demo-3": [],
 };
+
+export const STORY_CATEGORIES = [
+  "Fantasy",
+  "Sci-Fi",
+  "Horror",
+  "Mystery",
+  "Romance",
+  "Adventure",
+  "Thriller",
+  "Comedy",
+  "Drama",
+  "Surreal",
+  "Historical",
+  "Dystopia",
+] as const;
+
+export type StoryCategory = (typeof STORY_CATEGORIES)[number];
 
 export function isDemo(): boolean {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;

@@ -21,6 +21,7 @@ export interface Story {
   upvotes: number;
   downvotes: number;
   depth: number;
+  tags: string[] | null;
   created_at: string;
   children_count?: number;
 }

@@ -31,6 +31,7 @@ export async function POST(req: NextRequest) {
       image_prompt,
       parent_id,
       is_ending,
+      tags,
     } = body;
 
     const isBranch = !!parent_id;
@@ -125,29 +126,46 @@ export async function POST(req: NextRequest) {
       if (parent) depth = parent.depth + 1;
     }
 
-    const storyType = isBranch ? "branch" : "seed";
+    // Base row — columns that always exist
+    const row: Record<string, unknown> = {
+      title: isBranch ? null : title.trim().slice(0, 200),
+      content: content.trim().slice(0, maxContent),
+      author_id: authorId,
+      author_name: resolvedAuthorName,
+      image_url: image_url || null,
+      image_prompt: image_prompt?.slice(0, 500) || null,
+      parent_id: parent_id || null,
+      depth,
+      upvotes: 0,
+      downvotes: 0,
+    };
 
-    const { data, error } = await supabase
+    // Try insert with CYOA columns (story_type, is_ending, tags)
+    // Falls back to base columns if migration hasn't run yet
+    const cyoaRow = {
+      ...row,
+      story_type: isBranch ? "branch" : "seed",
+      is_ending: isBranch ? !!is_ending : false,
+      tags: Array.isArray(tags) ? tags.slice(0, 5) : null,
+    };
+
+    let result = await supabase
       .from("stories")
-      .insert({
-        title: isBranch ? null : title.trim().slice(0, 200),
-        content: content.trim().slice(0, maxContent),
-        story_type: storyType,
-        is_ending: isBranch ? !!is_ending : false,
-        author_id: authorId,
-        author_name: resolvedAuthorName,
-        image_url: image_url || null,
-        image_prompt: image_prompt?.slice(0, 500) || null,
-        parent_id: parent_id || null,
-        depth,
-        upvotes: 0,
-        downvotes: 0,
-      })
+      .insert(cyoaRow)
       .select("id")
       .single();
 
-    if (error) throw error;
-    return NextResponse.json({ id: data.id }, { status: 201 });
+    // If schema error (columns don't exist yet), retry without them
+    if (result.error?.message?.includes("schema cache")) {
+      result = await supabase
+        .from("stories")
+        .insert(row)
+        .select("id")
+        .single();
+    }
+
+    if (result.error) throw result.error;
+    return NextResponse.json({ id: result.data.id }, { status: 201 });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

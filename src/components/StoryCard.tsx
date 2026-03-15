@@ -97,6 +97,20 @@ export default function StoryCard({ story }: { story: Story }) {
           </div>
         )}
 
+        {/* Tags */}
+        {story.tags && story.tags.length > 0 && (
+          <div className="mt-2 flex gap-1.5">
+            {story.tags.map((tag) => (
+              <span
+                key={tag}
+                className="text-[10px] px-2 py-0.5 rounded-full bg-gray-800 text-gray-400 border border-gray-700/50"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
         {/* Meta row */}
         <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
           <span>{story.author_name}</span>

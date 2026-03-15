@@ -17,6 +17,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import { STORY_CATEGORIES } from "@/lib/demo-data";
 
 type AiAction =
   | "next_sentence"
@@ -59,7 +60,18 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
   const [content, setContent] = useState("");
   const [authorName, setAuthorName] = useState("");
   const [isEnding, setIsEnding] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
+
+  function toggleTag(tag: string) {
+    setSelectedTags((prev) =>
+      prev.includes(tag)
+        ? prev.filter((t) => t !== tag)
+        : prev.length < 3
+        ? [...prev, tag]
+        : prev
+    );
+  }
 
   // AI assist state
   const [aiOpen, setAiOpen] = useState(false);
@@ -138,6 +150,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
           image_prompt: null,
           parent_id: parentId || null,
           is_ending: isBranch ? isEnding : false,
+          tags: !isBranch && selectedTags.length > 0 ? selectedTags : null,
         }),
       });
 
@@ -238,6 +251,35 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
             />
           </div>
         </>
+      )}
+
+      {/* Category tags (seeds only) */}
+      {!isBranch && (
+        <div>
+          <p className="text-xs text-gray-500 mb-2">
+            Categories{" "}
+            <span className="text-gray-600">(pick up to 3)</span>
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {STORY_CATEGORIES.map((cat) => {
+              const active = selectedTags.includes(cat);
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => toggleTag(cat)}
+                  className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
+                    active
+                      ? "bg-brand-500/20 text-brand-300 border border-brand-500/40"
+                      : "bg-gray-800/70 text-gray-500 border border-gray-700/50 hover:text-gray-300 hover:border-gray-600"
+                  }`}
+                >
+                  {cat}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       )}
 
       {/* Content textarea */}
