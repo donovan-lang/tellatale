@@ -1,59 +1,46 @@
+export const dynamic = "force-dynamic";
+
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
+import { createClient } from "@supabase/supabase-js";
 import { toAuthorSlug } from "@/lib/utils";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 
-async function getUser() {
-  const cookieStore = cookies();
-  const authClient = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(
-          cookiesToSet: {
-            name: string;
-            value: string;
-            options: Record<string, unknown>;
-          }[]
-        ) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch {}
-        },
-      },
-    }
-  );
-  const {
-    data: { user },
-  } = await authClient.auth.getUser();
-  return user;
+async function getUserFromRequest(req: NextRequest) {
+  // Try Authorization header first (client passes session token)
+  const authHeader = req.headers.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.slice(7);
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    const {
+      data: { user },
+    } = await supabase.auth.getUser(token);
+    return user;
+  }
+  return null;
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const user = await getUser();
+    const user = await getUserFromRequest(req);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const supabase = createServiceClient();
 
-    const { data: profile, error } = await supabase
+    const { data: profile } = await supabase
       .from("profiles")
       .select("*")
       .eq("id", user.id)
       .single();
 
-    if (error) throw error;
+    if (!profile) {
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
 
-    // Also get email preferences if they exist
     const { data: emailPrefs } = await supabase
       .from("email_preferences")
       .select("*")
@@ -79,7 +66,7 @@ export async function GET() {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const user = await getUser();
+    const user = await getUserFromRequest(req);
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -87,7 +74,6 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json();
     const supabase = createServiceClient();
 
-    // Update profile fields
     const profileUpdates: Record<string, unknown> = {};
     if (body.pen_name !== undefined) {
       const name = body.pen_name.trim().slice(0, 50);
@@ -98,7 +84,6 @@ export async function PATCH(req: NextRequest) {
         );
       }
       profileUpdates.pen_name = name;
-      // Regenerate slug
       let slug = toAuthorSlug(name);
       const { data: existing } = await supabase
         .from("profiles")
@@ -124,21 +109,13 @@ export async function PATCH(req: NextRequest) {
 
       if (error) throw error;
 
-      // Also update user metadata so NavBar reflects new name
+      // Update user metadata for NavBar
       if (profileUpdates.pen_name) {
-        const authClient = createServerClient(
+        const adminClient = createClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.SUPABASE_SERVICE_ROLE_KEY!,
-          {
-            cookies: {
-              getAll() {
-                return [];
-              },
-              setAll() {},
-            },
-          }
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
         );
-        await authClient.auth.admin.updateUserById(user.id, {
+        await adminClient.auth.admin.updateUserById(user.id, {
           user_metadata: {
             ...user.user_metadata,
             pen_name: profileUpdates.pen_name,

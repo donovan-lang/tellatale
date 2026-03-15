@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
+import { getSupabase } from "@/lib/supabase-browser";
 import {
   User,
   Mail,
@@ -61,9 +62,24 @@ export default function AccountPage() {
   const [notifyTips, setNotifyTips] = useState(true);
   const [newsletter, setNewsletter] = useState(true);
 
+  async function getAuthHeaders(): Promise<Record<string, string>> {
+    const sb = getSupabase();
+    const { data } = await sb.auth.getSession();
+    const token = data.session?.access_token;
+    return token
+      ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+      : { "Content-Type": "application/json" };
+  }
+
   const loadProfile = useCallback(async (currentUser: typeof user) => {
     try {
-      const res = await fetch("/api/profile");
+      const sb = getSupabase();
+      const { data: sessionData } = await sb.auth.getSession();
+      const token = sessionData.session?.access_token;
+      const headers: Record<string, string> = token
+        ? { Authorization: `Bearer ${token}` }
+        : {};
+      const res = await fetch("/api/profile", { headers });
       if (res.ok) {
         const data: ProfileData = await res.json();
         setProfile(data);
@@ -134,9 +150,10 @@ export default function AccountPage() {
     setSaved(false);
 
     try {
+      const headers = await getAuthHeaders();
       const res = await fetch("/api/profile", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           pen_name: penName,
           bio,
