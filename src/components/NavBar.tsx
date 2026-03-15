@@ -29,7 +29,7 @@ export default function NavBar() {
     }`;
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800/60 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl">
+    <nav className="sticky top-0 z-50 border-b border-amber-200/60 dark:border-gray-800/60 bg-amber-50/80 dark:bg-gray-950/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         {/* Logo */}
         <a href="/" className="flex items-center gap-2 group">
@@ -103,7 +103,7 @@ export default function NavBar() {
           ) : (
             <div className="flex items-center gap-2">
               <a href="/login" className="btn-ghost text-sm">Log In</a>
-              <a href="/signup" className="bg-white text-gray-950 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-gray-100 transition-all duration-200 shadow-sm hover:shadow-md">
+              <a href="/signup" className="bg-brand-600 text-white font-semibold px-4 py-2 rounded-lg text-sm hover:bg-brand-500 transition-all duration-200 shadow-sm hover:shadow-md hover:shadow-brand-500/20">
                 Sign Up Free
               </a>
             </div>
@@ -121,7 +121,7 @@ export default function NavBar() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-gray-800/60 px-4 py-4 space-y-1 bg-gray-950/98 backdrop-blur-xl">
+        <div className="md:hidden border-t border-amber-200/60 dark:border-gray-800/60 px-4 py-4 space-y-1 bg-amber-50/98 dark:bg-gray-950/98 backdrop-blur-xl">
           {user ? (
             <>
               <a href="/read" className={navLinkClass("/read") + " w-full"}>
@@ -154,7 +154,7 @@ export default function NavBar() {
             ) : (
               <div className="flex gap-2">
                 <a href="/login" className="btn-ghost text-sm flex-1 text-center">Log In</a>
-                <a href="/signup" className="bg-white text-gray-950 font-semibold px-4 py-2 rounded-lg text-sm flex-1 text-center">Sign Up Free</a>
+                <a href="/signup" className="bg-brand-600 text-white font-semibold px-4 py-2 rounded-lg text-sm flex-1 text-center hover:bg-brand-500">Sign Up Free</a>
               </div>
             )}
           </div>

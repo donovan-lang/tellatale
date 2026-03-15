@@ -3,20 +3,20 @@
 @tailwind utilities;
 
 @layer base {
-  /* Light mode (default) */
+  /* Light mode — warm, inviting, literary feel */
   body {
-    @apply bg-white text-gray-900 antialiased;
+    @apply bg-amber-50/30 text-gray-800 antialiased;
   }
-  /* Dark mode */
+  /* Dark mode — rich, deep */
   .dark body {
     @apply bg-gray-950 text-gray-100;
   }
 
   *:focus-visible {
-    @apply outline-none ring-2 ring-brand-500/50 ring-offset-2 ring-offset-white;
+    @apply outline-none ring-2 ring-brand-500/40 ring-offset-2 ring-offset-amber-50/30;
   }
   .dark *:focus-visible {
-    @apply ring-offset-gray-950;
+    @apply ring-offset-gray-950 ring-brand-500/50;
   }
 
   html { scroll-behavior: smooth; }
@@ -30,31 +30,32 @@
 }
 
 @layer components {
-  /* Light mode cards */
+  /* Cards — warm paper feel in light, rich dark in dark */
   .card {
-    @apply bg-white border border-gray-200 rounded-xl p-4 transition-all duration-200;
+    @apply bg-white border border-amber-200/60 rounded-xl p-4 transition-all duration-200 shadow-sm shadow-amber-100/50;
   }
   .card:hover {
-    @apply border-gray-300 shadow-lg shadow-gray-200/50;
+    @apply border-amber-300/80 shadow-md shadow-amber-200/40;
   }
   .dark .card {
-    @apply bg-gray-900 border-gray-800;
+    @apply bg-gray-900 border-gray-800 shadow-none;
   }
   .dark .card:hover {
-    @apply border-gray-700 shadow-black/20;
+    @apply border-gray-700 shadow-lg shadow-black/20;
   }
 
+  /* Buttons */
   .btn-primary {
-    @apply bg-brand-600 hover:bg-brand-500 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-brand-500/20 active:scale-[0.98];
+    @apply bg-brand-600 hover:bg-brand-500 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-brand-500/25 active:scale-[0.98];
   }
   .btn-secondary {
-    @apply bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium px-4 py-2 rounded-lg border border-gray-200 transition-all duration-200 hover:shadow-lg active:scale-[0.98];
+    @apply bg-white hover:bg-amber-50 text-gray-800 font-medium px-4 py-2 rounded-lg border border-amber-200 transition-all duration-200 hover:shadow-md hover:border-amber-300 active:scale-[0.98];
   }
   .dark .btn-secondary {
-    @apply bg-gray-800 hover:bg-gray-700 text-white border-gray-700 hover:shadow-black/20;
+    @apply bg-gray-800 hover:bg-gray-700 text-white border-gray-700 hover:shadow-black/20 hover:border-gray-600;
   }
   .btn-ghost {
-    @apply text-gray-500 hover:text-gray-900 hover:bg-gray-100 px-3 py-2 rounded-lg transition-all duration-200 active:scale-[0.98];
+    @apply text-gray-600 hover:text-gray-900 hover:bg-amber-100/50 px-3 py-2 rounded-lg transition-all duration-200 active:scale-[0.98];
   }
   .dark .btn-ghost {
     @apply text-gray-400 hover:text-white hover:bg-gray-800;
@@ -69,24 +70,24 @@
     text-shadow: 0 0 40px rgba(217, 70, 239, 0.3);
   }
 
-  /* Inputs */
+  /* Inputs — warm light, deep dark */
   .input-field {
-    @apply w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm transition-all duration-200;
+    @apply w-full bg-white border border-amber-200/60 rounded-lg px-4 py-3 text-sm transition-all duration-200 shadow-sm;
   }
   .input-field:focus {
-    @apply outline-none border-brand-500 ring-2 ring-brand-500/20 bg-white;
+    @apply outline-none border-brand-500 ring-2 ring-brand-500/20 bg-white shadow-md;
   }
   .input-field::placeholder {
     @apply text-gray-400;
   }
   .input-field:disabled {
-    @apply opacity-60 cursor-not-allowed bg-gray-100;
+    @apply opacity-60 cursor-not-allowed bg-amber-50/50;
   }
   .dark .input-field {
-    @apply bg-gray-800 border-gray-700;
+    @apply bg-gray-800 border-gray-700 shadow-none;
   }
   .dark .input-field:focus {
-    @apply bg-gray-800/80;
+    @apply bg-gray-800/80 shadow-none;
   }
   .dark .input-field::placeholder {
     @apply text-gray-500;
@@ -96,8 +97,14 @@
   }
 }
 
-/* Hero gradient mesh */
+/* Hero gradient — warm purple tones */
 .hero-gradient {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(168, 85, 247, 0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 50%, rgba(217, 70, 239, 0.06), transparent),
+    radial-gradient(ellipse 60% 40% at 20% 60%, rgba(139, 92, 246, 0.06), transparent);
+}
+.dark .hero-gradient {
   background:
     radial-gradient(ellipse 80% 50% at 50% -20%, rgba(168, 85, 247, 0.15), transparent),
     radial-gradient(ellipse 60% 40% at 80% 50%, rgba(217, 70, 239, 0.08), transparent),
@@ -107,9 +114,12 @@
 /* Gradient border */
 .gradient-border {
   position: relative;
-  background: linear-gradient(135deg, rgba(217, 70, 239, 0.1), rgba(139, 92, 246, 0.1));
+  background: linear-gradient(135deg, rgba(217, 70, 239, 0.06), rgba(139, 92, 246, 0.06));
   border: 1px solid transparent;
   background-clip: padding-box;
+}
+.dark .gradient-border {
+  background: linear-gradient(135deg, rgba(217, 70, 239, 0.1), rgba(139, 92, 246, 0.1));
 }
 .gradient-border::before {
   content: '';
@@ -117,11 +127,14 @@
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(217, 70, 239, 0.4), rgba(139, 92, 246, 0.2), rgba(217, 70, 239, 0.4));
+  background: linear-gradient(135deg, rgba(217, 70, 239, 0.3), rgba(139, 92, 246, 0.15), rgba(217, 70, 239, 0.3));
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
   -webkit-mask-composite: xor;
   pointer-events: none;
+}
+.dark .gradient-border::before {
+  background: linear-gradient(135deg, rgba(217, 70, 239, 0.4), rgba(139, 92, 246, 0.2), rgba(217, 70, 239, 0.4));
 }
 
 /* Animations */
@@ -135,50 +148,31 @@
 .animate-fade-up-delay-3 { animation-delay: 0.3s; opacity: 0; }
 .animate-fade-up-delay-4 { animation-delay: 0.4s; opacity: 0; }
 
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
+@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
 
-@keyframes tab-in {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
-}
-.tab-active {
-  border-bottom: 2px solid;
-  animation: tab-in 0.2s ease-out;
-  transform-origin: left;
-}
+@keyframes tab-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.tab-active { border-bottom: 2px solid; animation: tab-in 0.2s ease-out; transform-origin: left; }
 
-/* Toast animation */
-@keyframes toast-in {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes toast-out {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(16px); }
-}
+@keyframes toast-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes toast-out { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(16px); } }
 .toast-enter { animation: toast-in 0.3s ease-out forwards; }
 .toast-exit { animation: toast-out 0.2s ease-in forwards; }
 
 /* Scrollbar */
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 .scrollbar-hide::-webkit-scrollbar { display: none; }
-
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(107, 114, 128, 0.3); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(107, 114, 128, 0.5); }
+::-webkit-scrollbar-thumb { background: rgba(180, 160, 140, 0.3); border-radius: 3px; }
+.dark ::-webkit-scrollbar-thumb { background: rgba(107, 114, 128, 0.3); }
+::-webkit-scrollbar-thumb:hover { background: rgba(180, 160, 140, 0.5); }
+.dark ::-webkit-scrollbar-thumb:hover { background: rgba(107, 114, 128, 0.5); }
 
 /* Skeleton shimmer */
-@keyframes shimmer {
-  0% { background-position: -200px 0; }
-  100% { background-position: calc(200px + 100%) 0; }
-}
+@keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: calc(200px + 100%) 0; } }
 .skeleton {
-  background: linear-gradient(90deg, rgb(229, 231, 235) 0px, rgb(243, 244, 246) 50%, rgb(229, 231, 235) 100%);
+  background: linear-gradient(90deg, rgb(245, 240, 230) 0px, rgb(255, 250, 240) 50%, rgb(245, 240, 230) 100%);
   background-size: 200px 100%;
   animation: shimmer 1.5s ease-in-out infinite;
   border-radius: 0.5rem;
@@ -193,9 +187,6 @@
 .tree-line::before {
   content: '';
   position: absolute;
-  left: -17px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: linear-gradient(to bottom, rgb(107, 33, 168), transparent);
+  left: -17px; top: 0; bottom: 0; width: 2px;
+  background: linear-gradient(to bottom, rgb(168, 85, 247), transparent);
 }

@@ -198,12 +198,12 @@ export default function StoryReader({
           {story.depth > 0 && ` · Depth ${story.depth}`}
         </p>
 
-        <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+        <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap text-[15px]">
           {story.content}
         </p>
 
         {/* Vote bar */}
-        <div className="mt-4 flex items-center gap-3 pt-3 border-t border-gray-800/60">
+        <div className="mt-4 flex items-center gap-3 pt-3 border-t border-amber-200/60 dark:border-gray-800/60">
           <button
             onClick={() => handleVote(1)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
@@ -277,7 +277,7 @@ export default function StoryReader({
 
         {/* Seed author info */}
         {story.story_type === "seed" && (
-          <div className="mt-4 flex items-center gap-3 pt-3 border-t border-gray-800/60">
+          <div className="mt-4 flex items-center gap-3 pt-3 border-t border-amber-200/60 dark:border-gray-800/60">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-purple-700 flex items-center justify-center text-xs font-bold shrink-0">
               {story.author_name.charAt(0).toUpperCase()}
             </div>

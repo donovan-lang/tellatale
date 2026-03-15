@@ -38,7 +38,7 @@ export default function RootLayout({
           {children}
 
           {/* Footer */}
-          <footer className="border-t border-gray-200 dark:border-gray-800/60 mt-20">
+          <footer className="border-t border-amber-200/60 dark:border-gray-800/60 mt-20 bg-amber-50/50 dark:bg-transparent">
             <div className="mx-auto max-w-6xl px-4 py-12">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                 <div>
