@@ -4,7 +4,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import NavBar from "@/components/NavBar";
 
 export const metadata: Metadata = {
-  title: "MakeATale — Collaborative AI Storytelling",
+  title: "MakeATale — Collaborative Storytelling",
   description:
     "Write story seeds, the community branches them. Collaborative choose-your-own-adventure fiction. Tip your favorite writers.",
   keywords: [
