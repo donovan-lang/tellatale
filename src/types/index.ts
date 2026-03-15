@@ -12,8 +12,10 @@ export interface Story {
   parent_id: string | null;
   author_id: string | null;
   author_name: string;
-  title: string;
+  title: string | null;
   content: string;
+  story_type: "seed" | "branch";
+  is_ending: boolean;
   image_url: string | null;
   image_prompt: string | null;
   upvotes: number;
@@ -39,4 +41,22 @@ export interface Donation {
   token: "USDC" | "SOL";
   tx_signature: string;
   created_at: string;
+}
+
+export interface Chronicle {
+  id: string;
+  user_id: string;
+  root_story_id: string;
+  title: string;
+  story_path: string[]; // uuid[]
+  created_at: string;
+  updated_at: string;
+  root_story?: Story;
+}
+
+export interface ReadingProgress {
+  user_id: string;
+  root_story_id: string;
+  current_story_id: string;
+  updated_at: string;
 }

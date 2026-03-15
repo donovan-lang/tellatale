@@ -82,6 +82,15 @@
   animation: pulse-dot 2s ease-in-out infinite;
 }
 
+/* Scrollbar hide utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Story tree connector */
 .tree-line {
   position: relative;

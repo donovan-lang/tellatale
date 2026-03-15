@@ -23,12 +23,37 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { title, content, author_name, image_url, image_prompt, parent_id } =
-      body;
+    const {
+      title,
+      content,
+      author_name,
+      image_url,
+      image_prompt,
+      parent_id,
+      is_ending,
+    } = body;
 
-    if (!title?.trim() || !content?.trim()) {
+    const isBranch = !!parent_id;
+    const maxContent = isBranch ? 200 : 500;
+
+    // Seed requires title; branch does not
+    if (!isBranch && !title?.trim()) {
       return NextResponse.json(
-        { error: "Title and content required" },
+        { error: "Title is required for story seeds" },
+        { status: 400 }
+      );
+    }
+
+    if (!content?.trim()) {
+      return NextResponse.json(
+        { error: "Content is required" },
+        { status: 400 }
+      );
+    }
+
+    if (content.trim().length > maxContent) {
+      return NextResponse.json(
+        { error: `Content must be ${maxContent} characters or fewer` },
         { status: 400 }
       );
     }
@@ -49,7 +74,13 @@ export async function POST(req: NextRequest) {
             getAll() {
               return cookieStore.getAll();
             },
-            setAll(cookiesToSet: { name: string; value: string; options: Record<string, unknown> }[]) {
+            setAll(
+              cookiesToSet: {
+                name: string;
+                value: string;
+                options: Record<string, unknown>;
+              }[]
+            ) {
               try {
                 cookiesToSet.forEach(({ name, value, options }) =>
                   cookieStore.set(name, value, options)
@@ -68,8 +99,6 @@ export async function POST(req: NextRequest) {
 
       if (user) {
         authorId = user.id;
-
-        // Look up profile pen_name
         const { data: profile } = await supabase
           .from("profiles")
           .select("pen_name")
@@ -81,7 +110,7 @@ export async function POST(req: NextRequest) {
         }
       }
     } catch {
-      // No auth session — that's fine, post anonymously
+      // No auth session — post anonymously
     }
 
     // Calculate depth from parent
@@ -96,11 +125,15 @@ export async function POST(req: NextRequest) {
       if (parent) depth = parent.depth + 1;
     }
 
+    const storyType = isBranch ? "branch" : "seed";
+
     const { data, error } = await supabase
       .from("stories")
       .insert({
-        title: title.trim().slice(0, 200),
-        content: content.trim().slice(0, 5000),
+        title: isBranch ? null : title.trim().slice(0, 200),
+        content: content.trim().slice(0, maxContent),
+        story_type: storyType,
+        is_ending: isBranch ? !!is_ending : false,
         author_id: authorId,
         author_name: resolvedAuthorName,
         image_url: image_url || null,

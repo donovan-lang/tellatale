@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
-import { ChevronUp, ChevronDown, GitFork, MessageSquare, Heart } from "lucide-react";
+import { ChevronUp, ChevronDown, GitFork, MessageSquare } from "lucide-react";
 import type { Story } from "@/types";
 import DonateButton from "./DonateButton";
 
@@ -13,6 +13,7 @@ export default function StoryCard({ story }: { story: Story }) {
   const [voting, setVoting] = useState(false);
 
   const score = votes.up - votes.down;
+  const displayTitle = story.title || "Untitled Branch";
 
   async function handleVote(direction: 1 | -1) {
     if (voting) return;
@@ -20,7 +21,6 @@ export default function StoryCard({ story }: { story: Story }) {
 
     const newVote = userVote === direction ? 0 : direction;
 
-    // Optimistic update
     setVotes((prev) => ({
       up:
         prev.up +
@@ -40,7 +40,6 @@ export default function StoryCard({ story }: { story: Story }) {
         body: JSON.stringify({ vote: newVote }),
       });
     } catch {
-      // Revert on error
       setVotes({ up: story.upvotes, down: story.downvotes });
       setUserVote(0);
     }
@@ -80,7 +79,7 @@ export default function StoryCard({ story }: { story: Story }) {
       <div className="flex-1 min-w-0">
         <a href={`/story/${story.id}`} className="block group">
           <h2 className="text-lg font-semibold group-hover:text-brand-400 transition-colors truncate">
-            {story.title}
+            {displayTitle}
           </h2>
         </a>
 
@@ -90,7 +89,7 @@ export default function StoryCard({ story }: { story: Story }) {
           <div className="mt-3 relative aspect-[16/9] rounded-lg overflow-hidden bg-gray-800">
             <Image
               src={story.image_url}
-              alt={story.title}
+              alt={displayTitle}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 640px"

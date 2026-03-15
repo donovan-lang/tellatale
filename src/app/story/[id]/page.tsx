@@ -1,6 +1,6 @@
-import StoryCard from "@/components/StoryCard";
-import StoryForm from "@/components/StoryForm";
-import { isDemo, getDemoStory, getDemoBranches } from "@/lib/demo-data";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import StoryReader from "@/components/StoryReader";
+import { isDemo, getDemoStory, getDemoBranches, getDemoAncestors } from "@/lib/demo-data";
 import type { Story } from "@/types";
 
 async function getStory(id: string): Promise<Story | null> {
@@ -47,6 +47,48 @@ async function getBranches(parentId: string): Promise<Story[]> {
   }
 }
 
+async function getAncestors(id: string): Promise<Story[]> {
+  try {
+    if (isDemo()) return getDemoAncestors(id);
+
+    const { createClient } = await import("@supabase/supabase-js");
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    // Try RPC first
+    const { data: ancestorData } = await supabase.rpc("get_story_ancestors", {
+      story_uuid: id,
+    });
+
+    if (ancestorData && ancestorData.length > 0) {
+      return ancestorData;
+    }
+
+    // Fallback: walk manually
+    const chain: Story[] = [];
+    let currentId: string | null = id;
+
+    while (currentId) {
+      const result = await supabase
+        .from("stories")
+        .select("*")
+        .eq("id", currentId)
+        .single();
+
+      const node = result.data as Story | null;
+      if (!node) break;
+      chain.unshift(node);
+      currentId = node.parent_id;
+    }
+
+    return chain;
+  } catch {
+    return getDemoAncestors(id);
+  }
+}
+
 export default async function StoryPage({
   params,
 }: {
@@ -68,32 +110,15 @@ export default async function StoryPage({
     );
   }
 
-  const branches = await getBranches(story.id);
+  const [branches, ancestors] = await Promise.all([
+    getBranches(story.id),
+    getAncestors(story.id),
+  ]);
 
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* Parent story */}
-      <StoryCard story={story} />
-
-      {/* Branches */}
-      {branches.length > 0 && (
-        <div className="mt-8">
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <span className="text-brand-400">{branches.length}</span> branches
-          </h2>
-          <div className="space-y-3 border-l-2 border-gray-800 pl-4">
-            {branches.map((branch) => (
-              <StoryCard key={branch.id} story={branch} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Branch form */}
-      <div className="mt-8">
-        <h2 className="text-lg font-semibold mb-4">Continue the story...</h2>
-        <StoryForm parentId={story.id} />
-      </div>
+    <div className="max-w-2xl mx-auto px-4 py-6">
+      <Breadcrumbs ancestors={ancestors} />
+      <StoryReader story={story} branches={branches} />
     </div>
   );
 }

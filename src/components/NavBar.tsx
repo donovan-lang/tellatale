@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/AuthProvider";
-import { LogOut, Menu, X, Loader2 } from "lucide-react";
+import { LogOut, Menu, X, Loader2, BookMarked } from "lucide-react";
 import { useState } from "react";
 
 export default function NavBar() {
@@ -40,6 +40,15 @@ export default function NavBar() {
           <a href="/submit" className="hover:text-white transition-colors">
             Write
           </a>
+          {user && (
+            <a
+              href="/chronicles"
+              className="hover:text-white transition-colors flex items-center gap-1"
+            >
+              <BookMarked size={14} />
+              My Chronicles
+            </a>
+          )}
         </div>
 
         {/* Desktop auth area */}
@@ -119,6 +128,15 @@ export default function NavBar() {
           >
             + New Story
           </a>
+          {user && (
+            <a
+              href="/chronicles"
+              className="block text-sm text-gray-400 hover:text-white flex items-center gap-1"
+            >
+              <BookMarked size={14} />
+              My Chronicles
+            </a>
+          )}
           <div className="pt-3 border-t border-gray-800/60">
             {loading ? (
               <Loader2 size={16} className="animate-spin text-gray-500" />
