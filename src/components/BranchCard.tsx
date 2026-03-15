@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ChevronUp, ChevronDown, Flag } from "lucide-react";
+import { ChevronUp, ChevronDown, Flag, MessageSquare } from "lucide-react";
 import type { Story } from "@/types";
 import { toAuthorSlug } from "@/lib/utils";
 
@@ -110,6 +110,9 @@ export default function BranchCard({
           ) : (
             <span className="text-[10px] text-gray-500 font-medium">{story.author_name}</span>
           )}
+          <span className="text-[10px] text-gray-500 dark:text-gray-600 flex items-center gap-0.5" title="Click to read and discuss">
+            <MessageSquare size={9} />
+          </span>
         </div>
       </div>
 

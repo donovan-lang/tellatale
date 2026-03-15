@@ -109,8 +109,10 @@ export interface Comment {
   content: string;
   parent_comment_id: string | null;
   upvotes: number;
+  downvotes: number;
   is_hidden: boolean;
   created_at: string;
+  children?: Comment[];
 }
 
 export interface Follow {
