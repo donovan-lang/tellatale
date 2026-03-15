@@ -147,9 +147,23 @@ export async function POST(req: NextRequest) {
       if (parent) depth = parent.depth + 1;
     }
 
+    // Generate slug for seeds
+    let slug: string | null = null;
+    if (!isBranch && title) {
+      slug = title
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9 ]/g, "")
+        .replace(/ +/g, "-")
+        .slice(0, 80);
+      // Append random suffix to avoid collisions
+      slug += "-" + Math.random().toString(36).slice(2, 6);
+    }
+
     // Base row
     const row: Record<string, unknown> = {
       title: isBranch ? null : title.trim().slice(0, 200),
+      slug,
       content: content.trim().slice(0, maxContent),
       teaser: isBranch && teaser ? teaser.trim().slice(0, maxTeaser) : null,
       author_id: authorId,

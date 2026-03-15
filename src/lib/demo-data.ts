@@ -9,6 +9,7 @@ export const DEMO_STORIES: Story[] = [
     title: "The Last Lighthouse Keeper",
     story_type: "seed",
     is_ending: false,
+    slug: null,
     teaser: null,
     tags: ["Horror", "Mystery"],
     content:
@@ -30,6 +31,7 @@ export const DEMO_STORIES: Story[] = [
     title: "Seeds of the Machine Garden",
     story_type: "seed",
     is_ending: false,
+    slug: null,
     teaser: null,
     tags: ["Sci-Fi", "Fantasy"],
     content:
@@ -50,6 +52,7 @@ export const DEMO_STORIES: Story[] = [
     title: "The Color That Doesn't Exist",
     story_type: "seed",
     is_ending: false,
+    slug: null,
     teaser: null,
     tags: ["Horror", "Surreal"],
     content:
@@ -71,6 +74,7 @@ export const DEMO_STORIES: Story[] = [
     title: "The Library at the Bottom of the Lake",
     story_type: "seed",
     is_ending: false,
+    slug: null,
     teaser: null,
     tags: ["Adventure", "Mystery"],
     content:
@@ -92,6 +96,7 @@ export const DEMO_STORIES: Story[] = [
     title: "Eleven Minutes After Midnight",
     story_type: "seed",
     is_ending: false,
+    slug: null,
     teaser: null,
     tags: ["Thriller", "Horror"],
     content:
@@ -112,6 +117,7 @@ export const DEMO_STORIES: Story[] = [
     title: "The Cartographer's Last Map",
     story_type: "seed",
     is_ending: false,
+    slug: null,
     teaser: null,
     tags: ["Adventure", "Fantasy"],
     content:
@@ -137,6 +143,7 @@ export const DEMO_BRANCHES: Record<string, Story[]> = {
       title: null,
       story_type: "branch",
       is_ending: false,
+      slug: null,
       teaser: null,
       tags: null,
       content:
@@ -156,6 +163,7 @@ export const DEMO_BRANCHES: Record<string, Story[]> = {
       title: null,
       story_type: "branch",
       is_ending: false,
+      slug: null,
       teaser: null,
       tags: null,
       content:
@@ -175,6 +183,7 @@ export const DEMO_BRANCHES: Record<string, Story[]> = {
       title: null,
       story_type: "branch",
       is_ending: true,
+      slug: null,
       teaser: null,
       tags: null,
       content:
@@ -196,6 +205,7 @@ export const DEMO_BRANCHES: Record<string, Story[]> = {
       title: null,
       story_type: "branch",
       is_ending: false,
+      slug: null,
       teaser: null,
       tags: null,
       content:

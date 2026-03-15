@@ -89,7 +89,7 @@ export default function StoryCard({ story }: { story: Story }) {
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <a href={`/story/${story.id}`} className="block group">
+        <a href={`/story/${story.slug || story.id}`} className="block group">
           <h2 className="text-lg font-semibold group-hover:text-brand-400 transition-colors truncate">
             {displayTitle}
           </h2>

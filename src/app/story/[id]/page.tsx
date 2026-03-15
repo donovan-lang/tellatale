@@ -8,11 +8,11 @@ import type { Story } from "@/types";
 async function getStory(id: string): Promise<Story | null> {
   try {
     const supabase = createServiceClient();
-    const { data } = await supabase
-      .from("stories")
-      .select("*")
-      .eq("id", id)
-      .single();
+    // Try UUID first, then slug
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    const { data } = isUuid
+      ? await supabase.from("stories").select("*").eq("id", id).single()
+      : await supabase.from("stories").select("*").eq("slug", id).single();
     return data;
   } catch {
     return null;

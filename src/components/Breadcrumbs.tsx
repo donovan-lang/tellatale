@@ -18,7 +18,7 @@ export default function Breadcrumbs({ ancestors }: { ancestors: Story[] }) {
             </span>
           ) : (
             <a
-              href={`/story/${story.id}`}
+              href={`/story/${story.slug || story.id}`}
               className="text-gray-500 hover:text-gray-300 transition-colors truncate max-w-[150px]"
             >
               {story.title || `Branch ${i}`}

@@ -21,6 +21,7 @@ export interface Story {
   upvotes: number;
   downvotes: number;
   depth: number;
+  slug: string | null;
   teaser: string | null;
   tags: string[] | null;
   created_at: string;
