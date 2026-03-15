@@ -2,62 +2,40 @@ export const dynamic = "force-dynamic";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
 import StoryReader from "@/components/StoryReader";
-import { isDemo, getDemoStory, getDemoBranches, getDemoAncestors } from "@/lib/demo-data";
+import { createServiceClient } from "@/lib/supabase-server";
 import type { Story } from "@/types";
 
 async function getStory(id: string): Promise<Story | null> {
   try {
-    if (isDemo()) return getDemoStory(id);
-
-    const { createClient } = await import("@supabase/supabase-js");
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
+    const supabase = createServiceClient();
     const { data } = await supabase
       .from("stories")
       .select("*")
       .eq("id", id)
       .single();
-
     return data;
   } catch {
-    return getDemoStory(id);
+    return null;
   }
 }
 
 async function getBranches(parentId: string): Promise<Story[]> {
   try {
-    if (isDemo()) return getDemoBranches(parentId);
-
-    const { createClient } = await import("@supabase/supabase-js");
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
+    const supabase = createServiceClient();
     const { data } = await supabase
       .from("stories")
       .select("*")
       .eq("parent_id", parentId)
       .order("upvotes", { ascending: false });
-
     return data || [];
   } catch {
-    return getDemoBranches(parentId);
+    return [];
   }
 }
 
 async function getAncestors(id: string): Promise<Story[]> {
   try {
-    if (isDemo()) return getDemoAncestors(id);
-
-    const { createClient } = await import("@supabase/supabase-js");
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const supabase = createServiceClient();
 
     // Try RPC first
     const { data: ancestorData } = await supabase.rpc("get_story_ancestors", {
@@ -87,7 +65,7 @@ async function getAncestors(id: string): Promise<Story[]> {
 
     return chain;
   } catch {
-    return getDemoAncestors(id);
+    return [];
   }
 }
 
@@ -105,8 +83,8 @@ export default async function StoryPage({
         <p className="mt-2 text-gray-600">
           This story may have been removed or doesn&apos;t exist yet.
         </p>
-        <a href="/" className="btn-primary mt-4 inline-block">
-          Back to feed
+        <a href="/explore" className="btn-primary mt-4 inline-block">
+          Explore stories
         </a>
       </div>
     );

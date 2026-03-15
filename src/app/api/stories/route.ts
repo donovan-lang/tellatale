@@ -5,13 +5,22 @@ import { createServiceClient } from "@/lib/supabase-server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const supabase = createServiceClient();
-    const { data, error } = await supabase
-      .from("stories")
-      .select("*")
-      .is("parent_id", null)
+    const authorId = req.nextUrl.searchParams.get("author_id");
+
+    let query = supabase.from("stories").select("*");
+
+    if (authorId) {
+      // Get all stories by this author (seeds + branches)
+      query = query.eq("author_id", authorId);
+    } else {
+      // Default: root stories only
+      query = query.is("parent_id", null);
+    }
+
+    const { data, error } = await query
       .order("created_at", { ascending: false })
       .limit(50);
 

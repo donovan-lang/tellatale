@@ -12,22 +12,15 @@ import {
 } from "lucide-react";
 import StoryCard from "@/components/StoryCard";
 import NewsletterSignup from "@/components/NewsletterSignup";
-import { DEMO_STORIES, isDemo } from "@/lib/demo-data";
+import { createServiceClient } from "@/lib/supabase-server";
 import type { Story } from "@/types";
 
 async function getStories(): Promise<Story[]> {
   try {
-    if (isDemo()) return DEMO_STORIES;
-
-    const { createClient } = await import("@supabase/supabase-js");
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
+    const supabase = createServiceClient();
     const { data, error } = await supabase
       .from("stories")
-      .select("*, children_count:stories(count)")
+      .select("*")
       .is("parent_id", null)
       .order("created_at", { ascending: false })
       .limit(50);
@@ -35,7 +28,7 @@ async function getStories(): Promise<Story[]> {
     if (error) throw error;
     return data || [];
   } catch {
-    return DEMO_STORIES;
+    return [];
   }
 }
 
