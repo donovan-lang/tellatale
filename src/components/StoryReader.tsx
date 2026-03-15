@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import {
   ChevronDown,
+  ChevronUp,
   Flag,
   Star,
   Bookmark,
@@ -31,6 +32,9 @@ export default function StoryReader({
   const [showAll, setShowAll] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const [bookmarkId, setBookmarkId] = useState<string | null>(null);
+  const [votes, setVotes] = useState({ up: story.upvotes, down: story.downvotes });
+  const [userVote, setUserVote] = useState<1 | -1 | 0>(0);
+  const [voting, setVoting] = useState(false);
 
   // Auto-track reading progress
   useEffect(() => {
@@ -44,6 +48,40 @@ export default function StoryReader({
       }),
     }).catch(() => {});
   }, [story.id, rootStoryId, user]);
+
+  // Load existing vote
+  useEffect(() => {
+    fetch(`/api/stories/${story.id}/vote`)
+      .then((r) => r.json())
+      .then((d) => { if (d.vote) setUserVote(d.vote); })
+      .catch(() => {});
+  }, [story.id]);
+
+  async function handleVote(direction: 1 | -1) {
+    if (voting) return;
+    setVoting(true);
+    const newVote = userVote === direction ? 0 : direction;
+    setVotes((prev) => ({
+      up: prev.up + (newVote === 1 ? 1 : 0) - (userVote === 1 ? 1 : 0),
+      down: prev.down + (newVote === -1 ? 1 : 0) - (userVote === -1 ? 1 : 0),
+    }));
+    setUserVote(newVote as 1 | -1 | 0);
+    try {
+      const res = await fetch(`/api/stories/${story.id}/vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ vote: newVote }),
+      });
+      const data = await res.json();
+      if (data.ok) setVotes({ up: data.upvotes, down: data.downvotes });
+    } catch {
+      setVotes({ up: story.upvotes, down: story.downvotes });
+      setUserVote(0);
+    }
+    setVoting(false);
+  }
+
+  const score = votes.up - votes.down;
 
   // Check if bookmarked
   useEffect(() => {
@@ -147,6 +185,43 @@ export default function StoryReader({
         <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
           {story.content}
         </p>
+
+        {/* Vote bar */}
+        <div className="mt-4 flex items-center gap-3 pt-3 border-t border-gray-800/60">
+          <button
+            onClick={() => handleVote(1)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              userVote === 1
+                ? "bg-brand-500/20 text-brand-400"
+                : "text-gray-500 hover:text-brand-400 hover:bg-gray-800"
+            }`}
+          >
+            <ChevronUp size={18} />
+            Upvote
+          </button>
+          <span
+            className={`text-sm font-bold tabular-nums ${
+              score > 0
+                ? "text-brand-400"
+                : score < 0
+                ? "text-red-400"
+                : "text-gray-500"
+            }`}
+          >
+            {score}
+          </span>
+          <button
+            onClick={() => handleVote(-1)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              userVote === -1
+                ? "bg-red-500/20 text-red-400"
+                : "text-gray-500 hover:text-red-400 hover:bg-gray-800"
+            }`}
+          >
+            <ChevronDown size={18} />
+            Downvote
+          </button>
+        </div>
 
         {story.is_ending && (
           <div className="mt-4 flex items-center gap-2 text-amber-400 bg-amber-400/10 px-3 py-2 rounded-lg text-sm">
