@@ -7,6 +7,7 @@ import { ChevronUp, ChevronDown, GitFork, MessageSquare } from "lucide-react";
 import type { Story } from "@/types";
 import { toAuthorSlug } from "@/lib/utils";
 import DonateButton from "./DonateButton";
+import ReportButton from "./ReportButton";
 
 export default function StoryCard({ story }: { story: Story }) {
   const [votes, setVotes] = useState({ up: story.upvotes, down: story.downvotes });
@@ -145,6 +146,7 @@ export default function StoryCard({ story }: { story: Story }) {
             </span>
           )}
           <DonateButton storyId={story.id} />
+          <ReportButton storyId={story.id} />
         </div>
       </div>
     </article>

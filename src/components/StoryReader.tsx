@@ -15,6 +15,7 @@ import type { Story } from "@/types";
 import { toAuthorSlug } from "@/lib/utils";
 import BranchCard from "./BranchCard";
 import StoryForm from "./StoryForm";
+import ReportButton from "./ReportButton";
 
 export default function StoryReader({
   story,
@@ -221,6 +222,9 @@ export default function StoryReader({
             <ChevronDown size={18} />
             Downvote
           </button>
+          <span className="ml-auto">
+            <ReportButton storyId={story.id} />
+          </span>
         </div>
 
         {story.is_ending && (

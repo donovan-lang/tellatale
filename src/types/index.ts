@@ -1,7 +1,20 @@
+export interface Report {
+  id: string;
+  story_id: string;
+  reporter_id: string;
+  reason: string;
+  status: "pending" | "reviewed" | "actioned" | "dismissed";
+  admin_note: string | null;
+  created_at: string;
+  resolved_at: string | null;
+  story?: Story;
+}
+
 export interface Profile {
   id: string;
   pen_name: string;
   slug: string | null;
+  is_banned: boolean;
   avatar_url: string | null;
   bio: string | null;
   wallet_address: string | null;
@@ -33,6 +46,8 @@ export interface Story {
   slug: string | null;
   teaser: string | null;
   tags: string[] | null;
+  is_hidden: boolean;
+  hidden_reason?: string | null;
   created_at: string;
   children_count?: number;
 }

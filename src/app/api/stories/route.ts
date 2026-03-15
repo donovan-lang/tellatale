@@ -10,13 +10,11 @@ export async function GET(req: NextRequest) {
     const supabase = createServiceClient();
     const authorId = req.nextUrl.searchParams.get("author_id");
 
-    let query = supabase.from("stories").select("*");
+    let query = supabase.from("stories").select("*").eq("is_hidden", false);
 
     if (authorId) {
-      // Get all stories by this author (seeds + branches)
       query = query.eq("author_id", authorId);
     } else {
-      // Default: root stories only
       query = query.is("parent_id", null);
     }
 

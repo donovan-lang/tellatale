@@ -26,6 +26,7 @@ async function getBranches(parentId: string): Promise<Story[]> {
       .from("stories")
       .select("*")
       .eq("parent_id", parentId)
+      .eq("is_hidden", false)
       .order("upvotes", { ascending: false });
     if (error) return [];
     return data || [];
@@ -87,6 +88,25 @@ export default async function StoryPage({
         <a href="/explore" className="btn-primary mt-4 inline-block">
           Explore stories
         </a>
+      </div>
+    );
+  }
+
+  if (story.is_hidden) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-20 text-center">
+        <div className="card p-8">
+          <h1 className="text-xl font-bold text-gray-400 mb-2">
+            Content Removed
+          </h1>
+          <p className="text-sm text-gray-500">
+            This content has been removed by moderators for violating community
+            guidelines.
+          </p>
+          <a href="/explore" className="btn-primary mt-6 inline-block">
+            Explore stories
+          </a>
+        </div>
       </div>
     );
   }
