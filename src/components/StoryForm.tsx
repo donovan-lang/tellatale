@@ -2,7 +2,53 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Send, Flag } from "lucide-react";
+import {
+  Loader2,
+  Send,
+  Flag,
+  Wand2,
+  Sparkles,
+  Compass,
+  CheckCheck,
+  PenLine,
+  Lightbulb,
+  ArrowRight,
+  X,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
+
+type AiAction =
+  | "next_sentence"
+  | "directions"
+  | "grammar"
+  | "polish"
+  | "shorten"
+  | "stronger_ending"
+  | "expand";
+
+interface AiSuggestion {
+  action: AiAction;
+  label: string;
+  text: string;
+}
+
+// Placeholder responses until the AI API is hooked up
+const PLACEHOLDER_RESPONSES: Record<AiAction, (content: string) => string> = {
+  next_sentence: (c) =>
+    c.length > 20
+      ? "The silence that followed was heavier than anything that had come before."
+      : "Something stirred in the darkness, just beyond the edge of sight.",
+  directions: () =>
+    "1. The protagonist discovers the truth is worse than they imagined\n2. An unexpected ally appears with a warning\n3. The world shifts — literally — and nothing is where it was",
+  grammar: (c) => c, // Would return corrected text
+  polish: (c) => c, // Would return polished text
+  shorten: (c) =>
+    c.length > 100 ? c.slice(0, Math.floor(c.length * 0.7)) + "..." : c,
+  stronger_ending: () =>
+    "And in that moment, she understood: the door had never been locked from the outside.",
+  expand: (c) => c + " The air grew thick with anticipation. Every shadow seemed to lean closer, listening.",
+};
 
 export default function StoryForm({ parentId }: { parentId?: string }) {
   const router = useRouter();
@@ -14,6 +60,66 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
   const [authorName, setAuthorName] = useState("");
   const [isEnding, setIsEnding] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  // AI assist state
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiLoading, setAiLoading] = useState<AiAction | null>(null);
+  const [suggestion, setSuggestion] = useState<AiSuggestion | null>(null);
+  const [showMore, setShowMore] = useState(false);
+
+  async function callAi(action: AiAction, label: string) {
+    if (aiLoading) return;
+    setAiLoading(action);
+    setSuggestion(null);
+
+    try {
+      // TODO: Replace with real API call to /api/ai-assist
+      // const res = await fetch("/api/ai-assist", {
+      //   method: "POST",
+      //   headers: { "Content-Type": "application/json" },
+      //   body: JSON.stringify({ action, content, title, parent_id: parentId }),
+      // });
+      // const data = await res.json();
+      // setSuggestion({ action, label, text: data.text });
+
+      // Placeholder: simulate API delay + return canned response
+      await new Promise((r) => setTimeout(r, 800));
+      const text = PLACEHOLDER_RESPONSES[action](content);
+      setSuggestion({ action, label, text });
+    } catch {
+      setSuggestion({
+        action,
+        label,
+        text: "AI assist is not connected yet. Hook up the /api/ai-assist endpoint to enable this.",
+      });
+    }
+    setAiLoading(null);
+  }
+
+  function applySuggestion() {
+    if (!suggestion) return;
+
+    const { action, text } = suggestion;
+    if (action === "grammar" || action === "polish" || action === "shorten") {
+      // Replace content
+      setContent(text.slice(0, maxContent));
+    } else if (action === "next_sentence" || action === "expand") {
+      // Append
+      const appended = content + (content.endsWith(" ") ? "" : " ") + text;
+      setContent(appended.slice(0, maxContent));
+    } else if (action === "stronger_ending") {
+      // Replace last sentence or append
+      const sentences = content.split(/(?<=[.!?])\s+/);
+      if (sentences.length > 1) {
+        sentences[sentences.length - 1] = text;
+        setContent(sentences.join(" ").slice(0, maxContent));
+      } else {
+        setContent(text.slice(0, maxContent));
+      }
+    }
+    // directions doesn't auto-apply — it's just for inspiration
+    setSuggestion(null);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,6 +155,61 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
     setSubmitting(false);
   }
 
+  const QUICK_ACTIONS: {
+    action: AiAction;
+    label: string;
+    icon: typeof Wand2;
+    description: string;
+  }[] = [
+    {
+      action: "next_sentence",
+      label: "Next Sentence",
+      icon: ArrowRight,
+      description: "Suggest what comes next",
+    },
+    {
+      action: "directions",
+      label: "Story Directions",
+      icon: Compass,
+      description: "3 ways this could go",
+    },
+    {
+      action: "grammar",
+      label: "Grammar Pass",
+      icon: CheckCheck,
+      description: "Fix grammar & spelling",
+    },
+    {
+      action: "polish",
+      label: "Polish",
+      icon: Sparkles,
+      description: "Tighten prose & flow",
+    },
+  ];
+
+  const MORE_ACTIONS: typeof QUICK_ACTIONS = [
+    {
+      action: "shorten",
+      label: "Shorten",
+      icon: PenLine,
+      description: "Make it more concise",
+    },
+    {
+      action: "stronger_ending",
+      label: "Stronger Ending",
+      icon: Lightbulb,
+      description: "Rewrite the last line",
+    },
+    {
+      action: "expand",
+      label: "Expand",
+      icon: Wand2,
+      description: "Add detail & atmosphere",
+    },
+  ];
+
+  const hasContent = content.trim().length > 0;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       {isBranch ? (
@@ -79,6 +240,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
         </>
       )}
 
+      {/* Content textarea */}
       <div>
         <textarea
           placeholder={
@@ -97,6 +259,161 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
         <p className="text-right text-xs text-gray-600 mt-1">
           {content.length}/{maxContent}
         </p>
+      </div>
+
+      {/* ====== AI ASSIST ====== */}
+      <div className="border border-gray-800 rounded-xl overflow-hidden">
+        {/* Toggle header */}
+        <button
+          type="button"
+          onClick={() => setAiOpen(!aiOpen)}
+          className="w-full flex items-center justify-between px-4 py-2.5 bg-gray-900/50 hover:bg-gray-800/50 transition-colors"
+        >
+          <span className="flex items-center gap-2 text-sm font-medium text-gray-400">
+            <Wand2 size={15} className="text-purple-400" />
+            AI Writing Assist
+          </span>
+          {aiOpen ? (
+            <ChevronUp size={14} className="text-gray-500" />
+          ) : (
+            <ChevronDown size={14} className="text-gray-500" />
+          )}
+        </button>
+
+        {aiOpen && (
+          <div className="px-4 py-3 space-y-3 border-t border-gray-800/60">
+            {/* Quick action buttons */}
+            <div className="grid grid-cols-2 gap-2">
+              {QUICK_ACTIONS.map((a) => (
+                <button
+                  key={a.action}
+                  type="button"
+                  disabled={!hasContent || !!aiLoading}
+                  onClick={() => callAi(a.action, a.label)}
+                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-gray-800/70 border border-gray-700/50 hover:border-purple-500/30 hover:bg-gray-800 transition-all text-left disabled:opacity-40 disabled:cursor-not-allowed group"
+                >
+                  <div className="w-7 h-7 rounded-md bg-purple-500/10 flex items-center justify-center shrink-0 group-hover:bg-purple-500/20 transition-colors">
+                    {aiLoading === a.action ? (
+                      <Loader2
+                        size={14}
+                        className="animate-spin text-purple-400"
+                      />
+                    ) : (
+                      <a.icon size={14} className="text-purple-400" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-gray-300">
+                      {a.label}
+                    </p>
+                    <p className="text-[10px] text-gray-600 leading-tight">
+                      {a.description}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* More tools */}
+            {showMore && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {MORE_ACTIONS.map((a) => (
+                  <button
+                    key={a.action}
+                    type="button"
+                    disabled={!hasContent || !!aiLoading}
+                    onClick={() => callAi(a.action, a.label)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-800/70 border border-gray-700/50 hover:border-purple-500/30 hover:bg-gray-800 transition-all text-left disabled:opacity-40 disabled:cursor-not-allowed group"
+                  >
+                    {aiLoading === a.action ? (
+                      <Loader2
+                        size={13}
+                        className="animate-spin text-purple-400 shrink-0"
+                      />
+                    ) : (
+                      <a.icon
+                        size={13}
+                        className="text-purple-400 shrink-0"
+                      />
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-gray-300">
+                        {a.label}
+                      </p>
+                      <p className="text-[10px] text-gray-600 leading-tight">
+                        {a.description}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setShowMore(!showMore)}
+              className="text-[11px] text-gray-500 hover:text-gray-400 transition-colors flex items-center gap-1"
+            >
+              {showMore ? "Less tools" : "More tools"}
+              {showMore ? (
+                <ChevronUp size={10} />
+              ) : (
+                <ChevronDown size={10} />
+              )}
+            </button>
+
+            {!hasContent && (
+              <p className="text-[11px] text-gray-600 italic">
+                Start writing to unlock AI tools.
+              </p>
+            )}
+
+            {/* Suggestion output box */}
+            {suggestion && (
+              <div className="bg-purple-500/5 border border-purple-500/20 rounded-lg p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] text-purple-400 font-semibold uppercase tracking-wider">
+                    {suggestion.label}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setSuggestion(null)}
+                    className="text-gray-600 hover:text-gray-400 transition-colors"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+                <p className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+                  {suggestion.text}
+                </p>
+                <div className="flex gap-2 pt-1">
+                  {suggestion.action !== "directions" && (
+                    <button
+                      type="button"
+                      onClick={applySuggestion}
+                      className="text-xs font-medium text-purple-400 hover:text-purple-300 bg-purple-500/10 hover:bg-purple-500/20 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1"
+                    >
+                      <CheckCheck size={12} />
+                      {suggestion.action === "grammar" ||
+                      suggestion.action === "polish" ||
+                      suggestion.action === "shorten" ||
+                      suggestion.action === "stronger_ending"
+                        ? "Apply"
+                        : "Insert"}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setSuggestion(null)}
+                    className="text-xs text-gray-500 hover:text-gray-400 px-3 py-1.5 rounded-md transition-colors"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {isBranch && (
