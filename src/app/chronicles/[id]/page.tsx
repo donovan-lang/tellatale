@@ -65,7 +65,7 @@ export default function ChroniclePlaybackPage({
       <div className="flex items-center gap-3 mb-6">
         <a
           href="/chronicles"
-          className="p-2 rounded-lg text-gray-500 hover:text-white hover:bg-gray-800 transition-colors"
+          className="p-2 rounded-lg text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
         >
           <ArrowLeft size={18} />
         </a>
@@ -89,7 +89,7 @@ export default function ChroniclePlaybackPage({
             {story.title && (
               <h2 className="text-lg font-semibold mb-2">{story.title}</h2>
             )}
-            <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
               {story.content}
             </p>
             <div className="mt-3 flex items-center gap-3 text-xs text-gray-500">

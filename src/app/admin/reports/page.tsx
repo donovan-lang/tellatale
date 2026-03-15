@@ -52,7 +52,7 @@ export default function AdminReportsPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="flex items-center gap-3 mb-6">
-        <a href="/admin" className="text-gray-500 hover:text-white"><ArrowLeft size={18} /></a>
+        <a href="/admin" className="text-gray-500 hover:text-gray-900 dark:hover:text-white"><ArrowLeft size={18} /></a>
         <h1 className="text-xl font-bold">Report Queue</h1>
       </div>
 
@@ -62,7 +62,7 @@ export default function AdminReportsPage() {
             key={f}
             onClick={() => setFilter(f)}
             className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors ${
-              filter === f ? "bg-red-500/20 text-red-400" : "text-gray-500 hover:text-gray-300 bg-gray-800/50"
+              filter === f ? "bg-red-500/20 text-red-400" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 bg-gray-100 dark:bg-gray-800/50"
             }`}
           >
             {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -95,7 +95,7 @@ export default function AdminReportsPage() {
                   {r.status}
                 </span>
               </div>
-              <div className="bg-gray-800/50 rounded p-2 mb-3">
+              <div className="bg-gray-100 dark:bg-gray-800/50 rounded p-2 mb-3">
                 <p className="text-xs text-gray-400">&ldquo;{r.reason}&rdquo;</p>
               </div>
               {r.status === "pending" && (
@@ -108,7 +108,7 @@ export default function AdminReportsPage() {
                   </button>
                   <button
                     onClick={() => handleAction(r.id, "dismissed")}
-                    className="text-xs bg-gray-800 text-gray-400 hover:text-white px-3 py-1.5 rounded flex items-center gap-1"
+                    className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-1.5 rounded flex items-center gap-1"
                   >
                     <X size={11} /> Dismiss
                   </button>

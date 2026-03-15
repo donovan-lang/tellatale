@@ -325,7 +325,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
                   className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
                     active
                       ? "bg-brand-500/20 text-brand-300 border border-brand-500/40"
-                      : "bg-gray-800/70 text-gray-500 border border-gray-700/50 hover:text-gray-300 hover:border-gray-600"
+                      : "bg-gray-100 dark:bg-gray-800/70 text-gray-500 border border-gray-300 dark:border-gray-700/50 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-400 dark:hover:border-gray-600"
                   }`}
                 >
                   {cat}
@@ -370,12 +370,12 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
       </div>
 
       {/* ====== AI ASSIST ====== */}
-      <div className="border border-gray-800 rounded-xl overflow-hidden">
+      <div className="border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
         {/* Toggle header */}
         <button
           type="button"
           onClick={() => setAiOpen(!aiOpen)}
-          className="w-full flex items-center justify-between px-4 py-2.5 bg-gray-900/50 hover:bg-gray-800/50 transition-colors"
+          className="w-full flex items-center justify-between px-4 py-2.5 bg-gray-100/50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors"
         >
           <span className="flex items-center gap-2 text-sm font-medium text-gray-400">
             <Wand2 size={15} className="text-purple-400" />
@@ -390,7 +390,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
         </button>
 
         {aiOpen && (
-          <div className="px-4 py-3 space-y-3 border-t border-gray-800/60">
+          <div className="px-4 py-3 space-y-3 border-t border-gray-200 dark:border-gray-800/60">
             {/* Quick action buttons */}
             <div className="grid grid-cols-2 gap-2">
               {QUICK_ACTIONS.map((a) => (
@@ -399,7 +399,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
                   type="button"
                   disabled={!hasContent || !!aiLoading}
                   onClick={() => callAi(a.action, a.label)}
-                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-gray-800/70 border border-gray-700/50 hover:border-purple-500/30 hover:bg-gray-800 transition-all text-left disabled:opacity-40 disabled:cursor-not-allowed group"
+                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800/70 border border-gray-300 dark:border-gray-700/50 hover:border-purple-500/30 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-left disabled:opacity-40 disabled:cursor-not-allowed group"
                 >
                   <div className="w-7 h-7 rounded-md bg-purple-500/10 flex items-center justify-center shrink-0 group-hover:bg-purple-500/20 transition-colors">
                     {aiLoading === a.action ? (
@@ -412,7 +412,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-gray-300">
+                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
                       {a.label}
                     </p>
                     <p className="text-[10px] text-gray-600 leading-tight">
@@ -432,7 +432,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
                     type="button"
                     disabled={!hasContent || !!aiLoading}
                     onClick={() => callAi(a.action, a.label)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-800/70 border border-gray-700/50 hover:border-purple-500/30 hover:bg-gray-800 transition-all text-left disabled:opacity-40 disabled:cursor-not-allowed group"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800/70 border border-gray-300 dark:border-gray-700/50 hover:border-purple-500/30 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-left disabled:opacity-40 disabled:cursor-not-allowed group"
                   >
                     {aiLoading === a.action ? (
                       <Loader2
@@ -446,7 +446,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
                       />
                     )}
                     <div className="min-w-0">
-                      <p className="text-xs font-medium text-gray-300">
+                      <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
                         {a.label}
                       </p>
                       <p className="text-[10px] text-gray-600 leading-tight">
@@ -492,7 +492,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
                     <X size={12} />
                   </button>
                 </div>
-                <p className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+                <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
                   {suggestion.text}
                 </p>
                 <div className="flex gap-2 pt-1">
@@ -531,7 +531,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
             type="checkbox"
             checked={isEnding}
             onChange={(e) => setIsEnding(e.target.checked)}
-            className="rounded border-gray-600 bg-gray-800 text-brand-500 focus:ring-brand-500"
+            className="rounded border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-brand-500 focus:ring-brand-500"
           />
           <Flag size={14} className="text-amber-400" />
           This is an ending

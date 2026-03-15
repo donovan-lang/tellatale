@@ -86,13 +86,13 @@ export default function DonateButton({ storyId }: { storyId: string }) {
       </button>
 
       {open && (
-        <div className="absolute bottom-full left-0 mb-2 flex gap-1 bg-gray-800 border border-gray-700 rounded-lg p-2 shadow-xl z-10">
+        <div className="absolute bottom-full left-0 mb-2 flex gap-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg p-2 shadow-xl z-10">
           {AMOUNTS.map((amt) => (
             <button
               key={amt}
               onClick={() => handleDonate(amt)}
               disabled={sending}
-              className="px-2 py-1 text-xs bg-gray-700 hover:bg-brand-600 rounded transition-colors disabled:opacity-50"
+              className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-brand-600 hover:text-white rounded transition-colors disabled:opacity-50"
             >
               ${amt}
             </button>

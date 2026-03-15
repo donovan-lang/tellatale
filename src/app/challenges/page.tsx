@@ -47,9 +47,9 @@ export default function ChallengesPage() {
               <div key={c.id} className="card p-6 border-brand-500/30 bg-gradient-to-r from-brand-500/5 to-purple-500/5">
                 <h3 className="text-xl font-bold mb-2">{c.title}</h3>
                 {c.description && <p className="text-sm text-gray-400 mb-3">{c.description}</p>}
-                <div className="bg-gray-800/50 rounded-lg p-4 mb-4">
+                <div className="bg-gray-100 dark:bg-gray-800/50 rounded-lg p-4 mb-4">
                   <p className="text-xs text-brand-400 font-semibold uppercase tracking-wider mb-1">Prompt</p>
-                  <p className="text-sm text-gray-300 italic">&ldquo;{c.prompt}&rdquo;</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 italic">&ldquo;{c.prompt}&rdquo;</p>
                 </div>
                 <div className="flex items-center gap-4 text-xs text-gray-500">
                   <span className="flex items-center gap-1">

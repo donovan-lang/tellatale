@@ -159,7 +159,7 @@ export default async function HomePage() {
             {STATS.map((stat) => (
               <div
                 key={stat.label}
-                className="bg-gray-900/50 border border-gray-800/50 rounded-xl p-4 text-center"
+                className="bg-gray-100/50 dark:bg-gray-900/50 border border-gray-200/50 dark:border-gray-800/50 rounded-xl p-4 text-center"
               >
                 <stat.icon
                   size={18}
@@ -173,7 +173,7 @@ export default async function HomePage() {
         </div>
 
         {/* Bottom fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-gray-950 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-amber-50/30 dark:from-gray-950 to-transparent" />
       </section>
 
       {/* ===== HOW IT WORKS ===== */}
@@ -188,7 +188,7 @@ export default async function HomePage() {
         <div className="grid md:grid-cols-4 gap-6">
           {HOW_IT_WORKS.map((item) => (
             <div key={item.step} className="relative group">
-              <div className="gradient-border rounded-2xl p-6 h-full bg-gray-900/50">
+              <div className="gradient-border rounded-2xl p-6 h-full bg-gray-100/50 dark:bg-gray-900/50">
                 <span
                   className={`inline-block text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br ${item.color} mb-4`}
                 >
@@ -238,7 +238,7 @@ export default async function HomePage() {
 
       {/* ===== STORY EXAMPLE VISUAL ===== */}
       <section className="mx-auto max-w-6xl px-4 py-20">
-        <div className="gradient-border rounded-2xl bg-gray-900/50 p-8 md:p-12">
+        <div className="gradient-border rounded-2xl bg-gray-100/50 dark:bg-gray-900/50 p-8 md:p-12">
           <div className="grid md:grid-cols-2 gap-10 items-center">
             <div>
               <p className="text-sm font-semibold text-brand-400 uppercase tracking-widest mb-3">
@@ -259,10 +259,10 @@ export default async function HomePage() {
             </div>
 
             {/* Visual story tree */}
-            <div className="bg-gray-950/50 rounded-xl p-6 border border-gray-800/50">
+            <div className="bg-gray-100/50 dark:bg-gray-950/50 rounded-xl p-6 border border-gray-200/50 dark:border-gray-800/50">
               <div className="space-y-3">
                 {/* Root */}
-                <div className="bg-gray-800/80 rounded-lg p-3 border-l-4 border-brand-500">
+                <div className="bg-gray-100 dark:bg-gray-800/80 rounded-lg p-3 border-l-4 border-brand-500">
                   <p className="text-xs text-brand-400 font-semibold">Root Story</p>
                   <p className="text-sm mt-1">&ldquo;The door appeared on a Tuesday...&rdquo;</p>
                   <div className="flex gap-3 mt-2 text-xs text-gray-500">
@@ -272,20 +272,20 @@ export default async function HomePage() {
                 </div>
                 {/* Branches */}
                 <div className="ml-6 space-y-2">
-                  <div className="bg-gray-800/50 rounded-lg p-3 border-l-2 border-purple-500/60">
+                  <div className="bg-gray-100 dark:bg-gray-800/50 rounded-lg p-3 border-l-2 border-purple-500/60">
                     <p className="text-xs text-purple-400 font-semibold flex items-center gap-1">
                       <GitFork size={10} /> Branch A
                       <span className="ml-auto text-green-400">Top voted</span>
                     </p>
-                    <p className="text-sm mt-1 text-gray-300">&ldquo;She opened it and found...&rdquo;</p>
+                    <p className="text-sm mt-1 text-gray-700 dark:text-gray-300">&ldquo;She opened it and found...&rdquo;</p>
                   </div>
-                  <div className="bg-gray-800/50 rounded-lg p-3 border-l-2 border-indigo-500/40">
+                  <div className="bg-gray-100 dark:bg-gray-800/50 rounded-lg p-3 border-l-2 border-indigo-500/40">
                     <p className="text-xs text-indigo-400 font-semibold flex items-center gap-1">
                       <GitFork size={10} /> Branch B
                     </p>
                     <p className="text-sm mt-1 text-gray-400">&ldquo;He walked past it, but...&rdquo;</p>
                   </div>
-                  <div className="bg-gray-800/50 rounded-lg p-3 border-l-2 border-blue-500/30">
+                  <div className="bg-gray-100 dark:bg-gray-800/50 rounded-lg p-3 border-l-2 border-blue-500/30">
                     <p className="text-xs text-blue-400 font-semibold flex items-center gap-1">
                       <GitFork size={10} /> Branch C
                     </p>
@@ -311,7 +311,7 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="flex gap-2">
-            <a href="/#stories" className="btn-ghost text-sm inline-flex items-center gap-1.5 bg-gray-800 text-white">
+            <a href="/#stories" className="btn-ghost text-sm inline-flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white">
               <TrendingUp size={14} /> Top
             </a>
             <a href="/#new" className="btn-ghost text-sm inline-flex items-center gap-1.5">
@@ -356,7 +356,7 @@ export default async function HomePage() {
 
       {/* ===== NEWSLETTER ===== */}
       <section className="mx-auto max-w-6xl px-4 pb-20">
-        <div className="gradient-border rounded-2xl bg-gray-900/50 p-8 md:p-10 text-center">
+        <div className="gradient-border rounded-2xl bg-gray-100/50 dark:bg-gray-900/50 p-8 md:p-10 text-center">
           <p className="text-sm font-semibold text-brand-400 uppercase tracking-widest mb-2">
             Stay in the loop
           </p>
@@ -375,7 +375,7 @@ export default async function HomePage() {
 
       {/* ===== CTA BANNER ===== */}
       <section className="mx-auto max-w-6xl px-4 pb-20">
-        <div className="hero-gradient rounded-2xl border border-gray-800/60 p-10 md:p-16 text-center">
+        <div className="hero-gradient rounded-2xl border border-gray-200/60 dark:border-gray-800/60 p-10 md:p-16 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Your story is waiting to be told
           </h2>

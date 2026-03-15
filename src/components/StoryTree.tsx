@@ -47,10 +47,10 @@ function TreeNodeView({
         className={`w-full text-left rounded-lg p-3 transition-all duration-200 border ${
           isCurrent
             ? "bg-brand-500/15 border-brand-500/40 shadow-md shadow-brand-500/10"
-            : "bg-gray-900/60 border-gray-800 hover:border-gray-700 hover:bg-gray-800/60"
+            : "bg-gray-100 dark:bg-gray-900/60 border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800/60"
         }`}
       >
-        <p className={`text-xs font-medium line-clamp-2 ${isCurrent ? "text-brand-300" : "text-gray-300"}`}>
+        <p className={`text-xs font-medium line-clamp-2 ${isCurrent ? "text-brand-300" : "text-gray-700 dark:text-gray-300"}`}>
           {s.title || s.teaser || s.content?.slice(0, 80)}
         </p>
         <div className="flex items-center gap-2 mt-1.5 text-[9px] text-gray-500">
@@ -62,7 +62,7 @@ function TreeNodeView({
         </div>
       </button>
       {node.children.length > 0 && (
-        <div className="ml-4 mt-1 pl-3 border-l-2 border-gray-800 space-y-1">
+        <div className="ml-4 mt-1 pl-3 border-l-2 border-gray-200 dark:border-gray-800 space-y-1">
           {node.children.map((child) => (
             <TreeNodeView
               key={child.story.id}

@@ -38,7 +38,7 @@ export default function AdminStoriesPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="flex items-center gap-3 mb-6">
-        <a href="/admin" className="text-gray-500 hover:text-white"><ArrowLeft size={18} /></a>
+        <a href="/admin" className="text-gray-500 hover:text-gray-900 dark:hover:text-white"><ArrowLeft size={18} /></a>
         <h1 className="text-xl font-bold">Manage Stories</h1>
       </div>
 
@@ -79,7 +79,7 @@ export default function AdminStoriesPage() {
                 </p>
               </div>
               <div className="flex items-center gap-1 shrink-0">
-                <a href={`/story/${s.slug || s.id}`} target="_blank" className="p-1.5 text-gray-500 hover:text-white"><ExternalLink size={13} /></a>
+                <a href={`/story/${s.slug || s.id}`} target="_blank" className="p-1.5 text-gray-500 hover:text-gray-900 dark:hover:text-white"><ExternalLink size={13} /></a>
                 {s.is_hidden ? (
                   <button onClick={() => action(s.id, "unhide")} className="p-1.5 text-yellow-400 hover:text-green-400" title="Unhide"><Eye size={13} /></button>
                 ) : (

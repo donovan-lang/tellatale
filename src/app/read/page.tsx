@@ -88,7 +88,7 @@ function ReadContent() {
       </h1>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 border-b border-gray-800 pb-px overflow-x-auto scrollbar-hide">
+      <div className="flex gap-1 mb-6 border-b border-gray-200 dark:border-gray-800 pb-px overflow-x-auto scrollbar-hide">
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -96,13 +96,13 @@ function ReadContent() {
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium shrink-0 transition-colors ${
               tab === t.id
                 ? "text-brand-400 border-b-2 border-brand-400 -mb-px"
-                : "text-gray-500 hover:text-gray-300"
+                : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
             }`}
           >
             <t.icon size={15} />
             {t.label}
             {t.count > 0 && (
-              <span className="text-[10px] bg-gray-800 text-gray-400 px-1.5 py-0.5 rounded-full">
+              <span className="text-[10px] bg-gray-100 dark:bg-gray-800 text-gray-400 px-1.5 py-0.5 rounded-full">
                 {t.count}
               </span>
             )}
@@ -174,13 +174,13 @@ function ReadContent() {
                   {bmarks.map((b) => (
                     <div
                       key={b.id}
-                      className="flex items-start gap-3 bg-gray-800/30 rounded-lg p-3"
+                      className="flex items-start gap-3 bg-gray-50 dark:bg-gray-800/30 rounded-lg p-3"
                     >
                       <MapPin size={14} className="text-purple-400 shrink-0 mt-0.5" />
                       <div className="flex-1 min-w-0">
                         <a
                           href={`/story/${b.story_id}`}
-                          className="text-sm text-gray-300 hover:text-brand-400 transition-colors line-clamp-2"
+                          className="text-sm text-gray-700 dark:text-gray-300 hover:text-brand-400 transition-colors line-clamp-2"
                         >
                           {b.story?.teaser || b.story?.content?.slice(0, 100) || "Bookmarked node"}
                         </a>

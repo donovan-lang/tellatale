@@ -48,7 +48,7 @@ export default function NewsletterSignup({ source = "homepage" }: { source?: str
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full bg-gray-900 border border-gray-800 rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 transition-colors"
+          className="w-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 transition-colors"
         />
       </div>
       <button

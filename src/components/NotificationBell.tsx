@@ -57,7 +57,7 @@ export default function NotificationBell() {
     <div className="relative">
       <button
         onClick={() => { setOpen(!open); if (!open && unread > 0) markAllRead(); }}
-        className="p-2 rounded-lg text-gray-500 hover:text-white hover:bg-gray-800 transition-all duration-200 relative"
+        className="p-2 rounded-lg text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 relative"
       >
         <Bell size={16} />
         {unread > 0 && (
@@ -68,20 +68,20 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-y-auto bg-gray-900 border border-gray-700 rounded-xl shadow-2xl shadow-black/40 z-50">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+        <div className="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-y-auto bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl shadow-2xl shadow-black/20 dark:shadow-black/40 z-50">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-800">
             <span className="text-sm font-semibold">Notifications</span>
-            <button onClick={() => setOpen(false)} className="p-1 text-gray-500 hover:text-white"><X size={14} /></button>
+            <button onClick={() => setOpen(false)} className="p-1 text-gray-500 hover:text-gray-900 dark:hover:text-white"><X size={14} /></button>
           </div>
           {notifications.length > 0 ? (
-            <div className="divide-y divide-gray-800/50">
+            <div className="divide-y divide-gray-200/50 dark:divide-gray-800/50">
               {notifications.slice(0, 20).map((n) => (
                 <a
                   key={n.id}
                   href={n.link || "#"}
-                  className={`block px-4 py-3 hover:bg-gray-800/50 transition-colors ${!n.is_read ? "bg-brand-500/5" : ""}`}
+                  className={`block px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors ${!n.is_read ? "bg-brand-500/5" : ""}`}
                 >
-                  <p className="text-xs font-medium text-gray-300">{n.title}</p>
+                  <p className="text-xs font-medium text-gray-700 dark:text-gray-300">{n.title}</p>
                   {n.body && <p className="text-[10px] text-gray-500 mt-0.5 line-clamp-1">{n.body}</p>}
                   <p className="text-[9px] text-gray-600 mt-1">
                     {formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}
@@ -93,7 +93,7 @@ export default function NotificationBell() {
             <p className="text-center text-xs text-gray-500 py-8">No notifications yet</p>
           )}
           {notifications.length > 0 && (
-            <a href="/notifications" className="block text-center text-xs text-brand-400 py-2.5 border-t border-gray-800 hover:bg-gray-800/50">
+            <a href="/notifications" className="block text-center text-xs text-brand-400 py-2.5 border-t border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800/50">
               View all
             </a>
           )}

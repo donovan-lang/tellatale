@@ -38,7 +38,7 @@ export default function NavBar() {
           </div>
           <span className="text-xl font-bold tracking-tight">
             <span className="text-brand-400">Make</span>
-            <span className="text-white">A</span>
+            <span className="text-gray-900 dark:text-white">A</span>
             <span className="text-brand-400">Tale</span>
           </span>
         </a>
@@ -59,7 +59,7 @@ export default function NavBar() {
             </>
           ) : (
             <>
-              <a href="/#how-it-works" className="text-sm text-gray-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
+              <a href="/#how-it-works" className="text-sm text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-1.5 rounded-lg transition-colors">
                 How It Works
               </a>
               <a href="/explore" className={navLinkClass("/explore")}>
@@ -113,7 +113,7 @@ export default function NavBar() {
         {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+          className="md:hidden p-2 rounded-lg text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
         >
           {mobileOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -136,12 +136,12 @@ export default function NavBar() {
             </>
           ) : (
             <>
-              <a href="/#how-it-works" className="block text-sm text-gray-400 hover:text-white px-3 py-2 rounded-lg">How It Works</a>
+              <a href="/#how-it-works" className="block text-sm text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-lg">How It Works</a>
               <a href="/explore" className={navLinkClass("/explore") + " w-full"}>Explore</a>
               <a href="/submit" className={navLinkClass("/submit") + " w-full"}>Write</a>
             </>
           )}
-          <div className="pt-3 mt-2 border-t border-gray-800/60">
+          <div className="pt-3 mt-2 border-t border-gray-200/60 dark:border-gray-800/60">
             {loading ? (
               <Loader2 size={16} className="animate-spin text-gray-500 ml-3" />
             ) : user ? (

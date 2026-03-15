@@ -187,7 +187,7 @@ export default async function AuthorPage({
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-gray-800/60">
+        <div className="grid grid-cols-3 gap-4 mt-6 pt-4 border-t border-gray-200/60 dark:border-gray-800/60">
           <div className="text-center">
             <p className="text-xl font-bold text-brand-400">
               {stats.total_seeds}
@@ -214,7 +214,7 @@ export default async function AuthorPage({
 
         {/* Tip */}
         {wallet_address && seeds.length > 0 && (
-          <div className="mt-4 pt-4 border-t border-gray-800/60 flex items-center gap-3">
+          <div className="mt-4 pt-4 border-t border-gray-200/60 dark:border-gray-800/60 flex items-center gap-3">
             <p className="text-sm text-gray-400 flex-1">
               Support {name}&apos;s writing
             </p>
@@ -262,7 +262,7 @@ export default async function AuthorPage({
                   <GitFork size={14} className="text-purple-400" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-300 line-clamp-2">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
                     {story.teaser || story.content}
                   </p>
                   <div className="flex items-center gap-3 mt-1.5 text-[10px] text-gray-500">

@@ -135,10 +135,10 @@ export default function SignupPage() {
 
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-800" />
+            <div className="w-full border-t border-gray-200 dark:border-gray-800" />
           </div>
           <div className="relative flex justify-center text-xs">
-            <span className="bg-gray-950 px-3 text-gray-600">or sign up with email</span>
+            <span className="bg-amber-50/30 dark:bg-gray-950 px-3 text-gray-600">or sign up with email</span>
           </div>
         </div>
 
@@ -195,7 +195,7 @@ export default function SignupPage() {
           </div>
 
           {/* Notification preferences */}
-          <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-4 space-y-3">
+          <div className="bg-gray-100/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-lg p-4 space-y-3">
             <p className="text-sm font-medium flex items-center gap-2">
               <Bell size={14} className="text-brand-400" />
               Email notifications
@@ -205,7 +205,7 @@ export default function SignupPage() {
                 type="checkbox"
                 checked={notifyBranches}
                 onChange={(e) => setNotifyBranches(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-700 bg-gray-800 text-brand-500 focus:ring-brand-500"
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-brand-500 focus:ring-brand-500"
               />
               When someone branches your story
             </label>
@@ -214,7 +214,7 @@ export default function SignupPage() {
                 type="checkbox"
                 checked={notifyVotes}
                 onChange={(e) => setNotifyVotes(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-700 bg-gray-800 text-brand-500 focus:ring-brand-500"
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-brand-500 focus:ring-brand-500"
               />
               When your story gets upvoted
             </label>
@@ -223,7 +223,7 @@ export default function SignupPage() {
                 type="checkbox"
                 checked={notifyTips}
                 onChange={(e) => setNotifyTips(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-700 bg-gray-800 text-brand-500 focus:ring-brand-500"
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-brand-500 focus:ring-brand-500"
               />
               When you receive a tip
             </label>
@@ -232,7 +232,7 @@ export default function SignupPage() {
                 type="checkbox"
                 checked={newsletter}
                 onChange={(e) => setNewsletter(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-700 bg-gray-800 text-brand-500 focus:ring-brand-500"
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-brand-500 focus:ring-brand-500"
               />
               Weekly digest of top stories & platform news
             </label>
@@ -261,7 +261,7 @@ export default function SignupPage() {
 
         <p className="mt-3 text-center text-xs text-gray-700">
           Don&apos;t want an account?{" "}
-          <a href="/submit" className="text-gray-500 hover:text-gray-300">Write anonymously</a>
+          <a href="/submit" className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Write anonymously</a>
         </p>
 
         <p className="mt-6 text-center text-[11px] text-gray-700">

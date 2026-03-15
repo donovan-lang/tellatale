@@ -78,8 +78,8 @@ export default function SubmitPage() {
                         href={`/story/${story.id}`}
                         className="block group"
                       >
-                        <div className="bg-gray-800/50 rounded-lg p-3 hover:bg-gray-800 transition-colors border border-gray-800/50 hover:border-gray-700">
-                          <p className="text-sm font-medium text-gray-300 group-hover:text-brand-400 transition-colors truncate">
+                        <div className="bg-gray-100 dark:bg-gray-800/50 rounded-lg p-3 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors border border-gray-200 dark:border-gray-800/50 hover:border-gray-300 dark:hover:border-gray-700">
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-brand-400 transition-colors truncate">
                             {story.title || "Untitled branch"}
                           </p>
                           <p className="text-xs text-gray-500 mt-1 line-clamp-2">
@@ -131,7 +131,7 @@ export default function SubmitPage() {
               </div>
 
               {/* Tips */}
-              <div className="card p-4 bg-gray-900/30 border-dashed border-gray-700">
+              <div className="card p-4 bg-gray-100/50 dark:bg-gray-900/30 border-dashed border-gray-300 dark:border-gray-700">
                 <h3 className="text-xs font-semibold text-gray-400 mb-2">
                   Writing Tips
                 </h3>

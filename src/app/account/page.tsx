@@ -212,7 +212,7 @@ export default function AccountPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 overflow-x-auto scrollbar-hide border-b border-gray-800 pb-px">
+      <div className="flex gap-1 mb-6 overflow-x-auto scrollbar-hide border-b border-gray-200 dark:border-gray-800 pb-px">
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -220,7 +220,7 @@ export default function AccountPage() {
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors shrink-0 ${
               tab === t.id
                 ? "text-brand-400 border-b-2 border-brand-400 -mb-px"
-                : "text-gray-500 hover:text-gray-300"
+                : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
             }`}
           >
             <t.icon size={15} />
@@ -278,9 +278,9 @@ export default function AccountPage() {
                 type="email"
                 value={profile.email}
                 disabled
-                className="flex-1 bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 text-sm text-gray-500 cursor-not-allowed"
+                className="flex-1 bg-gray-100 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-sm text-gray-500 cursor-not-allowed"
               />
-              <span className="text-xs text-gray-600 bg-gray-800 px-3 py-1.5 rounded-full capitalize">
+              <span className="text-xs text-gray-600 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-full capitalize">
                 {profile.provider}
               </span>
             </div>
@@ -327,12 +327,12 @@ export default function AccountPage() {
               <Settings size={16} className="text-brand-400" />
               Writing Defaults
             </h2>
-            <label className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer">
+            <label className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
               <input
                 type="checkbox"
                 checked={defaultAnonymous}
                 onChange={(e) => setDefaultAnonymous(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-brand-500 focus:ring-brand-500"
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-brand-500 focus:ring-brand-500"
               />
               Post as Anonymous by default
             </label>
@@ -347,12 +347,12 @@ export default function AccountPage() {
               <BookOpen size={16} className="text-brand-400" />
               Content Preferences
             </h2>
-            <label className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer">
+            <label className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
               <input
                 type="checkbox"
                 checked={matureContent}
                 onChange={(e) => setMatureContent(e.target.checked)}
-                className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-brand-500 focus:ring-brand-500"
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-brand-500 focus:ring-brand-500"
               />
               Show mature/dark themes in feed
             </label>
@@ -383,39 +383,39 @@ export default function AccountPage() {
               Email Notifications
             </h2>
             <div className="space-y-3">
-              <label className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer">
+              <label className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={notifyBranch}
                   onChange={(e) => setNotifyBranch(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-brand-500 focus:ring-brand-500"
+                  className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-brand-500 focus:ring-brand-500"
                 />
                 Someone branches your story
               </label>
-              <label className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer">
+              <label className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={notifyVotes}
                   onChange={(e) => setNotifyVotes(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-brand-500 focus:ring-brand-500"
+                  className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-brand-500 focus:ring-brand-500"
                 />
                 Your story gets upvoted
               </label>
-              <label className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer">
+              <label className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={notifyTips}
                   onChange={(e) => setNotifyTips(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-brand-500 focus:ring-brand-500"
+                  className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-brand-500 focus:ring-brand-500"
                 />
                 You receive a tip
               </label>
-              <label className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer">
+              <label className="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={newsletter}
                   onChange={(e) => setNewsletter(e.target.checked)}
-                  className="w-4 h-4 rounded border-gray-600 bg-gray-800 text-brand-500 focus:ring-brand-500"
+                  className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-brand-500 focus:ring-brand-500"
                 />
                 Weekly digest of top stories & platform news
               </label>
@@ -432,7 +432,7 @@ export default function AccountPage() {
               <CreditCard size={16} className="text-brand-400" />
               Payment & Earnings
             </h2>
-            <div className="bg-gray-800/50 rounded-lg p-6 text-center">
+            <div className="bg-gray-100 dark:bg-gray-800/50 rounded-lg p-6 text-center">
               <CreditCard size={32} className="mx-auto text-gray-600 mb-3" />
               <p className="text-gray-400 text-sm">
                 Payment features are coming soon.
@@ -451,15 +451,15 @@ export default function AccountPage() {
               Tip Earnings
             </h2>
             <div className="grid grid-cols-3 gap-4 text-center">
-              <div className="bg-gray-800/50 rounded-lg p-4">
+              <div className="bg-gray-100 dark:bg-gray-800/50 rounded-lg p-4">
                 <p className="text-2xl font-bold text-brand-400">$0.00</p>
                 <p className="text-xs text-gray-500 mt-1">Total earned</p>
               </div>
-              <div className="bg-gray-800/50 rounded-lg p-4">
+              <div className="bg-gray-100 dark:bg-gray-800/50 rounded-lg p-4">
                 <p className="text-2xl font-bold">0</p>
                 <p className="text-xs text-gray-500 mt-1">Tips received</p>
               </div>
-              <div className="bg-gray-800/50 rounded-lg p-4">
+              <div className="bg-gray-100 dark:bg-gray-800/50 rounded-lg p-4">
                 <p className="text-2xl font-bold">$0.00</p>
                 <p className="text-xs text-gray-500 mt-1">Available</p>
               </div>

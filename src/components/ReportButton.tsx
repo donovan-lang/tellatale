@@ -42,10 +42,10 @@ export default function ReportButton({ storyId }: { storyId: string }) {
         <Flag size={12} />
       </button>
       {open && (
-        <div className="absolute bottom-full right-0 mb-2 w-72 bg-gray-900 border border-gray-700 rounded-xl p-4 shadow-2xl shadow-black/40 z-50">
+        <div className="absolute bottom-full right-0 mb-2 w-72 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-xl p-4 shadow-2xl shadow-black/20 dark:shadow-black/40 z-50">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-semibold text-gray-300">Report content</span>
-            <button onClick={() => setOpen(false)} className="p-1 rounded text-gray-500 hover:text-gray-300 hover:bg-gray-800 transition-colors">
+            <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">Report content</span>
+            <button onClick={() => setOpen(false)} className="p-1 rounded text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
               <X size={14} />
             </button>
           </div>

@@ -76,9 +76,9 @@ export default function FullPathReader({
             {i > 0 && (
               <div className="flex items-center justify-center py-3">
                 <div className="flex items-center gap-2 text-gray-600">
-                  <div className="h-px w-8 bg-gray-700" />
+                  <div className="h-px w-8 bg-gray-300 dark:bg-gray-700" />
                   <ChevronRight size={12} />
-                  <div className="h-px w-8 bg-gray-700" />
+                  <div className="h-px w-8 bg-gray-300 dark:bg-gray-700" />
                 </div>
               </div>
             )}
@@ -98,13 +98,13 @@ export default function FullPathReader({
                       ? "bg-brand-500/20 text-brand-400"
                       : isLast
                       ? "bg-purple-500/20 text-purple-400"
-                      : "bg-gray-800 text-gray-500"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-500"
                   }`}
                 >
                   {isRoot ? "Seed" : `Depth ${story.depth}`}
                 </span>
                 {story.title && (
-                  <span className="text-sm font-semibold text-gray-300 truncate">
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 truncate">
                     {story.title}
                   </span>
                 )}
@@ -116,7 +116,7 @@ export default function FullPathReader({
               </p>
 
               {/* Author line */}
-              <div className="mt-3 flex items-center gap-2 pt-2 border-t border-gray-800/40">
+              <div className="mt-3 flex items-center gap-2 pt-2 border-t border-gray-200/40 dark:border-gray-800/40">
                 <div className="w-6 h-6 rounded-full bg-gradient-to-br from-brand-500 to-purple-700 flex items-center justify-center text-[10px] font-bold shrink-0">
                   {story.author_name?.charAt(0).toUpperCase() || "?"}
                 </div>

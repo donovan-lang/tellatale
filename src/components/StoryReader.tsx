@@ -210,11 +210,11 @@ export default function StoryReader({
           </div>
           <div>
             {story.author_id ? (
-              <a href={`/author/${toAuthorSlug(story.author_name)}`} className="text-sm font-semibold text-gray-200 hover:text-brand-400 transition-colors">
+              <a href={`/author/${toAuthorSlug(story.author_name)}`} className="text-sm font-semibold text-gray-800 dark:text-gray-200 hover:text-brand-400 transition-colors">
                 {story.author_name}
               </a>
             ) : (
-              <p className="text-sm font-semibold text-gray-200">{story.author_name}</p>
+              <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{story.author_name}</p>
             )}
             <p className="text-[11px] text-gray-500">
               Depth {story.depth} &middot; Branch author
@@ -232,7 +232,7 @@ export default function StoryReader({
             className={`absolute top-3 right-3 p-1.5 rounded-lg transition-colors ${
               bookmarked
                 ? "text-brand-400 bg-brand-400/10"
-                : "text-gray-600 hover:text-gray-400 hover:bg-gray-800"
+                : "text-gray-600 hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
             }`}
             title={bookmarked ? "Remove bookmark" : "Bookmark this point"}
           >
@@ -265,7 +265,7 @@ export default function StoryReader({
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               userVote === 1
                 ? "bg-brand-500/20 text-brand-400"
-                : "text-gray-500 hover:text-brand-400 hover:bg-gray-800"
+                : "text-gray-500 hover:text-brand-400 hover:bg-gray-100 dark:hover:bg-gray-800"
             }`}
           >
             <ChevronUp size={18} />
@@ -287,7 +287,7 @@ export default function StoryReader({
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
               userVote === -1
                 ? "bg-red-500/20 text-red-400"
-                : "text-gray-500 hover:text-red-400 hover:bg-gray-800"
+                : "text-gray-500 hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-800"
             }`}
           >
             <ChevronDown size={18} />
@@ -315,7 +315,7 @@ export default function StoryReader({
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
               }}
-              className={`p-1 rounded transition-all duration-200 ${copied ? "text-green-400" : "text-gray-600 hover:text-white hover:bg-gray-800"}`}
+              className={`p-1 rounded transition-all duration-200 ${copied ? "text-green-400" : "text-gray-600 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800"}`}
               title="Copy link"
             >
               {copied ? <Check size={13} /> : <Link2 size={13} />}
@@ -353,11 +353,11 @@ export default function StoryReader({
             </div>
             <div>
               {story.author_id ? (
-                <a href={`/author/${toAuthorSlug(story.author_name)}`} className="text-sm font-medium text-gray-300 hover:text-brand-400 transition-colors">
+                <a href={`/author/${toAuthorSlug(story.author_name)}`} className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-brand-400 transition-colors">
                   {story.author_name}
                 </a>
               ) : (
-                <p className="text-sm font-medium text-gray-300">{story.author_name}</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{story.author_name}</p>
               )}
               <p className="text-[10px] text-gray-500">Seed author</p>
             </div>
@@ -366,7 +366,7 @@ export default function StoryReader({
                 {story.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="text-[10px] px-2 py-0.5 rounded-full bg-gray-800 text-gray-400 border border-gray-700/50"
+                    className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 border border-gray-300 dark:border-gray-700/50"
                   >
                     {tag}
                   </span>
@@ -383,7 +383,7 @@ export default function StoryReader({
           {branches.length > 0 && (
             <>
               <div className="flex items-center gap-3 mb-3 flex-wrap">
-                <h2 className="text-lg font-semibold text-gray-300">
+                <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
                   What happens next?
                   <span className="text-sm font-normal text-gray-500 ml-2">
                     {branches.length} choice
@@ -403,7 +403,7 @@ export default function StoryReader({
                         className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${
                           branchSort === opt.id
                             ? "bg-brand-500/20 text-brand-300 border border-brand-500/40"
-                            : "text-gray-500 hover:text-gray-300 border border-transparent hover:border-gray-700"
+                            : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border border-transparent hover:border-gray-300 dark:hover:border-gray-700"
                         }`}
                       >
                         <opt.icon size={11} />

@@ -120,10 +120,10 @@ function LoginForm() {
 
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-800" />
+          <div className="w-full border-t border-gray-200 dark:border-gray-800" />
         </div>
         <div className="relative flex justify-center text-xs">
-          <span className="bg-gray-950 px-3 text-gray-600">or sign in with email</span>
+          <span className="bg-amber-50/30 dark:bg-gray-950 px-3 text-gray-600">or sign in with email</span>
         </div>
       </div>
 
@@ -198,7 +198,7 @@ function LoginForm() {
 
       <p className="mt-3 text-center text-xs text-gray-700">
         Just want to browse?{" "}
-        <a href="/" className="text-gray-500 hover:text-gray-300">Continue as guest</a>
+        <a href="/" className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300">Continue as guest</a>
       </p>
     </div>
   );

@@ -55,7 +55,7 @@ export default function FollowButton({ authorId }: { authorId: string }) {
       className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-all duration-200 flex items-center gap-1.5 ${
         following
           ? "bg-brand-500/10 text-brand-400 border border-brand-500/30"
-          : "bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 border border-gray-700"
+          : "bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-700"
       }`}
     >
       {following ? <UserCheck size={12} /> : <UserPlus size={12} />}
