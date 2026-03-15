@@ -5,6 +5,7 @@ import { createServiceClient } from "@/lib/supabase-server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { createNotification } from "@/lib/notify";
+import { isRateLimited, getClientIp } from "@/lib/spam-filter";
 
 async function getUserId(): Promise<string | null> {
   try {
@@ -52,6 +53,12 @@ export async function POST(
 
     if (![1, -1, 0].includes(vote)) {
       return NextResponse.json({ error: "Invalid vote" }, { status: 400 });
+    }
+
+    // Rate limit: 30 votes per minute per IP
+    const ip = getClientIp(req);
+    if (isRateLimited(ip, 30)) {
+      return NextResponse.json({ error: "Too many votes. Please slow down." }, { status: 429 });
     }
 
     // Get user ID (auth) or use IP as fallback for anonymous

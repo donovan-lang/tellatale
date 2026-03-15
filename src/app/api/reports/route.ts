@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { isRateLimited, getClientIp, sanitizeContent } from "@/lib/spam-filter";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,6 +14,12 @@ export async function POST(req: NextRequest) {
         { error: "story_id and reason required" },
         { status: 400 }
       );
+    }
+
+    // Rate limit: 5 reports per minute per IP
+    const ip = getClientIp(req);
+    if (isRateLimited(ip, 5)) {
+      return NextResponse.json({ error: "Too many reports. Please slow down." }, { status: 429 });
     }
 
     // Get reporter ID
@@ -55,7 +62,7 @@ export async function POST(req: NextRequest) {
     await sb.from("reports").insert({
       story_id,
       reporter_id: reporterId,
-      reason: reason.trim().slice(0, 500),
+      reason: sanitizeContent(reason).slice(0, 500),
     });
 
     return NextResponse.json({ ok: true });

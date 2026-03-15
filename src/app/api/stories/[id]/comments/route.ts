@@ -3,6 +3,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
 import { createClient } from "@supabase/supabase-js";
 import { createNotification } from "@/lib/notify";
+import {
+  isSpamContent,
+  isHoneypotFilled,
+  isSubmittedTooFast,
+  isRateLimited,
+  getClientIp,
+  sanitizeContent,
+} from "@/lib/spam-filter";
 
 async function getUser(req: NextRequest) {
   const auth = req.headers.get("authorization");
@@ -24,8 +32,24 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
 }
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const { content, parent_comment_id } = await req.json();
+  const body = await req.json();
+  const { content, parent_comment_id, _hp, _ts } = body;
   if (!content?.trim()) return NextResponse.json({ error: "Content required" }, { status: 400 });
+
+  // ── Spam protection ──────────────────────────────────────────
+  if (isHoneypotFilled(_hp)) {
+    return NextResponse.json({ error: "Submission rejected" }, { status: 400 });
+  }
+  if (_ts && isSubmittedTooFast(_ts)) {
+    return NextResponse.json({ error: "Please wait a moment before submitting" }, { status: 400 });
+  }
+  const ip = getClientIp(req);
+  if (isRateLimited(ip, 5)) {
+    return NextResponse.json({ error: "Too many comments. Please slow down." }, { status: 429 });
+  }
+  if (isSpamContent(content)) {
+    return NextResponse.json({ error: "Your comment was flagged as spam. Remove any URLs or suspicious patterns." }, { status: 400 });
+  }
 
   const user = await getUser(req);
   const sb = createServiceClient();
@@ -39,8 +63,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const { data, error } = await sb.from("comments").insert({
     story_id: params.id,
     user_id: user?.id || null,
-    author_name: authorName,
-    content: content.trim().slice(0, 1000),
+    author_name: sanitizeContent(authorName).slice(0, 50),
+    content: sanitizeContent(content).slice(0, 1000),
     parent_comment_id: parent_comment_id || null,
   }).select("id").single();
 

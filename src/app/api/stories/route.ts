@@ -5,6 +5,14 @@ import { createServiceClient } from "@/lib/supabase-server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { createNotification } from "@/lib/notify";
+import {
+  isSpamContent,
+  isHoneypotFilled,
+  isSubmittedTooFast,
+  isRateLimited,
+  getClientIp,
+  sanitizeContent,
+} from "@/lib/spam-filter";
 
 export async function GET(req: NextRequest) {
   try {
@@ -43,7 +51,34 @@ export async function POST(req: NextRequest) {
       parent_id,
       is_ending,
       tags,
+      _hp,
+      _ts,
     } = body;
+
+    // ── Spam protection ──────────────────────────────────────────
+    // Honeypot: bots fill hidden fields
+    if (isHoneypotFilled(_hp)) {
+      return NextResponse.json({ error: "Submission rejected" }, { status: 400 });
+    }
+    // Timing: reject instant submissions (bots)
+    if (_ts && isSubmittedTooFast(_ts)) {
+      return NextResponse.json({ error: "Please wait a moment before submitting" }, { status: 400 });
+    }
+    // Rate limit: 10 stories per minute per IP
+    const ip = getClientIp(req);
+    if (isRateLimited(ip, 10)) {
+      return NextResponse.json({ error: "Too many submissions. Please slow down." }, { status: 429 });
+    }
+    // Content spam checks
+    if (content && isSpamContent(content)) {
+      return NextResponse.json({ error: "Your content was flagged as spam. Remove any URLs or suspicious patterns and try again." }, { status: 400 });
+    }
+    if (title && isSpamContent(title)) {
+      return NextResponse.json({ error: "Your title was flagged as spam." }, { status: 400 });
+    }
+    if (teaser && isSpamContent(teaser)) {
+      return NextResponse.json({ error: "Your choice line was flagged as spam." }, { status: 400 });
+    }
 
     const isBranch = !!parent_id;
     const maxContent = isBranch ? 5000 : 3000;
@@ -159,14 +194,14 @@ export async function POST(req: NextRequest) {
       slug += "-" + Math.random().toString(36).slice(2, 6);
     }
 
-    // Base row
+    // Base row (sanitize all user text)
     const row: Record<string, unknown> = {
-      title: isBranch ? null : title.trim().slice(0, 200),
+      title: isBranch ? null : sanitizeContent(title).slice(0, 200),
       slug,
-      content: content.trim().slice(0, maxContent),
-      teaser: isBranch && teaser ? teaser.trim().slice(0, maxTeaser) : null,
+      content: sanitizeContent(content).slice(0, maxContent),
+      teaser: isBranch && teaser ? sanitizeContent(teaser).slice(0, maxTeaser) : null,
       author_id: authorId,
-      author_name: resolvedAuthorName,
+      author_name: sanitizeContent(resolvedAuthorName).slice(0, 50),
       image_url: image_url || null,
       image_prompt: image_prompt?.slice(0, 500) || null,
       parent_id: parent_id || null,

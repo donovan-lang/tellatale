@@ -13,6 +13,8 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
+  const [formLoadedAt] = useState(Date.now());
   const [error, setError] = useState<string | null>(
     callbackError === "auth_callback_failed"
       ? "Authentication failed. Please try again."
@@ -21,6 +23,12 @@ function LoginForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    // Anti-spam checks
+    if (honeypot) return;
+    if (Date.now() - formLoadedAt < 2000) {
+      setError("Please wait a moment before submitting.");
+      return;
+    }
     setLoading(true);
     setError(null);
 
@@ -120,6 +128,17 @@ function LoginForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Honeypot field — hidden from humans, bots fill it */}
+        <input
+          type="text"
+          name="website"
+          value={honeypot}
+          onChange={(e) => setHoneypot(e.target.value)}
+          className="hidden"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+        />
         <div className="relative">
           <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
           <input

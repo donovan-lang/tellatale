@@ -4,10 +4,30 @@ import { createServiceClient } from "@/lib/supabase-server";
 import { generateApiKey, hashApiKey } from "@/lib/api-auth";
 import { createClient } from "@supabase/supabase-js";
 import { randomBytes } from "crypto";
+import { isRateLimited, getClientIp, sanitizeContent } from "@/lib/spam-filter";
+
+// Separate rate limiter for bot registrations: 3 per hour
+const botRegCounts = new Map<string, { count: number; resetAt: number }>();
+function isBotRegLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = botRegCounts.get(ip);
+  if (!entry || entry.resetAt < now) {
+    botRegCounts.set(ip, { count: 1, resetAt: now + 3600000 });
+    return false;
+  }
+  entry.count++;
+  return entry.count > 3;
+}
 
 export async function POST(req: NextRequest) {
   const { name, description, homepage } = await req.json();
   if (!name?.trim()) return NextResponse.json({ error: "name required" }, { status: 400 });
+
+  // Rate limit: 3 bot registrations per hour per IP
+  const ip = getClientIp(req);
+  if (isBotRegLimited(ip)) {
+    return NextResponse.json({ error: "Too many bot registrations. Try again later." }, { status: 429 });
+  }
 
   const sb = createServiceClient();
 
@@ -32,9 +52,9 @@ export async function POST(req: NextRequest) {
 
   // Update profile
   await sb.from("profiles").update({
-    pen_name: name.trim().slice(0, 50),
+    pen_name: sanitizeContent(name).slice(0, 50),
     is_bot: true,
-    bot_description: description?.slice(0, 500) || null,
+    bot_description: description ? sanitizeContent(description).slice(0, 500) : null,
     slug: name.trim().toLowerCase().replace(/[^a-z0-9 ]/g, "").replace(/ +/g, "-").slice(0, 80),
   }).eq("id", userId);
 

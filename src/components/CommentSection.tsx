@@ -14,6 +14,10 @@ export default function CommentSection({ storyId }: { storyId: string }) {
   const [posting, setPosting] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Anti-spam: honeypot + timestamp
+  const [honeypot, setHoneypot] = useState("");
+  const [formLoadedAt] = useState(Date.now());
+
   useEffect(() => {
     fetch(`/api/stories/${storyId}/comments`)
       .then((r) => r.json())
@@ -24,6 +28,11 @@ export default function CommentSection({ storyId }: { storyId: string }) {
 
   async function handlePost() {
     if (!content.trim() || posting) return;
+    // Client-side honeypot check
+    if (honeypot) return;
+    // Client-side timing check
+    if (Date.now() - formLoadedAt < 2000) return;
+
     setPosting(true);
     try {
       const sb = getSupabase();
@@ -34,7 +43,7 @@ export default function CommentSection({ storyId }: { storyId: string }) {
       const res = await fetch(`/api/stories/${storyId}/comments`, {
         method: "POST",
         headers,
-        body: JSON.stringify({ content: content.trim() }),
+        body: JSON.stringify({ content: content.trim(), _hp: honeypot, _ts: formLoadedAt }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -66,6 +75,17 @@ export default function CommentSection({ storyId }: { storyId: string }) {
       </h2>
 
       {/* Comment input */}
+      {/* Honeypot field — hidden from humans, bots fill it */}
+      <input
+        type="text"
+        name="website"
+        value={honeypot}
+        onChange={(e) => setHoneypot(e.target.value)}
+        className="hidden"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+      />
       <div className="flex gap-3 mb-4">
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-600 flex items-center justify-center text-xs font-bold shrink-0">
           {user?.user_metadata?.pen_name?.charAt(0)?.toUpperCase() || "?"}

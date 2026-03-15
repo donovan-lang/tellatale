@@ -65,6 +65,10 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
+  // Anti-spam: honeypot + timestamp
+  const [honeypot, setHoneypot] = useState("");
+  const [formLoadedAt] = useState(Date.now());
+
   function toggleTag(tag: string) {
     setSelectedTags((prev) =>
       prev.includes(tag)
@@ -140,6 +144,15 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if ((!isBranch && !title.trim()) || !content.trim() || (isBranch && !teaser.trim()) || submitting) return;
+
+    // Client-side honeypot check
+    if (honeypot) return;
+    // Client-side timing check
+    if (Date.now() - formLoadedAt < 2000) {
+      alert("Please take a moment before submitting.");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -156,6 +169,8 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
           parent_id: parentId || null,
           is_ending: isBranch ? isEnding : false,
           tags: !isBranch && selectedTags.length > 0 ? selectedTags : null,
+          _hp: honeypot,
+          _ts: formLoadedAt,
         }),
       });
 
@@ -232,6 +247,17 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
+      {/* Honeypot field — hidden from humans, bots fill it */}
+      <input
+        type="text"
+        name="website"
+        value={honeypot}
+        onChange={(e) => setHoneypot(e.target.value)}
+        className="hidden"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+      />
       {isBranch ? (
         <>
           <p className="text-sm text-brand-400">What happens next?</p>

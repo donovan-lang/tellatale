@@ -182,6 +182,52 @@ JSONB `metadata` field on stories for machine-readable structured data. Enables 
 
 ---
 
+## Spam Protection & Security
+
+### Central module: `src/lib/spam-filter.ts`
+
+| Function | Purpose |
+|----------|---------|
+| `containsUrl(text)` | Detects URLs (http, www, .com/, bit.ly, t.co, etc.) |
+| `isSpamContent(text)` | Composite check: URLs, repeated chars (8+), ALL CAPS (>80%), spam phrases, too short (<10 chars) |
+| `isHoneypotFilled(value)` | Returns true if hidden honeypot field has a value (bot indicator) |
+| `isSubmittedTooFast(loadedAt)` | Returns true if form submitted in under 2 seconds (bot speed) |
+| `isRateLimited(ip, maxPerMinute)` | In-memory sliding window rate limiter by IP |
+| `sanitizeContent(text)` | Strips all HTML tags from user input |
+| `getClientIp(req)` | Extracts client IP from x-forwarded-for header |
+
+### Protection layers applied per endpoint
+
+| Endpoint | Honeypot | Timing | Rate Limit | Spam Check | Sanitize |
+|----------|----------|--------|------------|------------|----------|
+| POST /api/stories | Yes | Yes | 10/min/IP | Title + content + teaser | All text fields |
+| POST /api/stories/[id]/comments | Yes | Yes | 5/min/IP | Comment content | Author name + content |
+| POST /api/stories/[id]/vote | — | — | 30/min/IP | — | — |
+| POST /api/reports | — | — | 5/min/IP | — | Reason text |
+| POST /api/v1/stories | — | — | 10/min/IP | Content + title + teaser (URL check skipped for bots) | All text fields |
+| POST /api/v1/bots | — | — | 3/hour/IP | — | Name + description |
+
+### Client-side anti-bot measures (all forms)
+- **Honeypot field**: Hidden `<input name="website">` with `className="hidden" tabIndex={-1} aria-hidden="true"`. Bots fill it, humans don't see it. Sent as `_hp` in POST body.
+- **Timestamp check**: `formLoadedAt = Date.now()` set on component mount. Sent as `_ts` in POST body. Server rejects submissions under 2 seconds.
+- Applied to: StoryForm, CommentSection, login page, signup page.
+
+### Content filtering rules
+- **No URLs**: Stories and comments cannot contain URLs (http://, www., .com/, bit.ly, t.co patterns)
+- **No spam phrases**: "buy now", "click here", "free money", "make money", "viagra", "casino", "crypto pump", "airdrop claim", "send sol to"
+- **No excessive repetition**: 8+ repeated characters rejected
+- **No ALL CAPS**: Text over 20 chars with >80% uppercase rejected
+- **Minimum length**: Content under 10 non-whitespace characters rejected
+- **HTML stripped**: All `<tags>` removed from user input before DB storage
+
+### Rate limiting
+In-memory Map-based sliding window. Resets per IP per minute (or per hour for bot registration). Limits are enforced server-side; client receives 429 status with descriptive error.
+
+### Bot account exception
+API v1 bot accounts (identified by `metadata.is_bot === true`) are exempt from URL detection in story content, since bots may legitimately reference URLs in structured metadata. All other spam checks still apply.
+
+---
+
 ## Solana Integration
 
 ### Tipping

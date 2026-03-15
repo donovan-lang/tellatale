@@ -13,6 +13,8 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
+  const [formLoadedAt] = useState(Date.now());
 
   // Notification preferences
   const [notifyBranches, setNotifyBranches] = useState(true);
@@ -40,6 +42,12 @@ export default function SignupPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    // Anti-spam checks
+    if (honeypot) return;
+    if (Date.now() - formLoadedAt < 2000) {
+      setError("Please wait a moment before submitting.");
+      return;
+    }
     setLoading(true);
     setError(null);
 
@@ -136,6 +144,17 @@ export default function SignupPage() {
 
         {/* Email form */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Honeypot field — hidden from humans, bots fill it */}
+          <input
+            type="text"
+            name="website"
+            value={honeypot}
+            onChange={(e) => setHoneypot(e.target.value)}
+            className="hidden"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+          />
           <div className="relative">
             <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
             <input

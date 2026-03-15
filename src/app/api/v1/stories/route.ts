@@ -3,6 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
 import { resolveAuth, hasScope } from "@/lib/api-auth";
 import { createNotification } from "@/lib/notify";
+import {
+  isSpamContent,
+  containsUrl,
+  isRateLimited,
+  getClientIp,
+  sanitizeContent,
+} from "@/lib/spam-filter";
 
 export async function GET(req: NextRequest) {
   const sb = createServiceClient();
@@ -54,6 +61,23 @@ export async function POST(req: NextRequest) {
   if (!parent_id && !title?.trim()) return NextResponse.json({ error: "title required for seeds" }, { status: 400 });
   if (parent_id && !teaser?.trim()) return NextResponse.json({ error: "teaser required for branches" }, { status: 400 });
 
+  // ── Spam protection (API key rate limit) ───────────────────────
+  const ip = getClientIp(req);
+  if (isRateLimited(ip, 10)) {
+    return NextResponse.json({ error: "Rate limit exceeded. Please slow down." }, { status: 429 });
+  }
+  // Bot accounts (metadata.is_bot) can include URLs; others cannot
+  const isBotAccount = metadata?.is_bot === true;
+  if (!isBotAccount && content && isSpamContent(content)) {
+    return NextResponse.json({ error: "Content flagged as spam." }, { status: 400 });
+  }
+  if (title && isSpamContent(title)) {
+    return NextResponse.json({ error: "Title flagged as spam." }, { status: 400 });
+  }
+  if (teaser && isSpamContent(teaser)) {
+    return NextResponse.json({ error: "Teaser flagged as spam." }, { status: 400 });
+  }
+
   const sb = createServiceClient();
   const isBranch = !!parent_id;
 
@@ -69,16 +93,16 @@ export async function POST(req: NextRequest) {
   }
 
   const { data, error } = await sb.from("stories").insert({
-    title: isBranch ? null : title.trim().slice(0, 200),
+    title: isBranch ? null : sanitizeContent(title).slice(0, 200),
     slug,
-    teaser: isBranch && teaser ? teaser.trim().slice(0, 300) : null,
-    content: content.trim().slice(0, isBranch ? 5000 : 3000),
+    teaser: isBranch && teaser ? sanitizeContent(teaser).slice(0, 300) : null,
+    content: sanitizeContent(content).slice(0, isBranch ? 5000 : 3000),
     story_type: isBranch ? "branch" : "seed",
     is_ending: !!is_ending,
     tags: Array.isArray(tags) ? tags.slice(0, 5) : null,
     metadata: metadata || null,
     author_id: auth.user_id,
-    author_name: auth.author_name,
+    author_name: sanitizeContent(auth.author_name).slice(0, 50),
     parent_id: parent_id || null,
     depth,
     upvotes: 0,
