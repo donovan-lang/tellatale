@@ -54,8 +54,8 @@ const PLACEHOLDER_RESPONSES: Record<AiAction, (content: string) => string> = {
 export default function StoryForm({ parentId }: { parentId?: string }) {
   const router = useRouter();
   const isBranch = !!parentId;
-  const maxContent = isBranch ? 2000 : 500;
-  const maxTeaser = 200;
+  const maxContent = isBranch ? 5000 : 3000;
+  const maxTeaser = 300;
 
   const [title, setTitle] = useState("");
   const [teaser, setTeaser] = useState("");

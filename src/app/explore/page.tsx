@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { STORY_CATEGORIES } from "@/lib/demo-data";
+import { toAuthorSlug } from "@/lib/utils";
 import type { Story } from "@/types";
 
 type FeedTab = "trending" | "new" | "foryou";
@@ -343,7 +344,11 @@ export default function ExplorePage() {
               {activeWriters.length > 0 ? (
                 <div className="space-y-2.5">
                   {activeWriters.map((name, i) => (
-                    <div key={name} className="flex items-center gap-2.5">
+                    <a
+                      key={name}
+                      href={`/author/${toAuthorSlug(name)}`}
+                      className="flex items-center gap-2.5 group"
+                    >
                       <div
                         className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
                         style={{
@@ -352,11 +357,11 @@ export default function ExplorePage() {
                       >
                         {name.charAt(0).toUpperCase()}
                       </div>
-                      <span className="text-sm text-gray-300 truncate">
+                      <span className="text-sm text-gray-300 truncate group-hover:text-brand-400 transition-colors">
                         {name}
                       </span>
                       <span className="w-2 h-2 rounded-full bg-green-500 shrink-0 ml-auto" />
-                    </div>
+                    </a>
                   ))}
                 </div>
               ) : (

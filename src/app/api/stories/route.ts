@@ -47,8 +47,8 @@ export async function POST(req: NextRequest) {
     } = body;
 
     const isBranch = !!parent_id;
-    const maxContent = isBranch ? 2000 : 500;
-    const maxTeaser = 200;
+    const maxContent = isBranch ? 5000 : 3000;
+    const maxTeaser = 300;
 
     // Seed requires title; branch does not
     if (!isBranch && !title?.trim()) {
