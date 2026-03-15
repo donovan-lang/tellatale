@@ -11,6 +11,7 @@ import {
   Zap,
 } from "lucide-react";
 import StoryCard from "@/components/StoryCard";
+import NewsletterSignup from "@/components/NewsletterSignup";
 import { DEMO_STORIES, isDemo } from "@/lib/demo-data";
 import type { Story } from "@/types";
 
@@ -355,6 +356,25 @@ export default async function HomePage() {
           {newStories.map((story) => (
             <StoryCard key={`new-${story.id}`} story={story} />
           ))}
+        </div>
+      </section>
+
+      {/* ===== NEWSLETTER ===== */}
+      <section className="mx-auto max-w-6xl px-4 pb-20">
+        <div className="gradient-border rounded-2xl bg-gray-900/50 p-8 md:p-10 text-center">
+          <p className="text-sm font-semibold text-brand-400 uppercase tracking-widest mb-2">
+            Stay in the loop
+          </p>
+          <h2 className="section-heading mb-3">
+            Get the best stories in your inbox
+          </h2>
+          <p className="text-gray-400 text-sm max-w-lg mx-auto mb-6">
+            Weekly digest of top-voted stories, new features, and creator spotlights.
+            No spam, unsubscribe anytime.
+          </p>
+          <div className="flex justify-center">
+            <NewsletterSignup source="homepage_section" />
+          </div>
         </div>
       </section>
 
