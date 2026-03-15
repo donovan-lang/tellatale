@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import StoryCard from "@/components/StoryCard";
 import NewsletterSignup from "@/components/NewsletterSignup";
+import HomeRedirect from "@/components/HomeRedirect";
 import { createServiceClient } from "@/lib/supabase-server";
 import type { Story } from "@/types";
 
@@ -116,6 +117,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <HomeRedirect />
       {/* ===== HERO ===== */}
       <section className="hero-gradient relative overflow-hidden">
         <div className="mx-auto max-w-6xl px-4 pt-20 pb-24 md:pt-28 md:pb-32 text-center">

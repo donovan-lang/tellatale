@@ -20,6 +20,7 @@ import BranchCard from "./BranchCard";
 import StoryForm from "./StoryForm";
 import ReportButton from "./ReportButton";
 import CommentSection from "./CommentSection";
+import { useToast } from "./Toast";
 
 export default function StoryReader({
   story,
@@ -34,6 +35,7 @@ export default function StoryReader({
 }) {
   const router = useRouter();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [showAll, setShowAll] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const [bookmarkId, setBookmarkId] = useState<string | null>(null);
@@ -112,6 +114,7 @@ export default function StoryReader({
       await fetch(`/api/bookmarks/${bookmarkId}`, { method: "DELETE" });
       setBookmarked(false);
       setBookmarkId(null);
+      toast("Bookmark removed");
     } else {
       const res = await fetch("/api/bookmarks", {
         method: "POST",
@@ -125,6 +128,7 @@ export default function StoryReader({
       if (data.id) {
         setBookmarked(true);
         setBookmarkId(data.id);
+        toast("Bookmarked! Find it in your Read tab.");
       }
     }
   }
@@ -185,10 +189,16 @@ export default function StoryReader({
         )}
 
         {story.title && (
-          <h1 className="text-2xl font-bold mb-3 pr-10">{story.title}</h1>
+          <h1 className="text-2xl font-bold mb-1 pr-10">{story.title}</h1>
         )}
 
-        <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+        {/* Reading time */}
+        <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-3">
+          {Math.max(1, Math.ceil(story.content.split(/\s+/).length / 200))} min read
+          {story.depth > 0 && ` · Depth ${story.depth}`}
+        </p>
+
+        <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
           {story.content}
         </p>
 

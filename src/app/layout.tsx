@@ -3,6 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import NavBar from "@/components/NavBar";
+import { ToastProvider } from "@/components/Toast";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://makeatale.com"),
@@ -27,16 +28,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body className="min-h-screen">
         <AuthProvider>
           <ThemeProvider>
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "WebSite", name: "MakeATale", url: "https://makeatale.com", description: "Collaborative choose-your-own-adventure fiction" }) }} />
+          <ToastProvider>
           <NavBar />
           {children}
 
           {/* Footer */}
-          <footer className="border-t border-gray-800/60 mt-20">
+          <footer className="border-t border-gray-200 dark:border-gray-800/60 mt-20">
             <div className="mx-auto max-w-6xl px-4 py-12">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                 <div>
@@ -106,6 +108,7 @@ export default function RootLayout({
               </div>
             </div>
           </footer>
+        </ToastProvider>
         </ThemeProvider>
         </AuthProvider>
       </body>

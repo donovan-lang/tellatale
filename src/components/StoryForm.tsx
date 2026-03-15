@@ -18,6 +18,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { STORY_CATEGORIES } from "@/lib/demo-data";
+import { useToast } from "./Toast";
 
 type AiAction =
   | "next_sentence"
@@ -53,6 +54,7 @@ const PLACEHOLDER_RESPONSES: Record<AiAction, (content: string) => string> = {
 
 export default function StoryForm({ parentId }: { parentId?: string }) {
   const router = useRouter();
+  const { toast } = useToast();
   const isBranch = !!parentId;
   const maxContent = isBranch ? 5000 : 3000;
   const maxTeaser = 300;
@@ -179,8 +181,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
         throw new Error(data.error || "Submission failed");
       }
       const { id } = await res.json();
-      // Branches: go back to parent so user sees their choice listed
-      // Seeds: go to the new story page
+      toast(isBranch ? "Choice added! Others can now vote on it." : "Story planted! The community can start branching.");
       router.push(isBranch ? `/story/${parentId}` : `/story/${id}`);
       router.refresh();
     } catch (err: any) {

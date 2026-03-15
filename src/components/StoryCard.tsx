@@ -84,12 +84,20 @@ export default function StoryCard({ story }: { story: Story }) {
       {/* Content */}
       <div className="flex-1 min-w-0">
         <a href={`/story/${story.slug || story.id}`} className="block group/link">
-          <h2 className="text-base font-semibold group-hover/link:text-brand-400 transition-colors duration-200 line-clamp-1">
-            {displayTitle}
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-semibold group-hover/link:text-brand-400 transition-colors duration-200 line-clamp-1 flex-1">
+              {displayTitle}
+            </h2>
+            {story.children_count !== undefined && story.children_count > 0 && (
+              <span className="shrink-0 flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 dark:bg-purple-500/10 dark:text-purple-400">
+                <GitFork size={10} />
+                {story.children_count} {story.children_count === 1 ? "path" : "paths"}
+              </span>
+            )}
+          </div>
         </a>
 
-        <p className="mt-1.5 text-sm text-gray-400 line-clamp-3 leading-relaxed">
+        <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400 line-clamp-3 leading-relaxed">
           {story.content}
         </p>
 

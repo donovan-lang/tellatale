@@ -24,12 +24,12 @@ export default function NavBar() {
   const navLinkClass = (href: string) =>
     `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
       isActive(href)
-        ? "text-brand-400 bg-brand-500/10"
-        : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+        ? "text-brand-500 dark:text-brand-400 bg-brand-500/10"
+        : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800/50"
     }`;
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-gray-800/60 bg-gray-950/80 backdrop-blur-xl">
+    <nav className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800/60 bg-white/80 dark:bg-gray-950/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         {/* Logo */}
         <a href="/" className="flex items-center gap-2 group">

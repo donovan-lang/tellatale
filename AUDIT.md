@@ -298,6 +298,81 @@ Planned revenue streams:
 
 ---
 
+## Security Audit Findings (2026-03-15)
+
+Cross-referenced every claim in this doc against the actual codebase. Findings below with fix instructions.
+
+### CRITICAL — Fix Immediately
+
+#### 1. Admin cookie missing `httpOnly` and `secure` flags
+**File:** `src/app/api/admin/login/route.ts` (lines 9-13)
+**Issue:** Admin token cookie can be stolen via XSS — missing `httpOnly: true` and `secure: true`.
+**Fix:** Add both flags to the `res.cookies.set()` options object.
+
+#### 2. Admin secret falls back to hardcoded default
+**File:** `src/lib/admin-auth.ts` (lines 4-5)
+**Issue:** `const SECRET = process.env.ADMIN_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || "makeatale-admin-secret"` — if `ADMIN_SECRET` env var is missing, falls back to the service role key (extremely sensitive), then to a hardcoded string (publicly known).
+**Fix:** Remove both fallbacks. Require `ADMIN_SECRET` to be set or throw an error at startup.
+
+#### 3. Bot URL exception trusts client-provided metadata
+**File:** `src/app/api/v1/stories/route.ts` (lines 69-71)
+**Issue:** `const isBotAccount = metadata?.is_bot === true` — any authenticated user can set `metadata.is_bot = true` in their POST body to bypass URL filtering in story content.
+**Fix:** Check bot status from the auth resolver result (e.g., `auth.auth_method === 'api_key'` or check `auth.tier`) instead of trusting client-submitted metadata.
+
+---
+
+### HIGH — Fix Soon
+
+#### 4. Bot registration endpoint has no authentication
+**File:** `src/app/api/v1/bots/route.ts` (lines 22-79)
+**Issue:** `POST /api/v1/bots` requires no auth — anyone can register unlimited bots. Only throttled by IP-based rate limit (3/hour), which is bypassable via X-Forwarded-For spoofing.
+**Fix:** Require a Bearer token (logged-in Supabase user) to register a bot, or add stronger rate limiting (per account, CAPTCHA, etc.).
+
+#### 5. IP spoofing bypasses all rate limiting
+**File:** `src/lib/spam-filter.ts` (lines 76-79)
+**Issue:** `getClientIp()` trusts `X-Forwarded-For` header without validation. Attacker can forge this header to bypass every per-IP rate limit and anonymous vote dedup.
+**Fix:** Only trust `X-Forwarded-For` from known proxy IPs (Nginx/Cloudflare). If behind Cloudflare, use `cf-connecting-ip` header instead.
+
+#### 6. API key `rate_limit_rpm` never enforced
+**File:** `src/lib/api-auth.ts` — field returned but never checked anywhere
+**Issue:** `api_keys.rate_limit_rpm` exists in the DB and is set to 60 for bots, but no middleware actually enforces it. API keys can make unlimited requests.
+**Fix:** Add rate-limit middleware that checks the resolved API key's `rate_limit_rpm` value against a sliding window counter.
+
+---
+
+### MEDIUM — Fix When Possible
+
+#### 7. No CSRF protection on form endpoints
+**Files:** `/api/stories`, `/api/stories/[id]/comments`, `/api/reports`
+**Issue:** No CSRF token validation. Honeypot and timing checks help but don't prevent targeted CSRF attacks.
+**Fix:** Add CSRF token generation/validation, or ensure `SameSite=Strict` on auth cookies.
+
+#### 8. Anonymous vote spoofing via forged IP
+**File:** `src/app/api/stories/[id]/vote/route.ts` (lines 64-69)
+**Issue:** Anonymous voters identified by `anon_${ip}` — forging X-Forwarded-For allows unlimited votes.
+**Fix:** Use session IDs, browser fingerprinting, or stricter IP validation for anonymous votes.
+
+#### 9. Error messages leak server internals
+**Files:** Multiple API routes (e.g., `/api/stories/route.ts` line 259)
+**Issue:** Raw `err.message` returned to clients can expose table names, column names, or connection details.
+**Fix:** Log detailed errors server-side; return generic "An error occurred" to clients.
+
+---
+
+### Documentation Accuracy Corrections
+
+These are inaccuracies in THIS audit document that should be corrected:
+
+| Section | Issue | Correction |
+|---------|-------|------------|
+| Schema: `stories` | Claims `cover_url` field | Actual field name is `image_url` |
+| Schema: `stories` | Missing `hidden_reason` field | Used in admin routes for ban cascades |
+| Schema overview | Claims "20+ tables" | Only ~8 tables have migration files in the repo. Others (`comments`, `follows`, `notifications`, `reports`, `bookmarks`, `api_keys`, `tips`, `webhooks`, `challenges`, `challenge_entries`, `user_tokens`, `email_preferences`, `banned_authors`) are referenced in code but have no migration files — they must exist directly in Supabase. |
+| Webhook dispatch | Says "not wired into events yet" | More incomplete: `/api/v1/webhooks` folder is empty — no registration or dispatch code exists at all |
+| Missing entirely | Newsletter route | `/api/newsletter/route.ts` exists but is not documented anywhere in this file |
+
+---
+
 ## Deployment Checklist
 
 ```bash

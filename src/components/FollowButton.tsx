@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { UserPlus, UserCheck } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { getSupabase } from "@/lib/supabase-browser";
+import { useToast } from "./Toast";
 
 export default function FollowButton({ authorId }: { authorId: string }) {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [following, setFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -35,9 +37,11 @@ export default function FollowButton({ authorId }: { authorId: string }) {
     if (following) {
       await fetch(`/api/follows/${authorId}`, { method: "DELETE", headers });
       setFollowing(false);
+      toast("Unfollowed");
     } else {
       await fetch("/api/follows", { method: "POST", headers, body: JSON.stringify({ followed_id: authorId }) });
       setFollowing(true);
+      toast("Following! Their stories will appear in your For You feed.");
     }
     setLoading(false);
   }
