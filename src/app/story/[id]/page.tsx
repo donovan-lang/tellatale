@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Breadcrumbs from "@/components/Breadcrumbs";
 import StoryReader from "@/components/StoryReader";
 import { isDemo, getDemoStory, getDemoBranches, getDemoAncestors } from "@/lib/demo-data";

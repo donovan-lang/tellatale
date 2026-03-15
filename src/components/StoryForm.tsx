@@ -161,7 +161,9 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
         throw new Error(data.error || "Submission failed");
       }
       const { id } = await res.json();
-      router.push(`/story/${id}`);
+      // Branches: go back to parent so user sees their choice listed
+      // Seeds: go to the new story page
+      router.push(isBranch ? `/story/${parentId}` : `/story/${id}`);
       router.refresh();
     } catch (err: any) {
       console.error(err);
