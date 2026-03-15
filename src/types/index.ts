@@ -100,3 +100,43 @@ export interface Bookmark {
   story?: Story;
   root_story?: Story;
 }
+
+export interface Comment {
+  id: string;
+  story_id: string;
+  user_id: string | null;
+  author_name: string;
+  content: string;
+  parent_comment_id: string | null;
+  upvotes: number;
+  is_hidden: boolean;
+  created_at: string;
+}
+
+export interface Follow {
+  follower_id: string;
+  followed_id: string;
+  created_at: string;
+}
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: string;
+  title: string;
+  body: string | null;
+  link: string | null;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface Challenge {
+  id: string;
+  title: string;
+  description: string | null;
+  prompt: string;
+  start_date: string;
+  end_date: string;
+  winner_story_id: string | null;
+  created_at: string;
+}

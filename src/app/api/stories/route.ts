@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { createNotification } from "@/lib/notify";
 
 export async function GET(req: NextRequest) {
   try {
@@ -199,6 +200,25 @@ export async function POST(req: NextRequest) {
     }
 
     if (result.error) throw result.error;
+
+    // Notify parent story author when someone branches their story
+    if (isBranch && parent_id) {
+      const { data: parentStory } = await supabase
+        .from("stories")
+        .select("author_id, title, slug, id")
+        .eq("id", parent_id)
+        .single();
+      if (parentStory?.author_id && parentStory.author_id !== authorId) {
+        createNotification(
+          parentStory.author_id,
+          "branch",
+          `${resolvedAuthorName} branched "${parentStory.title || "your story"}"`,
+          teaser?.trim()?.slice(0, 100) || content.trim().slice(0, 100),
+          `/story/${parentStory.slug || parentStory.id}`
+        );
+      }
+    }
+
     return NextResponse.json({ id: result.data.id }, { status: 201 });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });

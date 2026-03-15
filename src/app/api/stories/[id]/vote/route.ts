@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { createNotification } from "@/lib/notify";
 
 async function getUserId(): Promise<string | null> {
   try {
@@ -113,6 +114,14 @@ export async function POST(
       .from("stories")
       .update({ upvotes: upCount || 0, downvotes: downCount || 0 })
       .eq("id", storyId);
+
+    // Notify story author on upvote
+    if (vote === 1) {
+      const { data: story } = await supabase.from("stories").select("author_id, title, slug, id").eq("id", storyId).single();
+      if (story?.author_id && story.author_id !== voterId) {
+        createNotification(story.author_id, "vote", `Your story got an upvote!`, story.title || "Your branch", `/story/${story.slug || story.id}`);
+      }
+    }
 
     return NextResponse.json({
       ok: true,

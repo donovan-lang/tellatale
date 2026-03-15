@@ -4,6 +4,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import StoryReader from "@/components/StoryReader";
 import { createServiceClient } from "@/lib/supabase-server";
 import type { Story } from "@/types";
+import type { Metadata } from "next";
 
 async function getStory(id: string): Promise<Story | null> {
   try {
@@ -69,6 +70,19 @@ async function getAncestors(id: string): Promise<Story[]> {
   } catch {
     return [];
   }
+}
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const story = await getStory(params.id);
+  if (!story) return { title: "Story not found — MakeATale" };
+  const desc = story.content.slice(0, 155) + "...";
+  const title = story.title ? `${story.title} | MakeATale` : "A Tale | MakeATale";
+  return {
+    title,
+    description: desc,
+    openGraph: { title, description: desc, type: "article", siteName: "MakeATale" },
+    twitter: { card: "summary_large_image", title, description: desc },
+  };
 }
 
 export default async function StoryPage({

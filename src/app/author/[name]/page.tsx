@@ -4,6 +4,7 @@ import { createServiceClient } from "@/lib/supabase-server";
 import { toAuthorSlug } from "@/lib/utils";
 import StoryCard from "@/components/StoryCard";
 import DonateButton from "@/components/DonateButton";
+import FollowButton from "@/components/FollowButton";
 import {
   Feather,
   GitFork,
@@ -15,6 +16,7 @@ import { formatDistanceToNow } from "date-fns";
 import type { Story } from "@/types";
 
 interface AuthorData {
+  profileId: string | null;
   name: string;
   bio: string | null;
   wallet_address: string | null;
@@ -51,6 +53,7 @@ async function getAuthorBySlug(slug: string): Promise<AuthorData | null> {
       );
 
       return {
+        profileId: profile.id,
         name: profile.pen_name,
         bio: profile.bio,
         wallet_address: profile.wallet_address,
@@ -90,6 +93,7 @@ async function getAuthorBySlug(slug: string): Promise<AuthorData | null> {
     const earliest = authorStories[authorStories.length - 1]?.created_at;
 
     return {
+      profileId: null,
       name: authorName,
       bio: null,
       wallet_address: null,
@@ -142,7 +146,7 @@ export default async function AuthorPage({
     );
   }
 
-  const { name, bio, wallet_address, joined, seeds, contributions, stats } =
+  const { profileId, name, bio, wallet_address, joined, seeds, contributions, stats } =
     data;
 
   return (
@@ -154,7 +158,10 @@ export default async function AuthorPage({
             {name.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold">{name}</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-bold">{name}</h1>
+              {profileId && <FollowButton authorId={profileId} />}
+            </div>
             {bio && (
               <p className="text-sm text-gray-400 mt-1">{bio}</p>
             )}

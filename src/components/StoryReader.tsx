@@ -10,12 +10,16 @@ import {
   Star,
   Bookmark,
   BookmarkCheck,
+  Share2,
+  Link2,
+  Check,
 } from "lucide-react";
 import type { Story } from "@/types";
 import { toAuthorSlug } from "@/lib/utils";
 import BranchCard from "./BranchCard";
 import StoryForm from "./StoryForm";
 import ReportButton from "./ReportButton";
+import CommentSection from "./CommentSection";
 
 export default function StoryReader({
   story,
@@ -36,6 +40,7 @@ export default function StoryReader({
   const [votes, setVotes] = useState({ up: story.upvotes, down: story.downvotes });
   const [userVote, setUserVote] = useState<1 | -1 | 0>(0);
   const [voting, setVoting] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   // Auto-track reading progress
   useEffect(() => {
@@ -225,6 +230,30 @@ export default function StoryReader({
           <span className="ml-auto">
             <ReportButton storyId={story.id} />
           </span>
+          <span className="flex items-center gap-1">
+            <button
+              onClick={() => {
+                const url = window.location.href;
+                const text = `"${story.title || story.teaser || story.content.slice(0, 80)}..." on MakeATale`;
+                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, "_blank", "width=550,height=420");
+              }}
+              className="p-1 rounded text-gray-600 hover:text-blue-400 hover:bg-blue-400/5 transition-all duration-200"
+              title="Share on X"
+            >
+              <Share2 size={13} />
+            </button>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }}
+              className={`p-1 rounded transition-all duration-200 ${copied ? "text-green-400" : "text-gray-600 hover:text-white hover:bg-gray-800"}`}
+              title="Copy link"
+            >
+              {copied ? <Check size={13} /> : <Link2 size={13} />}
+            </button>
+          </span>
         </div>
 
         {story.is_ending && (
@@ -328,6 +357,9 @@ export default function StoryReader({
           </div>
         </div>
       )}
+
+      {/* Discussion */}
+      <CommentSection storyId={story.id} />
     </div>
   );
 }

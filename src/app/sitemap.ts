@@ -1,0 +1,29 @@
+import { createServiceClient } from "@/lib/supabase-server";
+import type { MetadataRoute } from "next";
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const supabase = createServiceClient();
+  const { data: stories } = await supabase
+    .from("stories")
+    .select("slug, id, created_at")
+    .is("parent_id", null)
+    .eq("is_hidden", false)
+    .order("created_at", { ascending: false })
+    .limit(500);
+
+  const storyUrls = (stories || []).map((s: any) => ({
+    url: `https://makeatale.com/story/${s.slug || s.id}`,
+    lastModified: new Date(s.created_at),
+    changeFrequency: "daily" as const,
+    priority: 0.8,
+  }));
+
+  return [
+    { url: "https://makeatale.com", changeFrequency: "daily", priority: 1 },
+    { url: "https://makeatale.com/explore", changeFrequency: "hourly", priority: 0.9 },
+    { url: "https://makeatale.com/submit", changeFrequency: "monthly", priority: 0.6 },
+    { url: "https://makeatale.com/login", changeFrequency: "monthly", priority: 0.3 },
+    { url: "https://makeatale.com/signup", changeFrequency: "monthly", priority: 0.3 },
+    ...storyUrls,
+  ];
+}

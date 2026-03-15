@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 import NavBar from "@/components/NavBar";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://makeatale.com"),
   title: "MakeATale — Collaborative Storytelling",
   description:
     "Write story seeds, the community branches them. Collaborative choose-your-own-adventure fiction. Tip your favorite writers.",
@@ -15,6 +17,8 @@ export const metadata: Metadata = {
     "creative writing",
     "community stories",
   ],
+  manifest: "/manifest.json",
+  themeColor: "#d946ef",
 };
 
 export default function RootLayout({
@@ -23,9 +27,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen">
         <AuthProvider>
+          <ThemeProvider>
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "WebSite", name: "MakeATale", url: "https://makeatale.com", description: "Collaborative choose-your-own-adventure fiction" }) }} />
           <NavBar />
           {children}
 
@@ -100,6 +106,7 @@ export default function RootLayout({
               </div>
             </div>
           </footer>
+        </ThemeProvider>
         </AuthProvider>
       </body>
     </html>

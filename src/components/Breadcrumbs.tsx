@@ -1,13 +1,22 @@
 "use client";
 
-import { ChevronRight, BookOpen } from "lucide-react";
+import { ChevronRight, BookOpen, GitFork } from "lucide-react";
 import type { Story } from "@/types";
 
 export default function Breadcrumbs({ ancestors }: { ancestors: Story[] }) {
   if (ancestors.length <= 1) return null;
 
+  const rootSlug = ancestors[0]?.slug || ancestors[0]?.id;
+
   return (
     <nav className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide pb-3 mb-4 text-sm">
+      <a
+        href={`/story/${rootSlug}/tree`}
+        className="shrink-0 p-1.5 rounded-md text-gray-500 hover:text-brand-400 hover:bg-brand-500/10 transition-all duration-200 mr-1"
+        title="View story tree"
+      >
+        <GitFork size={14} />
+      </a>
       {ancestors.map((story, i) => (
         <span key={story.id} className="flex items-center gap-1.5 shrink-0">
           {i > 0 && <ChevronRight size={12} className="text-gray-700" />}
