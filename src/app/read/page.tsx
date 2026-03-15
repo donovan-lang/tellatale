@@ -12,6 +12,7 @@ import {
   ArrowRight,
   Loader2,
   MapPin,
+  Award,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { ReadingProgress, Bookmark as BookmarkType, Chronicle } from "@/types";
@@ -82,10 +83,13 @@ function ReadContent() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6 flex items-center gap-3">
-        <BookOpen size={24} className="text-brand-400" />
-        Your Library
-      </h1>
+      <div className="flex items-center gap-3 mb-6">
+        <h1 className="text-2xl font-bold flex items-center gap-3">
+          <BookOpen size={24} className="text-brand-400" />
+          Your Library
+        </h1>
+        <a href="/read/stats" className="btn-ghost text-xs flex items-center gap-1 ml-auto"><Award size={14} /> My Stats</a>
+      </div>
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 border-b border-gray-200 dark:border-gray-800 pb-px overflow-x-auto scrollbar-hide">

@@ -26,6 +26,9 @@ import ReportButton from "./ReportButton";
 import CommentSection from "./CommentSection";
 import RelatedStories from "./RelatedStories";
 import DonateButton from "./DonateButton";
+import ShareCard from "./ShareCard";
+import Reactions from "./Reactions";
+import BestPath from "./BestPath";
 import { useToast } from "./Toast";
 import FullPathReader from "./FullPathReader";
 
@@ -336,6 +339,11 @@ export default function StoryReader({
           </span>
         </div>
 
+        {/* Reactions */}
+        <div className="mt-3">
+          <Reactions storyId={story.id} />
+        </div>
+
         {story.is_ending && (
           <div className="mt-4 flex items-center gap-2 text-amber-400 bg-amber-400/10 px-3 py-2 rounded-lg text-sm">
             <Flag size={16} />
@@ -375,6 +383,14 @@ export default function StoryReader({
             )}
           </div>
         )}
+
+        {/* Best Path (seed stories only) */}
+        {story.story_type === "seed" && <BestPath rootId={story.id} />}
+
+        {/* Share Card */}
+        <div className="mt-4">
+          <ShareCard story={story} />
+        </div>
       </div>
 
       {/* Branches section */}

@@ -19,6 +19,7 @@ import {
   ChevronRight,
   Loader2,
   X,
+  Shuffle,
 } from "lucide-react";
 import { STORY_CATEGORIES } from "@/lib/demo-data";
 import { toAuthorSlug } from "@/lib/utils";
@@ -47,6 +48,7 @@ export default function ExplorePage() {
   const [trendingPeriod, setTrendingPeriod] = useState<TrendingPeriod>("week");
   const [filterTag, setFilterTag] = useState<string | null>(null);
   const [continueStory, setContinueStory] = useState<any>(null);
+  const [activeChallenge, setActiveChallenge] = useState<any>(null);
 
   const penName =
     user?.user_metadata?.pen_name ||
@@ -78,6 +80,19 @@ export default function ExplorePage() {
       })
       .catch(() => {});
   }, [user]);
+
+  // Fetch active challenge
+  useEffect(() => {
+    fetch("/api/challenges")
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const active = data.find((c: any) => new Date(c.end_date) > new Date());
+          if (active) setActiveChallenge(active);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Filter stories by trending period
   const periodCutoff = (() => {
@@ -227,6 +242,15 @@ export default function ExplorePage() {
               Plant a Seed
             </a>
 
+            {/* Surprise Me */}
+            <a
+              href="/surprise"
+              className="btn-ghost w-full flex items-center justify-center gap-2 py-2.5 text-sm"
+            >
+              <Shuffle size={16} />
+              Surprise Me
+            </a>
+
             {/* Quick stats */}
             <div className="card p-4 space-y-3">
               <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
@@ -295,6 +319,24 @@ export default function ExplorePage() {
               </div>
               <ChevronRight size={16} className="text-gray-400 shrink-0" />
             </a>
+          )}
+
+          {/* Story of the Week spotlight */}
+          {trending.length > 0 && tab === "trending" && trendingPeriod === "week" && (
+            <div className="card mb-5 p-5 border-2 border-yellow-400/30 dark:border-yellow-400/20 bg-gradient-to-r from-yellow-50 dark:from-yellow-500/5 to-transparent">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-lg bg-yellow-400/20 flex items-center justify-center shrink-0">
+                  <Trophy size={20} className="text-yellow-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-yellow-600 dark:text-yellow-400 font-bold uppercase tracking-wider">Story of the Week</p>
+                  <a href={`/story/${trending[0].slug || trending[0].id}`} className="text-base font-bold text-gray-900 dark:text-white hover:text-brand-500 transition-colors line-clamp-1 mt-1 block">
+                    {trending[0].title || "Untitled"}
+                  </a>
+                  <p className="text-xs text-gray-500 mt-1">by {trending[0].author_name} &middot; {trending[0].upvotes - trending[0].downvotes} votes</p>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* Daily prompt banner */}
@@ -425,6 +467,18 @@ export default function ExplorePage() {
                 ))}
               </div>
             </div>
+
+            {/* Daily Challenge */}
+            {activeChallenge && (
+              <div className="card p-4 border-2 border-yellow-300/30 dark:border-yellow-500/20">
+                <h3 className="text-sm font-semibold flex items-center gap-2 mb-2">
+                  <Trophy size={15} className="text-yellow-500" />
+                  Daily Challenge
+                </h3>
+                <p className="text-xs text-gray-600 dark:text-gray-400 italic mb-2">&ldquo;{activeChallenge.prompt}&rdquo;</p>
+                <a href="/challenges" className="text-[10px] text-brand-500 hover:text-brand-400 font-medium">Enter Challenge &rarr;</a>
+              </div>
+            )}
 
             {/* Tag Cloud */}
             <div className="card p-4">

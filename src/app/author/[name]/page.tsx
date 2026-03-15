@@ -15,6 +15,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import type { Story } from "@/types";
 import SimilarWriters from "@/components/SimilarWriters";
+import AchievementBadges from "@/components/AchievementBadges";
 
 interface AuthorData {
   profileId: string | null;
@@ -211,6 +212,9 @@ export default async function AuthorPage({
             </p>
           </div>
         </div>
+
+        {/* Achievement Badges */}
+        <AchievementBadges stats={{ seeds: stats.total_seeds, branches: stats.total_branches, votes: stats.total_votes, maxVotes: seeds.length > 0 ? Math.max(...seeds.map((s: any) => s.upvotes - s.downvotes)) : 0 }} />
 
         {/* Tip */}
         {wallet_address && seeds.length > 0 && (
