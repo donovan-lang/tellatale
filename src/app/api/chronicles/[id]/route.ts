@@ -73,7 +73,7 @@ export async function GET(
 
     return NextResponse.json({ ...data, stories: orderedStories });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: "An error occurred" }, { status: 500 });
   }
 }
 
@@ -121,7 +121,7 @@ export async function PATCH(
     if (error) throw error;
     return NextResponse.json({ story_path: newPath });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: "An error occurred" }, { status: 500 });
   }
 }
 
@@ -145,6 +145,6 @@ export async function DELETE(
     if (error) throw error;
     return NextResponse.json({ ok: true });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: "An error occurred" }, { status: 500 });
   }
 }

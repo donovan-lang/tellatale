@@ -28,6 +28,6 @@ export async function POST(
 
     return NextResponse.json({ transaction: serialized });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: "An error occurred" }, { status: 500 });
   }
 }

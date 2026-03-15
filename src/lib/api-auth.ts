@@ -3,12 +3,26 @@ import { NextRequest } from "next/server";
 import { createServiceClient } from "./supabase-server";
 import { createClient } from "@supabase/supabase-js";
 
+// In-memory API key rate limiter
+const apiKeyRateMap = new Map<string, { count: number; resetAt: number }>();
+function isApiKeyRateLimited(keyHash: string, rpm: number): boolean {
+  const now = Date.now();
+  const entry = apiKeyRateMap.get(keyHash);
+  if (!entry || entry.resetAt < now) {
+    apiKeyRateMap.set(keyHash, { count: 1, resetAt: now + 60000 });
+    return false;
+  }
+  entry.count++;
+  return entry.count > rpm;
+}
+
 export interface AuthResult {
   user_id: string | null;
   author_name: string;
   auth_method: "api_key" | "bearer" | "anonymous";
   scopes: string[];
   tier: string;
+  rate_limited?: boolean;
 }
 
 export function hashApiKey(key: string): string {
@@ -28,13 +42,17 @@ export async function resolveAuth(req: NextRequest): Promise<AuthResult> {
     const hash = hashApiKey(apiKey);
     const { data: keyRow } = await sb
       .from("api_keys")
-      .select("user_id, scopes, tier, is_active")
+      .select("user_id, scopes, tier, is_active, rate_limit_rpm")
       .eq("key_hash", hash)
       .single();
 
     if (keyRow && keyRow.is_active) {
       // Update last_used
       sb.from("api_keys").update({ last_used_at: new Date().toISOString() }).eq("key_hash", hash).then(() => {});
+
+      // Enforce per-key rate limit
+      const rpm = keyRow.rate_limit_rpm || 30;
+      const limited = isApiKeyRateLimited(hash, rpm);
 
       const { data: profile } = await sb.from("profiles").select("pen_name").eq("id", keyRow.user_id).single();
       return {
@@ -43,6 +61,7 @@ export async function resolveAuth(req: NextRequest): Promise<AuthResult> {
         auth_method: "api_key",
         scopes: keyRow.scopes || ["read"],
         tier: keyRow.tier,
+        rate_limited: limited,
       };
     }
   }

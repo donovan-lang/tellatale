@@ -61,11 +61,12 @@ export async function POST(
       return NextResponse.json({ error: "Too many votes. Please slow down." }, { status: 429 });
     }
 
-    // Get user ID (auth) or use IP as fallback for anonymous
+    // Get user ID (auth) or use IP + user-agent fingerprint for anonymous
     let voterId = await getUserId();
     if (!voterId) {
-      const forwarded = req.headers.get("x-forwarded-for");
-      voterId = `anon_${forwarded?.split(",")[0]?.trim() || "unknown"}`;
+      const ua = req.headers.get("user-agent") || "";
+      const uaHash = ua.slice(0, 50).replace(/\s/g, "");
+      voterId = `anon_${ip}_${uaHash.slice(0, 16)}`;
     }
 
     const supabase = createServiceClient();
@@ -137,7 +138,7 @@ export async function POST(
       your_vote: vote,
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: "An error occurred" }, { status: 500 });
   }
 }
 

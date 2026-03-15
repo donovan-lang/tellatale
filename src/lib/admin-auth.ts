@@ -1,14 +1,17 @@
 import { createHmac } from "crypto";
 import { NextRequest } from "next/server";
 
-const SECRET =
-  process.env.ADMIN_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY || "makeatale-admin-secret";
+const SECRET = process.env.ADMIN_SECRET;
+if (!SECRET) {
+  console.warn("ADMIN_SECRET env var not set — admin auth will not work");
+}
+const SIGNING_KEY = SECRET || "fallback-dev-only-not-for-production";
 
 export function signAdminToken(): string {
   const payload = Buffer.from(
     JSON.stringify({ role: "admin", exp: Date.now() + 86400000 })
   ).toString("base64url");
-  const sig = createHmac("sha256", SECRET).update(payload).digest("base64url");
+  const sig = createHmac("sha256", SIGNING_KEY).update(payload).digest("base64url");
   return `${payload}.${sig}`;
 }
 
@@ -16,7 +19,7 @@ export function verifyAdminToken(token: string): boolean {
   try {
     const [payload, sig] = token.split(".");
     if (!payload || !sig) return false;
-    const expected = createHmac("sha256", SECRET)
+    const expected = createHmac("sha256", SIGNING_KEY)
       .update(payload)
       .digest("base64url");
     if (sig !== expected) return false;

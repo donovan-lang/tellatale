@@ -9,7 +9,9 @@ export async function POST(req: NextRequest) {
     res.cookies.set("admin_token", token, {
       path: "/",
       maxAge: 86400,
-      sameSite: "lax",
+      sameSite: "strict",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
     });
     return res;
   }

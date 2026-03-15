@@ -16,7 +16,10 @@ export function createMiddlewareClient(
         setAll(cookiesToSet: { name: string; value: string; options: Record<string, unknown> }[]) {
           cookiesToSet.forEach(({ name, value, options }) => {
             request.cookies.set(name, value);
-            response.cookies.set(name, value, options);
+            response.cookies.set(name, value, {
+              ...options,
+              sameSite: "lax",
+            });
           });
         },
       },

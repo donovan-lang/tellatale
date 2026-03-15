@@ -32,6 +32,6 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
     await supabase.from("bookmarks").delete().eq("id", params.id).eq("user_id", user.id);
     return NextResponse.json({ ok: true });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: "An error occurred" }, { status: 500 });
   }
 }

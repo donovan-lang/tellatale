@@ -53,6 +53,9 @@ export async function POST(req: NextRequest) {
   if (!hasScope(auth, "write")) {
     return NextResponse.json({ error: "Write access required. Use a paid API key or Bearer token." }, { status: 403 });
   }
+  if (auth.rate_limited) {
+    return NextResponse.json({ error: "API key rate limit exceeded." }, { status: 429 });
+  }
 
   const body = await req.json();
   const { title, teaser, content, parent_id, tags, is_ending, metadata } = body;
@@ -66,8 +69,8 @@ export async function POST(req: NextRequest) {
   if (isRateLimited(ip, 10)) {
     return NextResponse.json({ error: "Rate limit exceeded. Please slow down." }, { status: 429 });
   }
-  // Bot accounts (metadata.is_bot) can include URLs; others cannot
-  const isBotAccount = metadata?.is_bot === true;
+  // Bot accounts (authenticated via API key) can include URLs; others cannot
+  const isBotAccount = auth.auth_method === "api_key";
   if (!isBotAccount && content && isSpamContent(content)) {
     return NextResponse.json({ error: "Content flagged as spam." }, { status: 400 });
   }

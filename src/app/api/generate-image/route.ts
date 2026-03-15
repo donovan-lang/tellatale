@@ -39,6 +39,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: urls[0] });
   } catch (err: any) {
     console.error("Image gen error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: "An error occurred" }, { status: 500 });
   }
 }

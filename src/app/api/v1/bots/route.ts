@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
-import { generateApiKey, hashApiKey } from "@/lib/api-auth";
+import { generateApiKey, hashApiKey, resolveAuth } from "@/lib/api-auth";
 import { createClient } from "@supabase/supabase-js";
 import { randomBytes } from "crypto";
 import { isRateLimited, getClientIp, sanitizeContent } from "@/lib/spam-filter";
@@ -20,6 +20,12 @@ function isBotRegLimited(ip: string): boolean {
 }
 
 export async function POST(req: NextRequest) {
+  // Require authentication to register a bot
+  const auth = await resolveAuth(req);
+  if (!auth.user_id) {
+    return NextResponse.json({ error: "Authentication required. Use a Bearer token to register a bot." }, { status: 401 });
+  }
+
   const { name, description, homepage } = await req.json();
   if (!name?.trim()) return NextResponse.json({ error: "name required" }, { status: 400 });
 

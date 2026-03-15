@@ -74,8 +74,18 @@ export function isRateLimited(
 }
 
 export function getClientIp(req: Request): string {
-  const forwarded = (req.headers as Headers).get("x-forwarded-for");
-  return forwarded?.split(",")[0]?.trim() || "unknown";
+  const headers = req.headers as Headers;
+  // Prefer Cloudflare's real IP header (can't be spoofed by client)
+  const cfIp = headers.get("cf-connecting-ip");
+  if (cfIp) return cfIp.trim();
+  // Fallback: x-real-ip set by Nginx (trustworthy if Nginx is configured correctly)
+  const realIp = headers.get("x-real-ip");
+  if (realIp) return realIp.trim();
+  // Last resort: first entry in x-forwarded-for (set by Nginx, not client)
+  // Note: only the LAST entry is trustworthy if multiple proxies, but Nginx typically sets this
+  const forwarded = headers.get("x-forwarded-for");
+  if (forwarded) return forwarded.split(",")[0].trim();
+  return "unknown";
 }
 
 // ── Content sanitization ───────────────────────────────────────────

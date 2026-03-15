@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error("AI assist error:", err);
     return NextResponse.json(
-      { error: err.message },
+      { error: "An error occurred" },
       { status: 500 }
     );
   }
