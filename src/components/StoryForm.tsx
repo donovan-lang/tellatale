@@ -264,7 +264,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
           <p className="text-sm text-brand-400">What happens next?</p>
           {/* Teaser: the choice line readers see */}
           <div>
-            <label className="text-xs text-gray-500 mb-1 block">
+            <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">
               Choice line <span className="text-gray-600">(what readers see before clicking)</span>
             </label>
             <input
@@ -276,7 +276,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
               maxLength={maxTeaser}
               required
             />
-            <p className="text-right text-xs text-gray-600 mt-1">
+            <p className="text-right text-xs text-gray-400 dark:text-gray-500 mt-1">
               {teaser.length}/{maxTeaser}
             </p>
           </div>
@@ -310,9 +310,9 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
       {/* Category tags (seeds only) */}
       {!isBranch && (
         <div>
-          <p className="text-xs text-gray-500 mb-2">
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
             Categories{" "}
-            <span className="text-gray-600">(pick up to 3)</span>
+            <span className="text-gray-400 dark:text-gray-500">(pick up to 3)</span>
           </p>
           <div className="flex flex-wrap gap-1.5">
             {STORY_CATEGORIES.map((cat) => {
@@ -324,7 +324,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
                   onClick={() => toggleTag(cat)}
                   className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
                     active
-                      ? "bg-brand-500/20 text-brand-300 border border-brand-500/40"
+                      ? "bg-brand-100 dark:bg-brand-500/20 text-brand-600 dark:text-brand-300 border border-brand-300 dark:border-brand-500/40"
                       : "bg-gray-100 dark:bg-gray-800/70 text-gray-500 border border-gray-300 dark:border-gray-700/50 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-400 dark:hover:border-gray-600"
                   }`}
                 >
@@ -375,12 +375,12 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
         <button
           type="button"
           onClick={() => setAiOpen(!aiOpen)}
-          className="w-full flex items-center justify-between px-4 py-2.5 bg-gray-100/50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors"
+          className="w-full flex items-center justify-between px-4 py-2.5 bg-purple-50/50 dark:bg-gray-900/50 hover:bg-purple-50 dark:hover:bg-gray-800/50 transition-colors"
         >
-          <span className="flex items-center gap-2 text-sm font-medium text-gray-400">
-            <Wand2 size={15} className="text-purple-400" />
+          <span className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+            <Wand2 size={15} className="text-purple-500 dark:text-purple-400" />
             AI Writing Assist
-            <span className="text-[10px] text-purple-400/60 font-normal">&mdash; try it!</span>
+            <span className="text-[10px] text-purple-500/70 dark:text-purple-400/60 font-normal">&mdash; try it!</span>
           </span>
           {aiOpen ? (
             <ChevronUp size={14} className="text-gray-500" />
@@ -401,21 +401,21 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
                   onClick={() => callAi(a.action, a.label)}
                   className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-gray-100 dark:bg-gray-800/70 border border-gray-300 dark:border-gray-700/50 hover:border-purple-500/30 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-left disabled:opacity-40 disabled:cursor-not-allowed group"
                 >
-                  <div className="w-7 h-7 rounded-md bg-purple-500/10 flex items-center justify-center shrink-0 group-hover:bg-purple-500/20 transition-colors">
+                  <div className="w-7 h-7 rounded-md bg-purple-100 dark:bg-purple-500/10 flex items-center justify-center shrink-0 group-hover:bg-purple-200 dark:group-hover:bg-purple-500/20 transition-colors">
                     {aiLoading === a.action ? (
                       <Loader2
                         size={14}
-                        className="animate-spin text-purple-400"
+                        className="animate-spin text-purple-500 dark:text-purple-400"
                       />
                     ) : (
-                      <a.icon size={14} className="text-purple-400" />
+                      <a.icon size={14} className="text-purple-500 dark:text-purple-400" />
                     )}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                    <p className="text-xs font-medium text-gray-800 dark:text-gray-200">
                       {a.label}
                     </p>
-                    <p className="text-[10px] text-gray-600 leading-tight">
+                    <p className="text-[10px] text-gray-500 dark:text-gray-500 leading-tight">
                       {a.description}
                     </p>
                   </div>
@@ -442,7 +442,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
                     ) : (
                       <a.icon
                         size={13}
-                        className="text-purple-400 shrink-0"
+                        className="text-purple-500 dark:text-purple-400 shrink-0"
                       />
                     )}
                     <div className="min-w-0">
@@ -461,7 +461,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
             <button
               type="button"
               onClick={() => setShowMore(!showMore)}
-              className="text-[11px] text-gray-500 hover:text-gray-400 transition-colors flex items-center gap-1"
+              className="text-[11px] text-purple-500/70 dark:text-gray-500 hover:text-purple-600 dark:hover:text-gray-400 transition-colors flex items-center gap-1"
             >
               {showMore ? "Less tools" : "More tools"}
               {showMore ? (
@@ -472,27 +472,27 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
             </button>
 
             {!hasContent && (
-              <p className="text-[11px] text-gray-600 italic">
+              <p className="text-[11px] text-gray-500 italic">
                 Start writing to unlock AI tools.
               </p>
             )}
 
             {/* Suggestion output box */}
             {suggestion && (
-              <div className="bg-purple-500/5 border border-purple-500/20 rounded-lg p-3 space-y-2">
+              <div className="bg-purple-50 dark:bg-purple-500/5 border border-purple-300/40 dark:border-purple-500/20 rounded-lg p-3 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] text-purple-400 font-semibold uppercase tracking-wider">
+                  <span className="text-[11px] text-purple-600 dark:text-purple-400 font-semibold uppercase tracking-wider">
                     {suggestion.label}
                   </span>
                   <button
                     type="button"
                     onClick={() => setSuggestion(null)}
-                    className="text-gray-600 hover:text-gray-400 transition-colors"
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   >
                     <X size={12} />
                   </button>
                 </div>
-                <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                <p className="text-sm text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed">
                   {suggestion.text}
                 </p>
                 <div className="flex gap-2 pt-1">
@@ -500,7 +500,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
                     <button
                       type="button"
                       onClick={applySuggestion}
-                      className="text-xs font-medium text-purple-400 hover:text-purple-300 bg-purple-500/10 hover:bg-purple-500/20 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1"
+                      className="text-xs font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 bg-purple-100 dark:bg-purple-500/10 hover:bg-purple-200 dark:hover:bg-purple-500/20 px-3 py-1.5 rounded-md transition-colors flex items-center gap-1"
                     >
                       <CheckCheck size={12} />
                       {suggestion.action === "grammar" ||
