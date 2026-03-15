@@ -143,7 +143,7 @@ export default function SignupPage() {
               placeholder="Pen name"
               value={penName}
               onChange={(e) => setPenName(e.target.value)}
-              className="w-full bg-gray-900 border border-gray-800 rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-brand-500 transition-colors"
+              className="input-field pl-10"
               disabled={loading}
             />
           </div>
@@ -155,7 +155,7 @@ export default function SignupPage() {
               placeholder="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-gray-900 border border-gray-800 rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-brand-500 transition-colors"
+              className="input-field pl-10"
               required
               disabled={loading}
             />
@@ -168,7 +168,7 @@ export default function SignupPage() {
               placeholder="Password (min 8 characters)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-gray-900 border border-gray-800 rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-brand-500 transition-colors"
+              className="input-field pl-10"
               required
               minLength={8}
               disabled={loading}

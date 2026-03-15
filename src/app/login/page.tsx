@@ -127,7 +127,7 @@ function LoginForm() {
             placeholder="Email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-gray-900 border border-gray-800 rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-brand-500 transition-colors"
+            className="input-field pl-10"
             required
             disabled={loading}
           />
@@ -140,7 +140,7 @@ function LoginForm() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-gray-900 border border-gray-800 rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-brand-500 transition-colors"
+            className="input-field pl-10"
             required
             disabled={loading}
           />

@@ -245,7 +245,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
               placeholder="e.g. She opens the door and steps into the darkness..."
               value={teaser}
               onChange={(e) => setTeaser(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand-500"
+              className="input-field"
               maxLength={maxTeaser}
               required
             />
@@ -262,7 +262,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
               placeholder="Your name (optional)"
               value={authorName}
               onChange={(e) => setAuthorName(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-brand-500"
+              className="input-field py-2"
               maxLength={50}
             />
           </div>
@@ -272,7 +272,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
               placeholder="Story title..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-lg font-semibold focus:outline-none focus:border-brand-500"
+              className="input-field text-lg font-semibold"
               maxLength={200}
               required
             />
@@ -324,15 +324,22 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
           }
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          className={`w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm resize-y focus:outline-none focus:border-brand-500 ${
+          className={`input-field resize-y ${
             isBranch ? "min-h-[160px]" : "min-h-[120px]"
           }`}
           maxLength={maxContent}
           required
         />
-        <p className="text-right text-xs text-gray-600 mt-1">
-          {content.length}/{maxContent}
-        </p>
+        <div className="flex justify-between items-center mt-1.5">
+          <span className="text-[10px] text-gray-600">
+            {isBranch ? "Full story content" : "Story seed"}
+          </span>
+          <span className={`text-[10px] tabular-nums ${
+            content.length > maxContent * 0.9 ? "text-amber-400" : "text-gray-600"
+          }`}>
+            {content.length.toLocaleString()}/{maxContent.toLocaleString()}
+          </span>
+        </div>
       </div>
 
       {/* ====== AI ASSIST ====== */}

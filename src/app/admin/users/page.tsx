@@ -57,7 +57,7 @@ export default function AdminUsersPage() {
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && load()}
             placeholder="Search by pen name..."
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-red-500"
+            className="input-field pl-9 py-2 focus:border-red-500 focus:ring-red-500/20"
           />
         </div>
       </div>

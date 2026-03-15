@@ -1,12 +1,14 @@
 "use client";
 
 import { useAuth } from "@/components/AuthProvider";
+import { usePathname } from "next/navigation";
 import { LogOut, Menu, X, Loader2, BookOpen, Pen, Compass } from "lucide-react";
 import { useState } from "react";
 
 export default function NavBar() {
   const { user, loading, signOut } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
 
   const penName =
     user?.user_metadata?.pen_name ||
@@ -14,12 +16,22 @@ export default function NavBar() {
     user?.email?.split("@")[0] ||
     "Writer";
 
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(href + "/");
+
+  const navLinkClass = (href: string) =>
+    `flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+      isActive(href)
+        ? "text-brand-400 bg-brand-500/10"
+        : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+    }`;
+
   return (
-    <nav className="sticky top-0 z-50 border-b border-gray-800/60 bg-gray-950/70 backdrop-blur-xl">
+    <nav className="sticky top-0 z-50 border-b border-gray-800/60 bg-gray-950/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         {/* Logo */}
-        <a href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-purple-700 flex items-center justify-center text-sm font-black">
+        <a href="/" className="flex items-center gap-2 group">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-purple-700 flex items-center justify-center text-sm font-black shadow-lg shadow-brand-500/20 group-hover:shadow-brand-500/40 transition-shadow duration-300">
             M
           </div>
           <span className="text-xl font-bold tracking-tight">
@@ -30,31 +42,28 @@ export default function NavBar() {
         </a>
 
         {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-6 text-sm text-gray-400">
+        <div className="hidden md:flex items-center gap-1">
           {user ? (
             <>
-              <a href="/read" className="hover:text-white transition-colors flex items-center gap-1.5">
-                <BookOpen size={15} />
-                Read
+              <a href="/read" className={navLinkClass("/read")}>
+                <BookOpen size={15} /> Read
               </a>
-              <a href="/explore" className="hover:text-white transition-colors flex items-center gap-1.5">
-                <Compass size={15} />
-                Explore
+              <a href="/explore" className={navLinkClass("/explore")}>
+                <Compass size={15} /> Explore
               </a>
-              <a href="/submit" className="hover:text-white transition-colors flex items-center gap-1.5">
-                <Pen size={15} />
-                Write
+              <a href="/submit" className={navLinkClass("/submit")}>
+                <Pen size={15} /> Write
               </a>
             </>
           ) : (
             <>
-              <a href="/#how-it-works" className="hover:text-white transition-colors">
+              <a href="/#how-it-works" className="text-sm text-gray-400 hover:text-white px-3 py-1.5 rounded-lg transition-colors">
                 How It Works
               </a>
-              <a href="/explore" className="hover:text-white transition-colors">
+              <a href="/explore" className={navLinkClass("/explore")}>
                 Explore
               </a>
-              <a href="/submit" className="hover:text-white transition-colors">
+              <a href="/submit" className={navLinkClass("/submit")}>
                 Write
               </a>
             </>
@@ -68,75 +77,80 @@ export default function NavBar() {
               <Loader2 size={16} className="animate-spin text-gray-500" />
             </div>
           ) : user ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
               <a
                 href="/account"
-                className="text-sm text-brand-400 font-medium hover:text-brand-300 transition-colors"
+                className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-all duration-200 ${
+                  isActive("/account")
+                    ? "text-brand-400 bg-brand-500/10"
+                    : "text-brand-400 hover:text-brand-300 hover:bg-brand-500/10"
+                }`}
               >
                 {penName}
               </a>
               <button
                 onClick={signOut}
-                className="btn-ghost text-sm flex items-center gap-1.5 text-gray-500 hover:text-red-400"
+                className="p-2 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-400/10 transition-all duration-200"
+                title="Sign out"
               >
-                <LogOut size={14} />
+                <LogOut size={15} />
               </button>
             </div>
           ) : (
-            <>
+            <div className="flex items-center gap-2">
               <a href="/login" className="btn-ghost text-sm">Log In</a>
-              <a href="/signup" className="bg-white text-gray-950 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-gray-200 transition-colors">
+              <a href="/signup" className="bg-white text-gray-950 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-gray-100 transition-all duration-200 shadow-sm hover:shadow-md">
                 Sign Up Free
               </a>
-            </>
+            </div>
           )}
         </div>
 
         {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden text-gray-400 hover:text-white"
+          className="md:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
         >
-          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
       </div>
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-gray-800/60 px-4 py-4 space-y-3 bg-gray-950/95 backdrop-blur-xl">
+        <div className="md:hidden border-t border-gray-800/60 px-4 py-4 space-y-1 bg-gray-950/98 backdrop-blur-xl">
           {user ? (
             <>
-              <a href="/read" className="block text-sm text-gray-400 hover:text-white flex items-center gap-2">
-                <BookOpen size={14} /> Read
+              <a href="/read" className={navLinkClass("/read") + " w-full"}>
+                <BookOpen size={16} /> Read
               </a>
-              <a href="/explore" className="block text-sm text-gray-400 hover:text-white flex items-center gap-2">
-                <Compass size={14} /> Explore
+              <a href="/explore" className={navLinkClass("/explore") + " w-full"}>
+                <Compass size={16} /> Explore
               </a>
-              <a href="/submit" className="block text-sm text-gray-400 hover:text-white flex items-center gap-2">
-                <Pen size={14} /> Write
+              <a href="/submit" className={navLinkClass("/submit") + " w-full"}>
+                <Pen size={16} /> Write
               </a>
             </>
           ) : (
             <>
-              <a href="/#how-it-works" className="block text-sm text-gray-400 hover:text-white">How It Works</a>
-              <a href="/explore" className="block text-sm text-gray-400 hover:text-white">Explore</a>
-              <a href="/submit" className="block text-sm text-gray-400 hover:text-white">Write</a>
+              <a href="/#how-it-works" className="block text-sm text-gray-400 hover:text-white px-3 py-2 rounded-lg">How It Works</a>
+              <a href="/explore" className={navLinkClass("/explore") + " w-full"}>Explore</a>
+              <a href="/submit" className={navLinkClass("/submit") + " w-full"}>Write</a>
             </>
           )}
-          <div className="pt-3 border-t border-gray-800/60">
+          <div className="pt-3 mt-2 border-t border-gray-800/60">
             {loading ? (
-              <Loader2 size={16} className="animate-spin text-gray-500" />
+              <Loader2 size={16} className="animate-spin text-gray-500 ml-3" />
             ) : user ? (
-              <div className="space-y-3">
-                <a href="/account" className="block text-sm text-brand-400 font-medium">{penName}</a>
-                <button onClick={signOut} className="text-sm text-gray-500 hover:text-red-400 flex items-center gap-1.5">
+              <div className="space-y-1">
+                <a href="/account" className={navLinkClass("/account") + " w-full"}>{penName}</a>
+                <button onClick={signOut} className="flex items-center gap-2 text-sm text-gray-500 hover:text-red-400 px-3 py-2 rounded-lg w-full transition-colors">
                   <LogOut size={14} /> Sign Out
                 </button>
               </div>
             ) : (
               <div className="flex gap-2">
-                <a href="/login" className="btn-ghost text-sm">Log In</a>
-                <a href="/signup" className="bg-white text-gray-950 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-gray-200 transition-colors">Sign Up Free</a>
+                <a href="/login" className="btn-ghost text-sm flex-1 text-center">Log In</a>
+                <a href="/signup" className="bg-white text-gray-950 font-semibold px-4 py-2 rounded-lg text-sm flex-1 text-center">Sign Up Free</a>
               </div>
             )}
           </div>

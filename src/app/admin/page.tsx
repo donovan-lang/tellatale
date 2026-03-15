@@ -92,14 +92,14 @@ export default function AdminPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Username"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-red-500"
+              className="input-field focus:border-red-500 focus:ring-red-500/20"
             />
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-red-500"
+              className="input-field focus:border-red-500 focus:ring-red-500/20"
             />
             <button
               type="submit"

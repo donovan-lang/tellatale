@@ -243,7 +243,7 @@ export default function AccountPage() {
               onChange={(e) => setPenName(e.target.value)}
               placeholder="Your pen name"
               maxLength={50}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand-500"
+              className="input-field"
             />
             <p className="text-xs text-gray-600">
               This is how other writers see you. Max 50 characters.
@@ -261,7 +261,7 @@ export default function AccountPage() {
               placeholder="Tell readers a little about yourself..."
               maxLength={300}
               rows={3}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm resize-y focus:outline-none focus:border-brand-500"
+              className="input-field resize-y"
             />
             <p className="text-right text-xs text-gray-600">
               {bio.length}/300
@@ -296,7 +296,7 @@ export default function AccountPage() {
               value={walletAddress}
               onChange={(e) => setWalletAddress(e.target.value)}
               placeholder="Your Solana wallet address for receiving tips"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm font-mono focus:outline-none focus:border-brand-500"
+              className="input-field font-mono"
             />
             <p className="text-xs text-gray-600">
               When readers tip your stories, funds go here. Leave blank to
