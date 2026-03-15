@@ -3,6 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import NavBar from "@/components/NavBar";
+import MobileNav from "@/components/MobileNav";
 import { ToastProvider } from "@/components/Toast";
 
 export const metadata: Metadata = {
@@ -108,6 +109,7 @@ export default function RootLayout({
               </div>
             </div>
           </footer>
+          <MobileNav />
         </ToastProvider>
         </ThemeProvider>
         </AuthProvider>

@@ -23,8 +23,10 @@ import {
 import { STORY_CATEGORIES } from "@/lib/demo-data";
 import { toAuthorSlug } from "@/lib/utils";
 import type { Story } from "@/types";
+import OnboardingOverlay from "@/components/OnboardingOverlay";
 
 type FeedTab = "trending" | "new" | "foryou";
+type TrendingPeriod = "day" | "week" | "month" | "all";
 
 // Writing prompts that rotate
 const PROMPTS = [
@@ -42,7 +44,9 @@ export default function ExplorePage() {
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<FeedTab>("trending");
+  const [trendingPeriod, setTrendingPeriod] = useState<TrendingPeriod>("week");
   const [filterTag, setFilterTag] = useState<string | null>(null);
+  const [continueStory, setContinueStory] = useState<any>(null);
 
   const penName =
     user?.user_metadata?.pen_name ||
@@ -62,7 +66,32 @@ export default function ExplorePage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const trending = [...stories].sort(
+  // Fetch reading progress for "Continue Reading" card
+  useEffect(() => {
+    if (!user) return;
+    fetch("/api/reading-progress")
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setContinueStory(data[0]);
+        }
+      })
+      .catch(() => {});
+  }, [user]);
+
+  // Filter stories by trending period
+  const periodCutoff = (() => {
+    const now = Date.now();
+    if (trendingPeriod === "day") return now - 24 * 60 * 60 * 1000;
+    if (trendingPeriod === "week") return now - 7 * 24 * 60 * 60 * 1000;
+    if (trendingPeriod === "month") return now - 30 * 24 * 60 * 60 * 1000;
+    return 0; // "all" — no cutoff
+  })();
+
+  const trendingPool = stories.filter(
+    (s) => new Date(s.created_at).getTime() >= periodCutoff
+  );
+  const trending = [...trendingPool].sort(
     (a, b) => b.upvotes - b.downvotes - (a.upvotes - a.downvotes)
   );
   const newest = [...stories].sort(
@@ -107,6 +136,19 @@ export default function ExplorePage() {
     { id: "foryou", label: "For You", icon: Sparkles },
   ];
 
+  const TRENDING_PERIODS: { id: TrendingPeriod; label: string }[] = [
+    { id: "day", label: "Today" },
+    { id: "week", label: "This Week" },
+    { id: "month", label: "This Month" },
+    { id: "all", label: "All Time" },
+  ];
+
+  const COLLECTIONS = [
+    { name: "Epic Adventures", tags: ["Adventure", "Fantasy"], emoji: "\u{2694}\u{FE0F}" },
+    { name: "Dark & Twisted", tags: ["Horror", "Thriller"], emoji: "\u{1F480}" },
+    { name: "Love Stories", tags: ["Romance", "Drama"], emoji: "\u{1F497}" },
+  ];
+
   const NAV_LINKS = [
     ...(user
       ? [{ href: "/read", label: "Read", icon: BookOpen }]
@@ -120,6 +162,7 @@ export default function ExplorePage() {
 
   return (
     <div className="mx-auto max-w-[1200px] px-4 py-6">
+      <OnboardingOverlay />
       <div className="flex gap-6">
         {/* ====== LEFT SIDEBAR ====== */}
         <aside className="hidden lg:block w-[220px] shrink-0">
@@ -207,11 +250,53 @@ export default function ExplorePage() {
                 </div>
               </div>
             </div>
+
+            {/* Your Activity (logged in only) */}
+            {user && (
+              <div className="card p-4 space-y-3">
+                <p className="text-xs text-gray-500 dark:text-gray-500 font-semibold uppercase tracking-wider">
+                  Your Activity
+                </p>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500 dark:text-gray-400">Stories</span>
+                    <span className="font-bold text-brand-400">
+                      {stories.filter(s => s.author_id === user.id).length}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500 dark:text-gray-400">Votes earned</span>
+                    <span className="font-bold text-green-500 dark:text-green-400">
+                      {stories.filter(s => s.author_id === user.id).reduce((sum, s) => sum + s.upvotes, 0)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </aside>
 
         {/* ====== MAIN FEED ====== */}
         <main className="flex-1 min-w-0">
+          {/* Continue Reading */}
+          {continueStory && continueStory.root_story && (
+            <a
+              href={`/story/${continueStory.current_story_id}`}
+              className="card mb-5 flex items-center gap-4 hover:border-brand-500/30 bg-gradient-to-r from-brand-500/5 to-transparent dark:from-brand-500/5"
+            >
+              <div className="w-10 h-10 rounded-lg bg-brand-500/10 flex items-center justify-center shrink-0">
+                <BookOpen size={18} className="text-brand-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-brand-400 font-semibold uppercase tracking-wider">Continue Reading</p>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate mt-0.5">
+                  {continueStory.root_story?.title || "Untitled story"}
+                </p>
+              </div>
+              <ChevronRight size={16} className="text-gray-400 shrink-0" />
+            </a>
+          )}
+
           {/* Daily prompt banner */}
           <div className="card mb-5 bg-gradient-to-r from-brand-500/5 to-purple-500/5 border-brand-500/20">
             <div className="flex items-start gap-3">
@@ -236,7 +321,7 @@ export default function ExplorePage() {
           </div>
 
           {/* Feed tabs */}
-          <div className="flex items-center gap-1 mb-5 border-b border-gray-800 pb-px">
+          <div className="flex items-center gap-1 mb-5 border-b border-gray-800 pb-px flex-wrap">
             {TABS.map((t) => (
               <button
                 key={t.id}
@@ -251,6 +336,24 @@ export default function ExplorePage() {
                 {t.label}
               </button>
             ))}
+            {/* Trending period pills */}
+            {tab === "trending" && (
+              <div className="flex items-center gap-1 ml-auto">
+                {TRENDING_PERIODS.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => setTrendingPeriod(p.id)}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${
+                      trendingPeriod === p.id
+                        ? "bg-brand-500/20 text-brand-300 border border-brand-500/40"
+                        : "text-gray-500 hover:text-gray-300 border border-transparent hover:border-gray-700"
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Active filter badge (mobile — tag cloud is in right sidebar on xl) */}
@@ -296,6 +399,33 @@ export default function ExplorePage() {
         {/* ====== RIGHT SIDEBAR ====== */}
         <aside className="hidden xl:block w-[260px] shrink-0">
           <div className="sticky top-20 space-y-5">
+            {/* Curated Collections */}
+            <div className="card p-4">
+              <h3 className="text-sm font-semibold flex items-center gap-2 mb-3">
+                <BookMarked size={15} className="text-brand-400" />
+                Collections
+              </h3>
+              <div className="space-y-2">
+                {COLLECTIONS.map((col) => (
+                  <button
+                    key={col.name}
+                    onClick={() => setFilterTag(col.tags[0])}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left hover:bg-gray-800/50 transition-colors group"
+                  >
+                    <span className="text-lg">{col.emoji}</span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-300 group-hover:text-brand-400 transition-colors">
+                        {col.name}
+                      </p>
+                      <p className="text-[10px] text-gray-600">
+                        {col.tags.join(" + ")}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Tag Cloud */}
             <div className="card p-4">
               <h3 className="text-sm font-semibold mb-3">Browse by Genre</h3>

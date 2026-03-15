@@ -82,7 +82,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
   }
 
   // AI assist state
-  const [aiOpen, setAiOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(true);
   const [aiLoading, setAiLoading] = useState<AiAction | null>(null);
   const [suggestion, setSuggestion] = useState<AiSuggestion | null>(null);
   const [showMore, setShowMore] = useState(false);
@@ -380,6 +380,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
           <span className="flex items-center gap-2 text-sm font-medium text-gray-400">
             <Wand2 size={15} className="text-purple-400" />
             AI Writing Assist
+            <span className="text-[10px] text-purple-400/60 font-normal">&mdash; try it!</span>
           </span>
           {aiOpen ? (
             <ChevronUp size={14} className="text-gray-500" />

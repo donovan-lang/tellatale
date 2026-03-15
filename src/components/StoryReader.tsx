@@ -13,6 +13,10 @@ import {
   Share2,
   Link2,
   Check,
+  ListOrdered,
+  Clock,
+  MessageCircle,
+  Layers,
 } from "lucide-react";
 import type { Story } from "@/types";
 import { toAuthorSlug } from "@/lib/utils";
@@ -20,7 +24,11 @@ import BranchCard from "./BranchCard";
 import StoryForm from "./StoryForm";
 import ReportButton from "./ReportButton";
 import CommentSection from "./CommentSection";
+import RelatedStories from "./RelatedStories";
 import { useToast } from "./Toast";
+import FullPathReader from "./FullPathReader";
+
+type BranchSort = "top" | "new" | "discussed";
 
 export default function StoryReader({
   story,
@@ -43,6 +51,13 @@ export default function StoryReader({
   const [userVote, setUserVote] = useState<1 | -1 | 0>(0);
   const [voting, setVoting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [branchSort, setBranchSort] = useState<BranchSort>("top");
+  const [fullPath, setFullPath] = useState(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search).get("path") === "true";
+    }
+    return false;
+  });
 
   // Auto-track reading progress
   useEffect(() => {
@@ -138,14 +153,54 @@ export default function StoryReader({
   const threadAuthorIds = new Set(chainAuthors || []);
 
   const sortedBranches = [...topBranches].sort((a, b) => {
+    // Thread author preference always comes first
     const aThread = a.author_id && threadAuthorIds.has(a.author_id) ? 1 : 0;
     const bThread = b.author_id && threadAuthorIds.has(b.author_id) ? 1 : 0;
     if (bThread !== aThread) return bThread - aThread;
+
+    if (branchSort === "new") {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }
+    if (branchSort === "discussed") {
+      // Use children_count as proxy for discussion, fallback to created_at
+      const aCount = a.children_count || 0;
+      const bCount = b.children_count || 0;
+      if (bCount !== aCount) return bCount - aCount;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    }
+    // "top" — default: by net votes
     return b.upvotes - b.downvotes - (a.upvotes - a.downvotes);
   });
 
+  // Full path mode
+  if (fullPath) {
+    return (
+      <div>
+        <button
+          onClick={() => setFullPath(false)}
+          className="mb-4 flex items-center gap-2 text-sm text-brand-400 hover:text-brand-300 transition-colors"
+        >
+          <Layers size={14} />
+          Exit Full Path
+        </button>
+        <FullPathReader storyId={story.id} rootStoryId={rootStoryId} />
+      </div>
+    );
+  }
+
   return (
     <div>
+      {/* Read Full Path button */}
+      {story.depth > 0 && (
+        <button
+          onClick={() => setFullPath(true)}
+          className="mb-4 flex items-center gap-2 text-sm text-gray-500 hover:text-brand-400 transition-colors px-3 py-1.5 rounded-lg hover:bg-brand-500/10"
+        >
+          <Layers size={14} />
+          Read Full Path
+        </button>
+      )}
+
       {/* Author info card (prominent for branches) */}
       {story.story_type === "branch" && (
         <div className="flex items-center gap-3 mb-4 px-1">
@@ -263,6 +318,19 @@ export default function StoryReader({
             >
               {copied ? <Check size={13} /> : <Link2 size={13} />}
             </button>
+            {story.depth > 0 && (
+              <button
+                onClick={() => {
+                  const pathUrl = `${window.location.origin}/story/${story.slug || story.id}?path=true`;
+                  navigator.clipboard.writeText(pathUrl);
+                  toast("Path link copied!");
+                }}
+                className="p-1 rounded text-gray-600 hover:text-purple-400 hover:bg-purple-400/5 transition-all duration-200"
+                title="Share full path"
+              >
+                <Layers size={13} />
+              </button>
+            )}
           </span>
         </div>
 
@@ -312,13 +380,37 @@ export default function StoryReader({
         <div className="mt-6">
           {branches.length > 0 && (
             <>
-              <h2 className="text-lg font-semibold mb-3 text-gray-300">
-                What happens next?
-                <span className="text-sm font-normal text-gray-500 ml-2">
-                  {branches.length} choice
-                  {branches.length !== 1 ? "s" : ""}
-                </span>
-              </h2>
+              <div className="flex items-center gap-3 mb-3 flex-wrap">
+                <h2 className="text-lg font-semibold text-gray-300">
+                  What happens next?
+                  <span className="text-sm font-normal text-gray-500 ml-2">
+                    {branches.length} choice
+                    {branches.length !== 1 ? "s" : ""}
+                  </span>
+                </h2>
+                {branches.length > 1 && (
+                  <div className="flex items-center gap-1 ml-auto">
+                    {([
+                      { id: "top" as BranchSort, label: "Top", icon: ListOrdered },
+                      { id: "new" as BranchSort, label: "New", icon: Clock },
+                      { id: "discussed" as BranchSort, label: "Discussed", icon: MessageCircle },
+                    ]).map((opt) => (
+                      <button
+                        key={opt.id}
+                        onClick={() => setBranchSort(opt.id)}
+                        className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${
+                          branchSort === opt.id
+                            ? "bg-brand-500/20 text-brand-300 border border-brand-500/40"
+                            : "text-gray-500 hover:text-gray-300 border border-transparent hover:border-gray-700"
+                        }`}
+                      >
+                        <opt.icon size={11} />
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               <div className="space-y-2">
                 {sortedBranches.map((branch, i) => (
@@ -370,6 +462,9 @@ export default function StoryReader({
 
       {/* Discussion */}
       <CommentSection storyId={story.id} />
+
+      {/* Related Stories */}
+      <RelatedStories tags={story.tags} currentId={story.id} />
     </div>
   );
 }

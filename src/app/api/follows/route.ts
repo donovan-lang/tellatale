@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
 import { createClient } from "@supabase/supabase-js";
+import { createNotification } from "@/lib/notify";
 
 async function getUser(req: NextRequest) {
   const auth = req.headers.get("authorization");
@@ -26,5 +27,13 @@ export async function POST(req: NextRequest) {
   if (!followed_id) return NextResponse.json({ error: "followed_id required" }, { status: 400 });
   const sb = createServiceClient();
   await sb.from("follows").upsert({ follower_id: user.id, followed_id }, { onConflict: "follower_id,followed_id" });
+
+  // Notify the followed user
+  if (user) {
+    const { data: profile } = await sb.from("profiles").select("pen_name").eq("id", user.id).single();
+    const name = profile?.pen_name || "Someone";
+    createNotification(followed_id, "follow", `${name} started following you`, null, "/explore");
+  }
+
   return NextResponse.json({ ok: true }, { status: 201 });
 }

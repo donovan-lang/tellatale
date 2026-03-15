@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { Story } from "@/types";
+import SimilarWriters from "@/components/SimilarWriters";
 
 interface AuthorData {
   profileId: string | null;
@@ -276,6 +277,11 @@ export default async function AuthorPage({
             ))}
           </div>
         </section>
+      )}
+
+      {/* Similar Writers */}
+      {seeds.length > 0 && seeds[0].tags && seeds[0].tags.length > 0 && (
+        <SimilarWriters tag={seeds[0].tags[0]} currentAuthor={name} />
       )}
 
       {seeds.length === 0 && contributions.length === 0 && (
