@@ -1,7 +1,7 @@
 import StoryForm from "@/components/StoryForm";
 
 export const metadata = {
-  title: "Submit a Story — TellATale",
+  title: "Submit a Story — MakeATale",
 };
 
 export default function SubmitPage() {

@@ -5,7 +5,7 @@ export const DEMO_STORIES: Story[] = [
     id: "demo-1",
     parent_id: null,
     author_id: null,
-    author_name: "TellATale",
+    author_name: "MakeATale",
     title: "The Last Lighthouse Keeper",
     content:
       "On the edge of a crumbling cliff, the last lighthouse keeper wound the mechanism for the final time. The ships had stopped coming years ago, but something else watched from the deep — something that feared the light.",

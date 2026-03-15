@@ -17,10 +17,10 @@ export default function NavBar() {
         {/* Logo */}
         <a href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-purple-700 flex items-center justify-center text-sm font-black">
-            T
+            M
           </div>
           <span className="text-xl font-bold tracking-tight">
-            <span className="text-brand-400">Tell</span>
+            <span className="text-brand-400">Make</span>
             <span className="text-white">A</span>
             <span className="text-brand-400">Tale</span>
           </span>

@@ -4,7 +4,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import NavBar from "@/components/NavBar";
 
 export const metadata: Metadata = {
-  title: "TellATale -- Collaborative AI Storytelling",
+  title: "MakeATale — Collaborative AI Storytelling",
   description:
     "Plant story seeds, AI illustrates them, community votes on branches. Choose-your-own-adventure meets creative AI. Tip creators with Solana.",
   keywords: [
@@ -36,10 +36,10 @@ export default function RootLayout({
                 <div>
                   <div className="flex items-center gap-2 mb-4">
                     <div className="w-6 h-6 rounded bg-gradient-to-br from-brand-500 to-purple-700 flex items-center justify-center text-xs font-black">
-                      T
+                      M
                     </div>
                     <span className="font-bold">
-                      <span className="text-brand-400">Tell</span>A
+                      <span className="text-brand-400">Make</span>A
                       <span className="text-brand-400">Tale</span>
                     </span>
                   </div>
@@ -95,7 +95,7 @@ export default function RootLayout({
                 </div>
               </div>
               <div className="mt-10 pt-6 border-t border-gray-800/60 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-600">
-                <p>2026 TellATale. Built by indie.io</p>
+                <p>2026 MakeATale. Built by indie.io</p>
                 <p>Powered by AI. Driven by community. Tipped in SOL.</p>
               </div>
             </div>
