@@ -399,7 +399,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
                   type="button"
                   disabled={!hasContent || !!aiLoading}
                   onClick={() => callAi(a.action, a.label)}
-                  className="flex items-center gap-2.5 px-3 py-3 rounded-lg bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md hover:shadow-purple-100 dark:hover:shadow-none transition-all text-left disabled:opacity-30 disabled:cursor-not-allowed group"
+                  className="flex items-center gap-2.5 px-3 py-3 rounded-lg bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md hover:shadow-purple-100 dark:hover:shadow-none transition-all text-left disabled:opacity-60 disabled:cursor-not-allowed group"
                 >
                   <div className="w-8 h-8 rounded-lg bg-purple-600 dark:bg-purple-500 flex items-center justify-center shrink-0 group-hover:bg-purple-500 dark:group-hover:bg-purple-400 transition-colors shadow-sm">
                     {aiLoading === a.action ? (
@@ -429,7 +429,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
                     type="button"
                     disabled={!hasContent || !!aiLoading}
                     onClick={() => callAi(a.action, a.label)}
-                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-500 transition-all text-left disabled:opacity-30 disabled:cursor-not-allowed group"
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-500 transition-all text-left disabled:opacity-60 disabled:cursor-not-allowed group"
                   >
                     {aiLoading === a.action ? (
                       <Loader2 size={14} className="animate-spin text-purple-600 dark:text-purple-400 shrink-0" />
