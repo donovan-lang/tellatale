@@ -67,7 +67,7 @@ export default function SignupPage() {
 
     setSuccess(true);
     setLoading(false);
-    setTimeout(() => router.push("/"), 1500);
+    setTimeout(() => router.push("/explore"), 1500);
   }
 
   async function handleGoogle() {
@@ -76,7 +76,7 @@ export default function SignupPage() {
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/`,
+        redirectTo: `${window.location.origin}/explore`,
       },
     });
     if (oauthError) {

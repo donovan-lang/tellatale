@@ -36,7 +36,7 @@ function LoginForm() {
       return;
     }
 
-    router.push("/");
+    router.push("/explore");
     router.refresh();
   }
 
@@ -46,7 +46,7 @@ function LoginForm() {
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/`,
+        redirectTo: `${window.location.origin}/explore`,
       },
     });
     if (oauthError) {

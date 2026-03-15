@@ -154,7 +154,7 @@ export default async function HomePage() {
             >
               Start Writing — It&apos;s Free
             </a>
-            <a href="/#stories" className="btn-secondary btn-large">
+            <a href="/explore" className="btn-secondary btn-large">
               Explore Stories
             </a>
           </div>

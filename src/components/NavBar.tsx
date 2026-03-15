@@ -34,7 +34,7 @@ export default function NavBar() {
           >
             How It Works
           </a>
-          <a href="/#stories" className="hover:text-white transition-colors">
+          <a href="/explore" className="hover:text-white transition-colors">
             Explore
           </a>
           <a href="/submit" className="hover:text-white transition-colors">
@@ -63,9 +63,12 @@ export default function NavBar() {
             </div>
           ) : user ? (
             <div className="flex items-center gap-3">
-              <span className="text-sm text-brand-400 font-medium">
+              <a
+                href="/account"
+                className="text-sm text-brand-400 font-medium hover:text-brand-300 transition-colors"
+              >
                 {penName}
-              </span>
+              </a>
               <button
                 onClick={signOut}
                 className="btn-ghost text-sm flex items-center gap-1.5 text-gray-500 hover:text-red-400"
@@ -76,10 +79,7 @@ export default function NavBar() {
             </div>
           ) : (
             <>
-              <a
-                href="/login"
-                className="btn-ghost text-sm"
-              >
+              <a href="/login" className="btn-ghost text-sm">
                 Log In
               </a>
               <a
@@ -111,7 +111,7 @@ export default function NavBar() {
             How It Works
           </a>
           <a
-            href="/#stories"
+            href="/explore"
             className="block text-sm text-gray-400 hover:text-white"
           >
             Explore
@@ -131,9 +131,8 @@ export default function NavBar() {
           {user && (
             <a
               href="/chronicles"
-              className="block text-sm text-gray-400 hover:text-white flex items-center gap-1"
+              className="block text-sm text-gray-400 hover:text-white"
             >
-              <BookMarked size={14} />
               My Chronicles
             </a>
           )}
@@ -142,7 +141,12 @@ export default function NavBar() {
               <Loader2 size={16} className="animate-spin text-gray-500" />
             ) : user ? (
               <div className="space-y-3">
-                <p className="text-sm text-brand-400 font-medium">{penName}</p>
+                <a
+                  href="/account"
+                  className="block text-sm text-brand-400 font-medium hover:text-brand-300"
+                >
+                  {penName}
+                </a>
                 <button
                   onClick={signOut}
                   className="text-sm text-gray-500 hover:text-red-400 flex items-center gap-1.5"
