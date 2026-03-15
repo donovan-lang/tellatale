@@ -1,5 +1,4 @@
 import {
-  Sparkles,
   GitFork,
   ThumbsUp,
   Wallet,
@@ -8,7 +7,8 @@ import {
   Clock,
   Users,
   BookOpen,
-  Zap,
+  Pen,
+  Heart,
 } from "lucide-react";
 import StoryCard from "@/components/StoryCard";
 import NewsletterSignup from "@/components/NewsletterSignup";
@@ -51,19 +51,13 @@ const FEATURES = [
     icon: Feather,
     title: "Plant a Seed",
     description:
-      "Write the opening of a story — a scene, a question, a single haunting sentence. That's all it takes.",
-  },
-  {
-    icon: Sparkles,
-    title: "AI Illustrates It",
-    description:
-      "Describe the scene and our AI paints it. Every story gets a unique, generated illustration that brings your words to life.",
+      "Write the opening of a story — a scene, a question, a single haunting sentence. That's all it takes to start something.",
   },
   {
     icon: GitFork,
-    title: "Community Branches It",
+    title: "Branch & Fork",
     description:
-      "Anyone can write what happens next. Stories fork into choose-your-own-adventure trees, voted on by readers.",
+      "Anyone can write what happens next. Stories fork into choose-your-own-adventure trees shaped by the community.",
   },
   {
     icon: ThumbsUp,
@@ -72,16 +66,22 @@ const FEATURES = [
       "Upvote the branches you love. The best continuations rise to the top. Bad turns fade away.",
   },
   {
-    icon: Wallet,
-    title: "Tip Creators",
+    icon: Pen,
+    title: "Build Your Reputation",
     description:
-      "Love a story? Send the writer a tip in USDC or SOL directly from your wallet. No middleman.",
+      "Your best writing earns votes and followers. Build a portfolio of stories and branches the community loves.",
   },
   {
-    icon: Zap,
-    title: "Earn & Grow",
+    icon: Heart,
+    title: "Tip Your Favorites",
     description:
-      "Top writers earn from tips and the future TAIL token. The better your stories, the more you earn.",
+      "Love a story? Send the writer a tip directly. Great writing deserves recognition.",
+  },
+  {
+    icon: Users,
+    title: "Join the Community",
+    description:
+      "Connect with writers, discover new voices, and be part of stories that grow beyond what any one person could write.",
   },
 ];
 
@@ -94,20 +94,20 @@ const HOW_IT_WORKS = [
   },
   {
     step: "02",
-    title: "AI generates art",
-    description: "Describe the mood and our AI creates a unique illustration using Flux.",
+    title: "Share it with the world",
+    description: "Your story hits the feed. Readers discover it, vote on it, and get hooked.",
     color: "from-purple-500 to-indigo-600",
   },
   {
     step: "03",
-    title: "Readers discover it",
-    description: "Your story hits the feed. Readers vote, comment, and get hooked.",
+    title: "Others continue it",
+    description: "Anyone can write the next chapter. Multiple paths emerge. The story grows.",
     color: "from-indigo-500 to-blue-600",
   },
   {
     step: "04",
-    title: "Writers branch it",
-    description: "Anyone continues the story. Multiple paths emerge. A tree grows.",
+    title: "The best paths win",
+    description: "The community votes. The most compelling branches rise to the top.",
     color: "from-blue-500 to-cyan-600",
   },
 ];
@@ -142,8 +142,8 @@ export default async function HomePage() {
           </h1>
 
           <p className="animate-fade-up animate-fade-up-delay-2 mt-6 text-lg md:text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
-            Plant a story seed. AI illustrates it. The community decides what happens next.
-            Choose-your-own-adventure meets collaborative fiction — with crypto tips for your favorite writers.
+            Write the beginning. The community writes what happens next.
+            Collaborative fiction where every reader shapes the story.
           </p>
 
           {/* CTA buttons */}
@@ -219,7 +219,7 @@ export default async function HomePage() {
             Everything a storyteller needs
           </h2>
           <p className="mt-3 text-gray-500 max-w-lg mx-auto">
-            Write, illustrate, branch, vote, and earn — all in one place.
+            Write, branch, vote, and earn — all in one place.
           </p>
         </div>
 

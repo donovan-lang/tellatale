@@ -6,7 +6,7 @@ import NavBar from "@/components/NavBar";
 export const metadata: Metadata = {
   title: "MakeATale — Collaborative AI Storytelling",
   description:
-    "Plant story seeds, AI illustrates them, community votes on branches. Choose-your-own-adventure meets creative AI. Tip creators with Solana.",
+    "Write story seeds, the community branches them. Collaborative choose-your-own-adventure fiction. Tip your favorite writers.",
   keywords: [
     "storytelling",
     "AI",
@@ -44,7 +44,7 @@ export default function RootLayout({
                     </span>
                   </div>
                   <p className="text-xs text-gray-500 leading-relaxed">
-                    Where stories grow. AI-illustrated, community-driven
+                    Where stories grow. Community-driven
                     collaborative fiction.
                   </p>
                 </div>
@@ -96,7 +96,7 @@ export default function RootLayout({
               </div>
               <div className="mt-10 pt-6 border-t border-gray-800/60 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-600">
                 <p>2026 MakeATale. Built by indie.io</p>
-                <p>Powered by AI. Driven by community. Tipped in SOL.</p>
+                <p>Driven by community. Powered by great writing.</p>
               </div>
             </div>
           </footer>
