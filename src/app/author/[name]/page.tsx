@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { createServiceClient } from "@/lib/supabase-server";
+import { toAuthorSlug } from "@/lib/utils";
 import StoryCard from "@/components/StoryCard";
 import DonateButton from "@/components/DonateButton";
 import {
@@ -11,10 +12,13 @@ import {
   Wallet,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import type { Story, Profile } from "@/types";
+import type { Story } from "@/types";
 
 interface AuthorData {
-  profile: Profile;
+  name: string;
+  bio: string | null;
+  wallet_address: string | null;
+  joined: string | null;
   seeds: Story[];
   contributions: Story[];
   stats: { total_seeds: number; total_branches: number; total_votes: number };
@@ -24,30 +28,72 @@ async function getAuthorBySlug(slug: string): Promise<AuthorData | null> {
   try {
     const supabase = createServiceClient();
 
+    // 1. Try registered profile first
     const { data: profile } = await supabase
       .from("profiles")
       .select("*")
       .eq("slug", slug)
       .single();
 
-    if (!profile) return null;
+    if (profile) {
+      const { data: stories } = await supabase
+        .from("stories")
+        .select("*")
+        .eq("author_id", profile.id)
+        .order("created_at", { ascending: false });
 
-    const { data: stories } = await supabase
+      const all = stories || [];
+      const seeds = all.filter((s: any) => s.story_type === "seed");
+      const contributions = all.filter((s: any) => s.story_type === "branch");
+      const totalVotes = all.reduce(
+        (sum: number, s: any) => sum + (s.upvotes || 0),
+        0
+      );
+
+      return {
+        name: profile.pen_name,
+        bio: profile.bio,
+        wallet_address: profile.wallet_address,
+        joined: profile.created_at,
+        seeds,
+        contributions,
+        stats: {
+          total_seeds: seeds.length,
+          total_branches: contributions.length,
+          total_votes: totalVotes,
+        },
+      };
+    }
+
+    // 2. No profile — find stories by author_name matching the slug
+    const { data: allStories } = await supabase
       .from("stories")
       .select("*")
-      .eq("author_id", profile.id)
       .order("created_at", { ascending: false });
 
-    const all = stories || [];
-    const seeds = all.filter((s: any) => s.story_type === "seed");
-    const contributions = all.filter((s: any) => s.story_type === "branch");
-    const totalVotes = all.reduce(
+    // Match stories where slugified author_name equals the slug
+    const authorStories = (allStories || []).filter(
+      (s: any) => toAuthorSlug(s.author_name) === slug
+    );
+
+    if (authorStories.length === 0) return null;
+
+    const authorName = authorStories[0].author_name;
+    const seeds = authorStories.filter((s: any) => s.story_type === "seed");
+    const contributions = authorStories.filter(
+      (s: any) => s.story_type === "branch"
+    );
+    const totalVotes = authorStories.reduce(
       (sum: number, s: any) => sum + (s.upvotes || 0),
       0
     );
+    const earliest = authorStories[authorStories.length - 1]?.created_at;
 
     return {
-      profile,
+      name: authorName,
+      bio: null,
+      wallet_address: null,
+      joined: earliest,
       seeds,
       contributions,
       stats: {
@@ -69,10 +115,9 @@ export async function generateMetadata({
   const data = await getAuthorBySlug(params.name);
   if (!data) return { title: "Author Not Found — MakeATale" };
   return {
-    title: `${data.profile.pen_name} — MakeATale Author`,
+    title: `${data.name} — MakeATale Author`,
     description:
-      data.profile.bio ||
-      `Read stories by ${data.profile.pen_name} on MakeATale.`,
+      data.bio || `Read stories by ${data.name} on MakeATale.`,
   };
 }
 
@@ -88,7 +133,7 @@ export default async function AuthorPage({
       <div className="text-center py-20">
         <h1 className="text-2xl font-bold text-gray-400">Author not found</h1>
         <p className="mt-2 text-gray-600">
-          This author page doesn&apos;t exist yet.
+          No stories found for this author.
         </p>
         <a href="/explore" className="btn-primary mt-4 inline-block">
           Explore stories
@@ -97,7 +142,8 @@ export default async function AuthorPage({
     );
   }
 
-  const { profile, seeds, contributions, stats } = data;
+  const { name, bio, wallet_address, joined, seeds, contributions, stats } =
+    data;
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
@@ -105,22 +151,24 @@ export default async function AuthorPage({
       <div className="card p-6 mb-6">
         <div className="flex items-start gap-4">
           <div className="w-16 h-16 rounded-full bg-gradient-to-br from-brand-500 to-purple-700 flex items-center justify-center text-2xl font-bold shrink-0">
-            {profile.pen_name.charAt(0).toUpperCase()}
+            {name.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold">{profile.pen_name}</h1>
-            {profile.bio && (
-              <p className="text-sm text-gray-400 mt-1">{profile.bio}</p>
+            <h1 className="text-2xl font-bold">{name}</h1>
+            {bio && (
+              <p className="text-sm text-gray-400 mt-1">{bio}</p>
             )}
             <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-              <span className="flex items-center gap-1">
-                <Calendar size={12} />
-                Joined{" "}
-                {formatDistanceToNow(new Date(profile.created_at), {
-                  addSuffix: true,
-                })}
-              </span>
-              {profile.wallet_address && (
+              {joined && (
+                <span className="flex items-center gap-1">
+                  <Calendar size={12} />
+                  First story{" "}
+                  {formatDistanceToNow(new Date(joined), {
+                    addSuffix: true,
+                  })}
+                </span>
+              )}
+              {wallet_address && (
                 <span className="flex items-center gap-1">
                   <Wallet size={12} />
                   Tips enabled
@@ -157,12 +205,12 @@ export default async function AuthorPage({
         </div>
 
         {/* Tip */}
-        {profile.wallet_address && (
+        {wallet_address && seeds.length > 0 && (
           <div className="mt-4 pt-4 border-t border-gray-800/60 flex items-center gap-3">
             <p className="text-sm text-gray-400 flex-1">
-              Support {profile.pen_name}&apos;s writing
+              Support {name}&apos;s writing
             </p>
-            <DonateButton storyId={seeds[0]?.id || ""} />
+            <DonateButton storyId={seeds[0].id} />
           </div>
         )}
       </div>
@@ -199,7 +247,7 @@ export default async function AuthorPage({
             {contributions.map((story) => (
               <a
                 key={story.id}
-                href={`/story/${story.id}`}
+                href={`/story/${story.slug || story.id}`}
                 className="card flex items-start gap-3 hover:border-purple-500/30 p-3"
               >
                 <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0 mt-0.5">
@@ -215,11 +263,6 @@ export default async function AuthorPage({
                       <ChevronUp size={10} />
                       {story.upvotes - story.downvotes}
                     </span>
-                    <span>
-                      {formatDistanceToNow(new Date(story.created_at), {
-                        addSuffix: true,
-                      })}
-                    </span>
                   </div>
                 </div>
               </a>
@@ -228,11 +271,10 @@ export default async function AuthorPage({
         </section>
       )}
 
-      {/* Empty state */}
       {seeds.length === 0 && contributions.length === 0 && (
         <div className="card text-center py-12">
           <p className="text-gray-500">
-            {profile.pen_name} hasn&apos;t written any stories yet.
+            {name} hasn&apos;t written any stories yet.
           </p>
         </div>
       )}
