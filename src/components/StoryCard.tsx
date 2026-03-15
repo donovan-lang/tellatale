@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { ChevronUp, ChevronDown, GitFork, MessageSquare } from "lucide-react";
@@ -11,6 +11,14 @@ export default function StoryCard({ story }: { story: Story }) {
   const [votes, setVotes] = useState({ up: story.upvotes, down: story.downvotes });
   const [userVote, setUserVote] = useState<1 | -1 | 0>(0);
   const [voting, setVoting] = useState(false);
+
+  // Load user's existing vote
+  useEffect(() => {
+    fetch(`/api/stories/${story.id}/vote`)
+      .then((r) => r.json())
+      .then((d) => { if (d.vote) setUserVote(d.vote); })
+      .catch(() => {});
+  }, [story.id]);
 
   const score = votes.up - votes.down;
   const displayTitle = story.title || "Untitled Branch";
@@ -34,11 +42,15 @@ export default function StoryCard({ story }: { story: Story }) {
     setUserVote(newVote as 1 | -1 | 0);
 
     try {
-      await fetch(`/api/stories/${story.id}/vote`, {
+      const res = await fetch(`/api/stories/${story.id}/vote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ vote: newVote }),
       });
+      const data = await res.json();
+      if (data.ok) {
+        setVotes({ up: data.upvotes, down: data.downvotes });
+      }
     } catch {
       setVotes({ up: story.upvotes, down: story.downvotes });
       setUserVote(0);
