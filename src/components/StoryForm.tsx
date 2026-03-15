@@ -85,19 +85,21 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
     setSuggestion(null);
 
     try {
-      // TODO: Replace with real API call to /api/ai-assist
-      // const res = await fetch("/api/ai-assist", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ action, content, title, parent_id: parentId }),
-      // });
-      // const data = await res.json();
-      // setSuggestion({ action, label, text: data.text });
+      const res = await fetch("/api/ai-assist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, content, title, parent_id: parentId }),
+      });
+      const data = await res.json();
 
-      // Placeholder: simulate API delay + return canned response
-      await new Promise((r) => setTimeout(r, 800));
-      const text = PLACEHOLDER_RESPONSES[action](content);
-      setSuggestion({ action, label, text });
+      if (!res.ok) {
+        // Fallback to placeholder if AI not configured
+        await new Promise((r) => setTimeout(r, 400));
+        const fallback = PLACEHOLDER_RESPONSES[action](content);
+        setSuggestion({ action, label, text: data.error === "AI assist not configured" ? fallback + "\n\n(AI not connected — placeholder response)" : data.error || "Something went wrong" });
+      } else {
+        setSuggestion({ action, label, text: data.text });
+      }
     } catch {
       setSuggestion({
         action,
