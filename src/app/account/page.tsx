@@ -61,21 +61,60 @@ export default function AccountPage() {
   const [notifyTips, setNotifyTips] = useState(true);
   const [newsletter, setNewsletter] = useState(true);
 
-  const loadProfile = useCallback(async () => {
+  const loadProfile = useCallback(async (currentUser: typeof user) => {
     try {
       const res = await fetch("/api/profile");
-      if (!res.ok) throw new Error();
-      const data: ProfileData = await res.json();
-      setProfile(data);
-      setPenName(data.pen_name || "");
-      setBio(data.bio || "");
-      setWalletAddress(data.wallet_address || "");
-      setNotifyBranch(data.email_prefs.notify_branch);
-      setNotifyVotes(data.email_prefs.notify_votes);
-      setNotifyTips(data.email_prefs.notify_tips);
-      setNewsletter(data.email_prefs.newsletter);
+      if (res.ok) {
+        const data: ProfileData = await res.json();
+        setProfile(data);
+        setPenName(data.pen_name || "");
+        setBio(data.bio || "");
+        setWalletAddress(data.wallet_address || "");
+        setNotifyBranch(data.email_prefs.notify_branch);
+        setNotifyVotes(data.email_prefs.notify_votes);
+        setNotifyTips(data.email_prefs.notify_tips);
+        setNewsletter(data.email_prefs.newsletter);
+      } else {
+        // API failed (auth cookie issue) — build profile from user metadata
+        const name =
+          currentUser?.user_metadata?.pen_name ||
+          currentUser?.user_metadata?.full_name ||
+          currentUser?.email?.split("@")[0] ||
+          "Anonymous";
+        setProfile({
+          pen_name: name,
+          bio: null,
+          wallet_address: null,
+          email: currentUser?.email || "",
+          provider: currentUser?.app_metadata?.provider || "email",
+          avatar_url: currentUser?.user_metadata?.avatar_url || null,
+          email_prefs: {
+            notify_branch: true,
+            notify_votes: true,
+            notify_tips: true,
+            newsletter: true,
+            marketing: false,
+          },
+        });
+        setPenName(name);
+      }
     } catch {
-      // Profile fetch failed
+      // Fallback
+      setProfile({
+        pen_name: "Anonymous",
+        bio: null,
+        wallet_address: null,
+        email: currentUser?.email || "",
+        provider: "email",
+        avatar_url: null,
+        email_prefs: {
+          notify_branch: true,
+          notify_votes: true,
+          notify_tips: true,
+          newsletter: true,
+          marketing: false,
+        },
+      });
     } finally {
       setLoading(false);
     }
@@ -87,7 +126,7 @@ export default function AccountPage() {
       router.push("/login");
       return;
     }
-    loadProfile();
+    loadProfile(user);
   }, [user, authLoading, router, loadProfile]);
 
   async function handleSave() {
