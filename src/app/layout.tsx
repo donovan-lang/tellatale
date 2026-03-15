@@ -91,13 +91,13 @@ export default function RootLayout({
                 <div>
                   <h4 className="text-sm font-semibold mb-3">Legal</h4>
                   <div className="space-y-2 text-sm text-gray-500">
-                    <a href="#" className="block hover:text-gray-300">
+                    <a href="/privacy" className="block hover:text-gray-300">
                       Privacy
                     </a>
-                    <a href="#" className="block hover:text-gray-300">
+                    <a href="/terms" className="block hover:text-gray-300">
                       Terms
                     </a>
-                    <a href="#" className="block hover:text-gray-300">
+                    <a href="/terms" className="block hover:text-gray-300">
                       Content Policy
                     </a>
                   </div>

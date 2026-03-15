@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ChevronUp, ChevronDown, Flag, MessageSquare } from "lucide-react";
 import type { Story } from "@/types";
 import { toAuthorSlug } from "@/lib/utils";
@@ -34,13 +34,6 @@ export default function BranchCard({
   const [votes, setVotes] = useState({ up: story.upvotes, down: story.downvotes });
   const [userVote, setUserVote] = useState<1 | -1 | 0>(0);
   const [voting, setVoting] = useState(false);
-
-  useEffect(() => {
-    fetch(`/api/stories/${story.id}/vote`)
-      .then((r) => r.json())
-      .then((d) => { if (d.vote) setUserVote(d.vote); })
-      .catch(() => {});
-  }, [story.id]);
 
   const score = votes.up - votes.down;
   const borderColor = rank < RANK_BORDERS.length ? RANK_BORDERS[rank] : "border-l-gray-300 dark:border-l-gray-800";
