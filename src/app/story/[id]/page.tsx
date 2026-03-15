@@ -22,13 +22,19 @@ async function getStory(id: string): Promise<Story | null> {
 async function getBranches(parentId: string): Promise<Story[]> {
   try {
     const supabase = createServiceClient();
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("stories")
       .select("*")
       .eq("parent_id", parentId)
       .order("upvotes", { ascending: false });
+    if (error) {
+      console.error("getBranches error:", error);
+      return [];
+    }
+    console.log("getBranches for", parentId, "found:", data?.length || 0);
     return data || [];
-  } catch {
+  } catch (e) {
+    console.error("getBranches catch:", e);
     return [];
   }
 }
