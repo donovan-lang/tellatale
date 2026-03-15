@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import StoryForm from "@/components/StoryForm";
 import {
-  Feather,
   BookOpen,
   GitFork,
   ChevronUp,
@@ -39,9 +38,7 @@ export default function SubmitPage() {
         {/* Main form */}
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center">
-              <Feather size={20} className="text-brand-400" />
-            </div>
+            <span className="text-2xl">{"\u{1F331}"}</span>
             <div>
               <h1 className="text-2xl font-bold">Plant a Story Seed</h1>
               <p className="text-sm text-gray-500">

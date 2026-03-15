@@ -6,6 +6,7 @@ import { formatDistanceToNow } from "date-fns";
 import { ChevronUp, ChevronDown, GitFork, MessageSquare } from "lucide-react";
 import type { Story } from "@/types";
 import { toAuthorSlug } from "@/lib/utils";
+import { getGenreEmoji, GENRE_EMOJI } from "@/lib/genre-theme";
 import DonateButton from "./DonateButton";
 import ReportButton from "./ReportButton";
 
@@ -78,6 +79,7 @@ export default function StoryCard({ story }: { story: Story }) {
       <div className="flex-1 min-w-0">
         <a href={`/story/${story.slug || story.id}`} className="block group/link">
           <div className="flex items-center gap-2">
+            <span className="text-lg shrink-0" title={story.tags?.[0] || "Story"}>{getGenreEmoji(story.tags)}</span>
             <h2 className="text-base font-semibold group-hover/link:text-brand-400 transition-colors duration-200 line-clamp-1 flex-1">
               {displayTitle}
             </h2>
@@ -114,7 +116,7 @@ export default function StoryCard({ story }: { story: Story }) {
                 key={tag}
                 className="text-[10px] px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-300 border border-brand-500/20"
               >
-                {tag}
+                {GENRE_EMOJI[tag] || ""} {tag}
               </span>
             ))}
           </div>

@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/components/AuthProvider";
 import { usePathname } from "next/navigation";
-import { LogOut, Menu, X, Loader2, BookOpen, Pen, Compass } from "lucide-react";
+import { LogOut, Menu, X, Loader2 } from "lucide-react";
 import { useState } from "react";
 import ThemeToggle from "./ThemeToggle";
 import NotificationBell from "./NotificationBell";
@@ -48,13 +48,13 @@ export default function NavBar() {
           {user ? (
             <>
               <a href="/read" className={navLinkClass("/read")}>
-                <BookOpen size={15} /> Read
+                {"\u{1F4D6}"} Read
               </a>
               <a href="/explore" className={navLinkClass("/explore")}>
-                <Compass size={15} /> Explore
+                {"\u{1F9ED}"} Explore
               </a>
               <a href="/submit" className={navLinkClass("/submit")}>
-                <Pen size={15} /> Write
+                {"\u{270D}\u{FE0F}"} Write
               </a>
             </>
           ) : (
@@ -125,13 +125,13 @@ export default function NavBar() {
           {user ? (
             <>
               <a href="/read" className={navLinkClass("/read") + " w-full"}>
-                <BookOpen size={16} /> Read
+                {"\u{1F4D6}"} Read
               </a>
               <a href="/explore" className={navLinkClass("/explore") + " w-full"}>
-                <Compass size={16} /> Explore
+                {"\u{1F9ED}"} Explore
               </a>
               <a href="/submit" className={navLinkClass("/submit") + " w-full"}>
-                <Pen size={16} /> Write
+                {"\u{270D}\u{FE0F}"} Write
               </a>
             </>
           ) : (

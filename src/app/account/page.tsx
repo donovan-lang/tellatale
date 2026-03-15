@@ -192,10 +192,10 @@ export default function AccountPage() {
   if (!user || !profile) return null;
 
   const TABS: { id: Tab; label: string; icon: typeof User }[] = [
-    { id: "profile", label: "Profile", icon: User },
-    { id: "story", label: "Story Settings", icon: BookOpen },
-    { id: "notifications", label: "Notifications", icon: Bell },
-    { id: "payment", label: "Payment", icon: CreditCard },
+    { id: "profile", label: "\u{1F464} Profile", icon: User },
+    { id: "story", label: "\u{1F4DD} Story Settings", icon: BookOpen },
+    { id: "notifications", label: "\u{1F514} Notifications", icon: Bell },
+    { id: "payment", label: "\u{1F4B0} Payment", icon: CreditCard },
   ];
 
   return (

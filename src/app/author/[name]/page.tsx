@@ -6,8 +6,6 @@ import StoryCard from "@/components/StoryCard";
 import DonateButton from "@/components/DonateButton";
 import FollowButton from "@/components/FollowButton";
 import {
-  Feather,
-  GitFork,
   ChevronUp,
   Calendar,
   Wallet,
@@ -231,8 +229,7 @@ export default async function AuthorPage({
       {seeds.length > 0 && (
         <section className="mb-8">
           <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-            <Feather size={18} className="text-brand-400" />
-            Their Seeds
+            {"\u{1F331}"} Their Seeds
             <span className="text-sm font-normal text-gray-500">
               {seeds.length}
             </span>
@@ -249,8 +246,7 @@ export default async function AuthorPage({
       {contributions.length > 0 && (
         <section className="mb-8">
           <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-            <GitFork size={18} className="text-purple-400" />
-            Contributions
+            {"\u{1F33F}"} Contributions
             <span className="text-sm font-normal text-gray-500">
               {contributions.length}
             </span>
@@ -262,9 +258,7 @@ export default async function AuthorPage({
                 href={`/story/${story.slug || story.id}`}
                 className="card flex items-start gap-3 hover:border-purple-500/30 p-3"
               >
-                <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                  <GitFork size={14} className="text-purple-400" />
-                </div>
+                <span className="text-lg shrink-0 mt-0.5">{"\u{1F33F}"}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
                     {story.teaser || story.content}

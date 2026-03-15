@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import type { Story } from "@/types";
 import { toAuthorSlug } from "@/lib/utils";
+import { getGenreEmoji, GENRE_EMOJI } from "@/lib/genre-theme";
 import BranchCard from "./BranchCard";
 import StoryForm from "./StoryForm";
 import ReportButton from "./ReportButton";
@@ -248,7 +249,10 @@ export default function StoryReader({
         )}
 
         {story.title && (
-          <h1 className="text-2xl font-bold mb-1 pr-10">{story.title}</h1>
+          <h1 className="text-2xl font-bold mb-1 pr-10">
+            <span className="mr-2">{getGenreEmoji(story.tags)}</span>
+            {story.title}
+          </h1>
         )}
 
         {/* Reading time */}
@@ -376,7 +380,7 @@ export default function StoryReader({
                     key={tag}
                     className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 border border-gray-300 dark:border-gray-700/50"
                   >
-                    {tag}
+                    {GENRE_EMOJI[tag] || ""} {tag}
                   </span>
                 ))}
               </div>

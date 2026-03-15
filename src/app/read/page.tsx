@@ -68,9 +68,9 @@ function ReadContent() {
   if (!user) return null;
 
   const TABS: { id: Tab; label: string; icon: typeof BookOpen; count: number }[] = [
-    { id: "progress", label: "In Progress", icon: BookOpen, count: progress.length },
-    { id: "bookmarks", label: "Bookmarks", icon: Bookmark, count: bookmarks.length },
-    { id: "chronicles", label: "Chronicles", icon: ScrollText, count: chronicles.length },
+    { id: "progress", label: "\u{1F4D6} Reading", icon: BookOpen, count: progress.length },
+    { id: "bookmarks", label: "\u{1F516} Bookmarks", icon: Bookmark, count: bookmarks.length },
+    { id: "chronicles", label: "\u{1F4DC} Chronicles", icon: ScrollText, count: chronicles.length },
   ];
 
   // Group bookmarks by root story

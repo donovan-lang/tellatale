@@ -7,7 +7,6 @@ import {
   TrendingUp,
   Clock,
   Sparkles,
-  Feather,
   BookOpen,
   BookMarked,
   Settings,
@@ -19,9 +18,9 @@ import {
   ChevronRight,
   Loader2,
   X,
-  Shuffle,
 } from "lucide-react";
 import { STORY_CATEGORIES } from "@/lib/demo-data";
+import { GENRE_EMOJI } from "@/lib/genre-theme";
 import { toAuthorSlug } from "@/lib/utils";
 import type { Story } from "@/types";
 import OnboardingOverlay from "@/components/OnboardingOverlay";
@@ -159,9 +158,9 @@ export default function ExplorePage() {
   ];
 
   const COLLECTIONS = [
-    { name: "Epic Adventures", tags: ["Adventure", "Fantasy"], emoji: "\u{2694}\u{FE0F}" },
-    { name: "Dark & Twisted", tags: ["Horror", "Thriller"], emoji: "\u{1F480}" },
-    { name: "Love Stories", tags: ["Romance", "Drama"], emoji: "\u{1F497}" },
+    { name: "Epic Adventures", tags: ["Adventure", "Fantasy"], emoji: "\u{2694}\u{FE0F}\u{1F409}" },
+    { name: "Dark & Twisted", tags: ["Horror", "Thriller"], emoji: "\u{1F47B}\u{1F52A}" },
+    { name: "Love Stories", tags: ["Romance", "Drama"], emoji: "\u{1F495}\u{1F3AD}" },
   ];
 
   const NAV_LINKS = [
@@ -238,8 +237,7 @@ export default function ExplorePage() {
               href="/submit"
               className="btn-primary w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold"
             >
-              <Feather size={16} />
-              Plant a Seed
+              {"\u{1F331}"} Plant a Seed
             </a>
 
             {/* Surprise Me */}
@@ -247,14 +245,13 @@ export default function ExplorePage() {
               href="/surprise"
               className="btn-ghost w-full flex items-center justify-center gap-2 py-2.5 text-sm"
             >
-              <Shuffle size={16} />
-              Surprise Me
+              {"\u{1F3B2}"} Surprise Me
             </a>
 
             {/* Quick stats */}
             <div className="card p-4 space-y-3">
               <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
-                Community
+{"\u{1F4CA}"} Community
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <div className="text-center">
@@ -279,7 +276,7 @@ export default function ExplorePage() {
             {user && (
               <div className="card p-4 space-y-3">
                 <p className="text-xs text-gray-500 dark:text-gray-500 font-semibold uppercase tracking-wider">
-                  Your Activity
+{"\u{2728}"} Your Activity
                 </p>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
@@ -342,9 +339,7 @@ export default function ExplorePage() {
           {/* Daily prompt banner */}
           <div className="card mb-5 bg-gradient-to-r from-brand-500/5 to-purple-500/5 border-brand-500/20">
             <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                <Sparkles size={16} className="text-brand-400" />
-              </div>
+              <span className="text-2xl shrink-0 mt-0.5">{"\u{270D}\u{FE0F}"}</span>
               <div className="flex-1">
                 <p className="text-xs text-brand-400 font-semibold uppercase tracking-wider mb-1">
                   Daily Writing Prompt
@@ -501,7 +496,7 @@ export default function ExplorePage() {
                           : "bg-gray-50 dark:bg-gray-800/30 text-gray-600 border border-gray-200 dark:border-gray-800/50 text-xs"
                       }`}
                     >
-                      {cat}
+                      {GENRE_EMOJI[cat] || ""} {cat}
                       {count > 0 && (
                         <span className="ml-1 text-gray-600">{count}</span>
                       )}

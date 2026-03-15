@@ -18,6 +18,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { STORY_CATEGORIES } from "@/lib/demo-data";
+import { GENRE_EMOJI } from "@/lib/genre-theme";
 import { useToast } from "./Toast";
 
 type AiAction =
@@ -328,7 +329,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
                       : "bg-gray-100 dark:bg-gray-800/70 text-gray-500 border border-gray-300 dark:border-gray-700/50 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-400 dark:hover:border-gray-600"
                   }`}
                 >
-                  {cat}
+                  {GENRE_EMOJI[cat] || ""} {cat}
                 </button>
               );
             })}
