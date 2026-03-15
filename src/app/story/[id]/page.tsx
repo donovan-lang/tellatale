@@ -96,15 +96,21 @@ export default async function StoryPage({
     getAncestors(story.id),
   ]);
 
-  // Collect author IDs from the ancestor chain for thread-author highlighting
   const chainAuthors = ancestors
     .map((a) => a.author_id)
     .filter((id): id is string => !!id);
 
+  const rootStoryId = ancestors.length > 0 ? ancestors[0].id : story.id;
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
       <Breadcrumbs ancestors={ancestors} />
-      <StoryReader story={story} branches={branches} chainAuthors={chainAuthors} />
+      <StoryReader
+        story={story}
+        branches={branches}
+        chainAuthors={chainAuthors}
+        rootStoryId={rootStoryId}
+      />
     </div>
   );
 }

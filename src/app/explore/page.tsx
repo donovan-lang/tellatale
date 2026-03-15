@@ -107,13 +107,13 @@ export default function ExplorePage() {
   ];
 
   const NAV_LINKS = [
-    { href: "/explore", label: "Feed", icon: Flame, active: true },
+    ...(user
+      ? [{ href: "/read", label: "Read", icon: BookOpen }]
+      : []),
+    { href: "/explore", label: "Explore", icon: Flame, active: true },
     { href: "/submit", label: "Write", icon: Pen },
     ...(user
-      ? [
-          { href: "/chronicles", label: "My Chronicles", icon: BookMarked },
-          { href: "/account", label: "Settings", icon: Settings },
-        ]
+      ? [{ href: "/account", label: "Settings", icon: Settings }]
       : []),
   ];
 

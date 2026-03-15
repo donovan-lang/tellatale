@@ -61,4 +61,17 @@ export interface ReadingProgress {
   root_story_id: string;
   current_story_id: string;
   updated_at: string;
+  root_story?: Story;
+  current_story?: Story;
+}
+
+export interface Bookmark {
+  id: string;
+  user_id: string;
+  story_id: string;
+  root_story_id: string;
+  note: string | null;
+  created_at: string;
+  story?: Story;
+  root_story?: Story;
 }

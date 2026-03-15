@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/AuthProvider";
-import { LogOut, Menu, X, Loader2, BookMarked } from "lucide-react";
+import { LogOut, Menu, X, Loader2, BookOpen, Pen, Compass } from "lucide-react";
 import { useState } from "react";
 
 export default function NavBar() {
@@ -9,7 +9,10 @@ export default function NavBar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const penName =
-    user?.user_metadata?.pen_name || user?.email?.split("@")[0] || "Writer";
+    user?.user_metadata?.pen_name ||
+    user?.user_metadata?.full_name ||
+    user?.email?.split("@")[0] ||
+    "Writer";
 
   return (
     <nav className="sticky top-0 z-50 border-b border-gray-800/60 bg-gray-950/70 backdrop-blur-xl">
@@ -28,35 +31,38 @@ export default function NavBar() {
 
         {/* Desktop links */}
         <div className="hidden md:flex items-center gap-6 text-sm text-gray-400">
-          <a
-            href="/#how-it-works"
-            className="hover:text-white transition-colors"
-          >
-            How It Works
-          </a>
-          <a href="/explore" className="hover:text-white transition-colors">
-            Explore
-          </a>
-          <a href="/submit" className="hover:text-white transition-colors">
-            Write
-          </a>
-          {user && (
-            <a
-              href="/chronicles"
-              className="hover:text-white transition-colors flex items-center gap-1"
-            >
-              <BookMarked size={14} />
-              My Chronicles
-            </a>
+          {user ? (
+            <>
+              <a href="/read" className="hover:text-white transition-colors flex items-center gap-1.5">
+                <BookOpen size={15} />
+                Read
+              </a>
+              <a href="/explore" className="hover:text-white transition-colors flex items-center gap-1.5">
+                <Compass size={15} />
+                Explore
+              </a>
+              <a href="/submit" className="hover:text-white transition-colors flex items-center gap-1.5">
+                <Pen size={15} />
+                Write
+              </a>
+            </>
+          ) : (
+            <>
+              <a href="/#how-it-works" className="hover:text-white transition-colors">
+                How It Works
+              </a>
+              <a href="/explore" className="hover:text-white transition-colors">
+                Explore
+              </a>
+              <a href="/submit" className="hover:text-white transition-colors">
+                Write
+              </a>
+            </>
           )}
         </div>
 
         {/* Desktop auth area */}
         <div className="hidden md:flex items-center gap-2">
-          <a href="/submit" className="btn-ghost text-sm">
-            + New Story
-          </a>
-
           {loading ? (
             <div className="px-4 py-2">
               <Loader2 size={16} className="animate-spin text-gray-500" />
@@ -74,18 +80,12 @@ export default function NavBar() {
                 className="btn-ghost text-sm flex items-center gap-1.5 text-gray-500 hover:text-red-400"
               >
                 <LogOut size={14} />
-                Sign Out
               </button>
             </div>
           ) : (
             <>
-              <a href="/login" className="btn-ghost text-sm">
-                Log In
-              </a>
-              <a
-                href="/signup"
-                className="bg-white text-gray-950 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-gray-200 transition-colors"
-              >
+              <a href="/login" className="btn-ghost text-sm">Log In</a>
+              <a href="/signup" className="bg-white text-gray-950 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-gray-200 transition-colors">
                 Sign Up Free
               </a>
             </>
@@ -104,68 +104,39 @@ export default function NavBar() {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden border-t border-gray-800/60 px-4 py-4 space-y-3 bg-gray-950/95 backdrop-blur-xl">
-          <a
-            href="/#how-it-works"
-            className="block text-sm text-gray-400 hover:text-white"
-          >
-            How It Works
-          </a>
-          <a
-            href="/explore"
-            className="block text-sm text-gray-400 hover:text-white"
-          >
-            Explore
-          </a>
-          <a
-            href="/submit"
-            className="block text-sm text-gray-400 hover:text-white"
-          >
-            Write
-          </a>
-          <a
-            href="/submit"
-            className="block text-sm text-gray-400 hover:text-white"
-          >
-            + New Story
-          </a>
-          {user && (
-            <a
-              href="/chronicles"
-              className="block text-sm text-gray-400 hover:text-white"
-            >
-              My Chronicles
-            </a>
+          {user ? (
+            <>
+              <a href="/read" className="block text-sm text-gray-400 hover:text-white flex items-center gap-2">
+                <BookOpen size={14} /> Read
+              </a>
+              <a href="/explore" className="block text-sm text-gray-400 hover:text-white flex items-center gap-2">
+                <Compass size={14} /> Explore
+              </a>
+              <a href="/submit" className="block text-sm text-gray-400 hover:text-white flex items-center gap-2">
+                <Pen size={14} /> Write
+              </a>
+            </>
+          ) : (
+            <>
+              <a href="/#how-it-works" className="block text-sm text-gray-400 hover:text-white">How It Works</a>
+              <a href="/explore" className="block text-sm text-gray-400 hover:text-white">Explore</a>
+              <a href="/submit" className="block text-sm text-gray-400 hover:text-white">Write</a>
+            </>
           )}
           <div className="pt-3 border-t border-gray-800/60">
             {loading ? (
               <Loader2 size={16} className="animate-spin text-gray-500" />
             ) : user ? (
               <div className="space-y-3">
-                <a
-                  href="/account"
-                  className="block text-sm text-brand-400 font-medium hover:text-brand-300"
-                >
-                  {penName}
-                </a>
-                <button
-                  onClick={signOut}
-                  className="text-sm text-gray-500 hover:text-red-400 flex items-center gap-1.5"
-                >
-                  <LogOut size={14} />
-                  Sign Out
+                <a href="/account" className="block text-sm text-brand-400 font-medium">{penName}</a>
+                <button onClick={signOut} className="text-sm text-gray-500 hover:text-red-400 flex items-center gap-1.5">
+                  <LogOut size={14} /> Sign Out
                 </button>
               </div>
             ) : (
               <div className="flex gap-2">
-                <a href="/login" className="btn-ghost text-sm">
-                  Log In
-                </a>
-                <a
-                  href="/signup"
-                  className="bg-white text-gray-950 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-gray-200 transition-colors"
-                >
-                  Sign Up Free
-                </a>
+                <a href="/login" className="btn-ghost text-sm">Log In</a>
+                <a href="/signup" className="bg-white text-gray-950 font-semibold px-4 py-2 rounded-lg text-sm hover:bg-gray-200 transition-colors">Sign Up Free</a>
               </div>
             )}
           </div>

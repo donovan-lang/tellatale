@@ -1,8 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, Flag, User, Star } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
+import {
+  ChevronDown,
+  Flag,
+  Star,
+  Bookmark,
+  BookmarkCheck,
+} from "lucide-react";
 import type { Story } from "@/types";
 import BranchCard from "./BranchCard";
 import StoryForm from "./StoryForm";
@@ -11,21 +18,76 @@ export default function StoryReader({
   story,
   branches,
   chainAuthors,
+  rootStoryId,
 }: {
   story: Story;
   branches: Story[];
-  chainAuthors?: string[]; // author_ids from the ancestor chain
+  chainAuthors?: string[];
+  rootStoryId: string;
 }) {
   const router = useRouter();
+  const { user } = useAuth();
   const [showAll, setShowAll] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [bookmarkId, setBookmarkId] = useState<string | null>(null);
+
+  // Auto-track reading progress
+  useEffect(() => {
+    if (!user) return;
+    fetch("/api/reading-progress", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        root_story_id: rootStoryId,
+        current_story_id: story.id,
+      }),
+    }).catch(() => {});
+  }, [story.id, rootStoryId, user]);
+
+  // Check if bookmarked
+  useEffect(() => {
+    if (!user) return;
+    fetch("/api/bookmarks")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const existing = data.find((b: any) => b.story_id === story.id);
+          if (existing) {
+            setBookmarked(true);
+            setBookmarkId(existing.id);
+          }
+        }
+      })
+      .catch(() => {});
+  }, [story.id, user]);
+
+  async function toggleBookmark() {
+    if (!user) return;
+    if (bookmarked && bookmarkId) {
+      await fetch(`/api/bookmarks/${bookmarkId}`, { method: "DELETE" });
+      setBookmarked(false);
+      setBookmarkId(null);
+    } else {
+      const res = await fetch("/api/bookmarks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          story_id: story.id,
+          root_story_id: rootStoryId,
+        }),
+      });
+      const data = await res.json();
+      if (data.id) {
+        setBookmarked(true);
+        setBookmarkId(data.id);
+      }
+    }
+  }
 
   const topBranches = showAll ? branches : branches.slice(0, 5);
   const hasMore = branches.length > 5 && !showAll;
-
-  // Authors who contributed earlier in this story thread get a badge
   const threadAuthorIds = new Set(chainAuthors || []);
 
-  // Sort branches: thread authors first, then by votes
   const sortedBranches = [...topBranches].sort((a, b) => {
     const aThread = a.author_id && threadAuthorIds.has(a.author_id) ? 1 : 0;
     const bThread = b.author_id && threadAuthorIds.has(b.author_id) ? 1 : 0;
@@ -53,9 +115,28 @@ export default function StoryReader({
       )}
 
       {/* Story content */}
-      <div className="card">
+      <div className="card relative">
+        {/* Bookmark button */}
+        {user && (
+          <button
+            onClick={toggleBookmark}
+            className={`absolute top-3 right-3 p-1.5 rounded-lg transition-colors ${
+              bookmarked
+                ? "text-brand-400 bg-brand-400/10"
+                : "text-gray-600 hover:text-gray-400 hover:bg-gray-800"
+            }`}
+            title={bookmarked ? "Remove bookmark" : "Bookmark this point"}
+          >
+            {bookmarked ? (
+              <BookmarkCheck size={18} />
+            ) : (
+              <Bookmark size={18} />
+            )}
+          </button>
+        )}
+
         {story.title && (
-          <h1 className="text-2xl font-bold mb-3">{story.title}</h1>
+          <h1 className="text-2xl font-bold mb-3 pr-10">{story.title}</h1>
         )}
 
         <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
@@ -71,7 +152,7 @@ export default function StoryReader({
           </div>
         )}
 
-        {/* Seed author info (below content) */}
+        {/* Seed author info */}
         {story.story_type === "seed" && (
           <div className="mt-4 flex items-center gap-3 pt-3 border-t border-gray-800/60">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-purple-700 flex items-center justify-center text-xs font-bold shrink-0">
@@ -115,10 +196,12 @@ export default function StoryReader({
               <div className="space-y-2">
                 {sortedBranches.map((branch, i) => (
                   <div key={branch.id} className="relative">
-                    {/* Thread author indicator */}
                     {branch.author_id &&
                       threadAuthorIds.has(branch.author_id) && (
-                        <div className="absolute -left-2 top-3 z-10" title="Author from this story thread">
+                        <div
+                          className="absolute -left-2 top-3 z-10"
+                          title="Author from this story thread"
+                        >
                           <Star
                             size={12}
                             className="text-yellow-500 fill-yellow-500"
