@@ -54,9 +54,11 @@ const PLACEHOLDER_RESPONSES: Record<AiAction, (content: string) => string> = {
 export default function StoryForm({ parentId }: { parentId?: string }) {
   const router = useRouter();
   const isBranch = !!parentId;
-  const maxContent = isBranch ? 200 : 500;
+  const maxContent = isBranch ? 2000 : 500;
+  const maxTeaser = 200;
 
   const [title, setTitle] = useState("");
+  const [teaser, setTeaser] = useState("");
   const [content, setContent] = useState("");
   const [authorName, setAuthorName] = useState("");
   const [isEnding, setIsEnding] = useState(false);
@@ -137,7 +139,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if ((!isBranch && !title.trim()) || !content.trim() || submitting) return;
+    if ((!isBranch && !title.trim()) || !content.trim() || (isBranch && !teaser.trim()) || submitting) return;
     setSubmitting(true);
 
     try {
@@ -146,6 +148,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: isBranch ? null : title.trim(),
+          teaser: isBranch ? teaser.trim() : null,
           content: content.trim(),
           author_name: authorName.trim() || "Anonymous",
           image_url: null,
@@ -230,7 +233,27 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       {isBranch ? (
-        <p className="text-sm text-brand-400">What happens next?</p>
+        <>
+          <p className="text-sm text-brand-400">What happens next?</p>
+          {/* Teaser: the choice line readers see */}
+          <div>
+            <label className="text-xs text-gray-500 mb-1 block">
+              Choice line <span className="text-gray-600">(what readers see before clicking)</span>
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. She opens the door and steps into the darkness..."
+              value={teaser}
+              onChange={(e) => setTeaser(e.target.value)}
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-brand-500"
+              maxLength={maxTeaser}
+              required
+            />
+            <p className="text-right text-xs text-gray-600 mt-1">
+              {teaser.length}/{maxTeaser}
+            </p>
+          </div>
+        </>
       ) : (
         <>
           <div>
@@ -288,16 +311,21 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
 
       {/* Content textarea */}
       <div>
+        {isBranch && (
+          <label className="text-xs text-gray-500 mb-1 block">
+            Your story <span className="text-gray-600">(the full content readers see after choosing)</span>
+          </label>
+        )}
         <textarea
           placeholder={
             isBranch
-              ? "Write a 1-2 sentence choice... (the community votes on the best ones)"
+              ? "Write the full story continuation... What happens when the reader picks this choice? End with a new question or decision point to keep the chain going."
               : "Write a short story seed that ends with a question or a choice... (the community will branch it)"
           }
           value={content}
           onChange={(e) => setContent(e.target.value)}
           className={`w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm resize-y focus:outline-none focus:border-brand-500 ${
-            isBranch ? "min-h-[80px]" : "min-h-[120px]"
+            isBranch ? "min-h-[160px]" : "min-h-[120px]"
           }`}
           maxLength={maxContent}
           required
@@ -477,7 +505,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
 
       <button
         type="submit"
-        disabled={(!isBranch && !title.trim()) || !content.trim() || submitting}
+        disabled={(!isBranch && !title.trim()) || !content.trim() || (isBranch && !teaser.trim()) || submitting}
         className="btn-primary w-full flex items-center justify-center gap-2 py-3 text-base disabled:opacity-50"
       >
         {submitting ? (

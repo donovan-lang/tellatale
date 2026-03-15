@@ -96,8 +96,13 @@ export default function BranchCard({
         </button>
       </div>
 
-      {/* Content */}
-      <p className="text-sm text-gray-300 flex-1 line-clamp-2">{story.content}</p>
+      {/* Teaser (choice line) — falls back to content for old branches */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm text-gray-300 line-clamp-2">
+          {story.teaser || story.content}
+        </p>
+        <p className="text-[10px] text-gray-600 mt-1">{story.author_name}</p>
+      </div>
 
       {/* Ending badge */}
       {story.is_ending && (

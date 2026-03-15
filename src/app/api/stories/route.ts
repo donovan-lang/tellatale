@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
     const {
       title,
       content,
+      teaser,
       author_name,
       image_url,
       image_prompt,
@@ -46,7 +47,8 @@ export async function POST(req: NextRequest) {
     } = body;
 
     const isBranch = !!parent_id;
-    const maxContent = isBranch ? 200 : 500;
+    const maxContent = isBranch ? 2000 : 500;
+    const maxTeaser = 200;
 
     // Seed requires title; branch does not
     if (!isBranch && !title?.trim()) {
@@ -66,6 +68,14 @@ export async function POST(req: NextRequest) {
     if (content.trim().length > maxContent) {
       return NextResponse.json(
         { error: `Content must be ${maxContent} characters or fewer` },
+        { status: 400 }
+      );
+    }
+
+    // Branches need a teaser (the choice line readers see before clicking)
+    if (isBranch && !teaser?.trim()) {
+      return NextResponse.json(
+        { error: "A choice line is required for branches" },
         { status: 400 }
       );
     }
@@ -137,10 +147,11 @@ export async function POST(req: NextRequest) {
       if (parent) depth = parent.depth + 1;
     }
 
-    // Base row — columns that always exist
+    // Base row
     const row: Record<string, unknown> = {
       title: isBranch ? null : title.trim().slice(0, 200),
       content: content.trim().slice(0, maxContent),
+      teaser: isBranch && teaser ? teaser.trim().slice(0, maxTeaser) : null,
       author_id: authorId,
       author_name: resolvedAuthorName,
       image_url: image_url || null,
