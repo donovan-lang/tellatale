@@ -25,6 +25,7 @@ import StoryForm from "./StoryForm";
 import ReportButton from "./ReportButton";
 import CommentSection from "./CommentSection";
 import RelatedStories from "./RelatedStories";
+import DonateButton from "./DonateButton";
 import { useToast } from "./Toast";
 import FullPathReader from "./FullPathReader";
 
@@ -292,7 +293,8 @@ export default function StoryReader({
             <ChevronDown size={18} />
             Downvote
           </button>
-          <span className="ml-auto">
+          <span className="ml-auto flex items-center gap-2">
+            <DonateButton storyId={story.id} />
             <ReportButton storyId={story.id} />
           </span>
           <span className="flex items-center gap-1">

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ChevronUp, ChevronDown, Flag, MessageSquare } from "lucide-react";
 import type { Story } from "@/types";
 import { toAuthorSlug } from "@/lib/utils";
+import DonateButton from "./DonateButton";
 
 const RANK_BORDERS = [
   "border-l-yellow-500",
@@ -121,6 +122,9 @@ export default function BranchCard({
           )}
           <span className="text-[10px] text-gray-400 dark:text-gray-600 flex items-center gap-0.5" title="Click to read and discuss">
             <MessageSquare size={9} />
+          </span>
+          <span onClick={(e) => e.stopPropagation()} className="text-[10px]">
+            <DonateButton storyId={story.id} />
           </span>
         </div>
       </div>
