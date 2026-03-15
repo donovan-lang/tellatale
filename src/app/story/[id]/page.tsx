@@ -31,7 +31,7 @@ async function getBranches(parentId: string): Promise<Story[]> {
       console.error("getBranches error:", error);
       return [];
     }
-    console.log("getBranches for", parentId, "found:", data?.length || 0);
+    console.log("getBranches for", parentId, "found:", data?.length || 0, "url:", process.env.NEXT_PUBLIC_SUPABASE_URL?.slice(0, 20), "key:", process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 10));
     return data || [];
   } catch (e) {
     console.error("getBranches catch:", e);
