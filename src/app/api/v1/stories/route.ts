@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
   const author = p.get("author");
   const since = p.get("since");
 
-  let query = sb.from("stories").select("*, profiles:author_id(is_bot)", { count: "exact" }).eq("is_hidden", false);
+  let query = sb.from("stories").select("*", { count: "exact" }).eq("is_hidden", false);
 
   if (storyType === "seed") query = query.is("parent_id", null);
   else if (storyType === "branch") query = query.not("parent_id", "is", null);
@@ -38,11 +38,7 @@ export async function GET(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Flatten is_bot from joined profiles into each story
-  const stories = (data || []).map((s: any) => {
-    const { profiles, ...story } = s;
-    return { ...story, is_bot: !!profiles?.is_bot };
-  });
+  const stories = data || [];
 
   return NextResponse.json({
     data: stories,

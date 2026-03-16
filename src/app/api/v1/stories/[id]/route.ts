@@ -6,14 +6,11 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   const sb = createServiceClient();
   const isUuid = /^[0-9a-f]{8}-/i.test(params.id);
 
-  const { data: rawStory } = isUuid
-    ? await sb.from("stories").select("*, profiles:author_id(is_bot)").eq("id", params.id).single()
-    : await sb.from("stories").select("*, profiles:author_id(is_bot)").eq("slug", params.id).single();
+  const { data: story } = isUuid
+    ? await sb.from("stories").select("*").eq("id", params.id).single()
+    : await sb.from("stories").select("*").eq("slug", params.id).single();
 
-  if (!rawStory || rawStory.is_hidden) return NextResponse.json({ error: "Not found" }, { status: 404 });
-
-  const { profiles, ...story } = rawStory as any;
-  (story as any).is_bot = !!profiles?.is_bot;
+  if (!story || story.is_hidden) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   // Get ancestors
   const ancestors = [];
