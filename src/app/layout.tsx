@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -22,7 +22,6 @@ export const metadata: Metadata = {
     "branching narratives",
   ],
   manifest: "/manifest.json",
-  themeColor: "#d946ef",
   icons: {
     icon: [
       { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
@@ -44,6 +43,10 @@ export const metadata: Metadata = {
     description: "Generate story seeds with AI or write your own. The community grows them.",
     images: ["/og-default.png"],
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#d946ef",
 };
 
 export default function RootLayout({
