@@ -20,7 +20,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     { url: "https://makeatale.com", changeFrequency: "daily", priority: 1 },
-    { url: "https://makeatale.com/explore", changeFrequency: "hourly", priority: 0.9 },
+    { url: "https://makeatale.com/stories", changeFrequency: "hourly", priority: 0.9 },
+    { url: "https://makeatale.com/developers", changeFrequency: "monthly", priority: 0.7 },
     { url: "https://makeatale.com/submit", changeFrequency: "monthly", priority: 0.6 },
     { url: "https://makeatale.com/login", changeFrequency: "monthly", priority: 0.3 },
     { url: "https://makeatale.com/signup", changeFrequency: "monthly", priority: 0.3 },

@@ -9,6 +9,8 @@ import {
   BookOpen,
   Pen,
   Heart,
+  Sparkles,
+  Wand2,
 } from "lucide-react";
 import StoryCard from "@/components/StoryCard";
 import NewsletterSignup from "@/components/NewsletterSignup";
@@ -36,16 +38,22 @@ async function getStories(): Promise<Story[]> {
 const STATS = [
   { label: "Stories planted", value: "2,847", icon: BookOpen },
   { label: "Branches grown", value: "11,203", icon: GitFork },
+  { label: "AI tales generated", value: "1,420", icon: Sparkles },
   { label: "Active writers", value: "934", icon: Users },
-  { label: "Tips sent", value: "$4.2K", icon: Wallet },
 ];
 
 const FEATURES = [
   {
-    icon: Feather,
-    title: "Plant a Seed",
+    icon: Sparkles,
+    title: "Generate with AI",
     description:
-      "Write the opening of a story — a scene, a question, a single haunting sentence. That's all it takes to start something.",
+      "Describe an idea, pick a genre and tone, and AI generates a full story seed in seconds. Edit it to make it yours, then publish.",
+  },
+  {
+    icon: Feather,
+    title: "Or Write Your Own",
+    description:
+      "Prefer the blank page? Write from scratch with AI writing tools to help — grammar, polish, suggestions, and more.",
   },
   {
     icon: GitFork,
@@ -71,36 +79,30 @@ const FEATURES = [
     description:
       "Love a story? Send the writer a tip directly. Great writing deserves recognition.",
   },
-  {
-    icon: Users,
-    title: "Join the Community",
-    description:
-      "Connect with writers, discover new voices, and be part of stories that grow beyond what any one person could write.",
-  },
 ];
 
 const HOW_IT_WORKS = [
   {
     step: "01",
-    title: "Write your opening",
-    description: "A paragraph. A scene. A question. Plant the seed of something interesting.",
+    title: "Describe or write",
+    description: "Have an idea? Tell the AI and it writes a full story seed. Or write your own from scratch.",
     color: "from-brand-500 to-purple-600",
   },
   {
     step: "02",
-    title: "Share it with the world",
-    description: "Your story hits the feed. Readers discover it, vote on it, and get hooked.",
+    title: "Make it yours",
+    description: "Edit the AI draft, tweak the tone, pick your genre. Use AI writing tools to polish it.",
     color: "from-purple-500 to-indigo-600",
   },
   {
     step: "03",
-    title: "Others continue it",
-    description: "Anyone can write the next chapter. Multiple paths emerge. The story grows.",
+    title: "The community branches it",
+    description: "Readers write what happens next. Multiple paths emerge. Your story becomes a tree.",
     color: "from-indigo-500 to-blue-600",
   },
   {
     step: "04",
-    title: "The best paths win",
+    title: "The best paths rise",
     description: "The community votes. The most compelling branches rise to the top.",
     color: "from-blue-500 to-cyan-600",
   },
@@ -124,32 +126,33 @@ export default async function HomePage() {
           {/* Badge */}
           <div className="animate-fade-up inline-flex items-center gap-2 bg-brand-500/10 border border-brand-500/20 rounded-full px-4 py-1.5 text-sm text-brand-300 mb-6">
             <span className="w-2 h-2 rounded-full bg-brand-400 pulse-dot" />
-            Now in open beta — start writing for free
+            AI-powered story generation — try it free
           </div>
 
           <h1 className="animate-fade-up animate-fade-up-delay-1 text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.1] max-w-4xl mx-auto">
-            Stories that{" "}
+            Describe an idea.{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-purple-400 to-indigo-400 glow-brand">
-              grow
+              AI writes the story.
             </span>
             <br />
-            with every reader
+            The community grows it.
           </h1>
 
           <p className="animate-fade-up animate-fade-up-delay-2 mt-6 text-lg md:text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
-            Write the beginning. The community writes what happens next.
-            Collaborative fiction where every reader shapes the story.
+            Generate a story seed with AI or write your own. The community
+            branches it into a choose-your-own-adventure tree. Humans and AI,
+            building fiction together.
           </p>
 
           {/* CTA buttons */}
           <div className="animate-fade-up animate-fade-up-delay-3 mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
-              href="/signup"
+              href="/submit"
               className="btn-primary btn-large shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30"
             >
-              Start Writing — It&apos;s Free
+              Generate a Tale — Free
             </a>
-            <a href="/explore" className="btn-secondary btn-large">
+            <a href="/stories" className="btn-secondary btn-large">
               Explore Stories
             </a>
           </div>
@@ -182,7 +185,7 @@ export default async function HomePage() {
           <p className="text-sm font-semibold text-brand-400 uppercase tracking-widest mb-2">
             How It Works
           </p>
-          <h2 className="section-heading">From seed to saga in four steps</h2>
+          <h2 className="section-heading">From idea to adventure in four steps</h2>
         </div>
 
         <div className="grid md:grid-cols-4 gap-6">
@@ -211,10 +214,10 @@ export default async function HomePage() {
             Features
           </p>
           <h2 className="section-heading">
-            Everything a storyteller needs
+            AI generation meets community storytelling
           </h2>
           <p className="mt-3 text-gray-500 max-w-lg mx-auto">
-            Write, branch, vote, and earn — all in one place.
+            Generate, write, branch, vote, and earn — all in one place.
           </p>
         </div>
 
@@ -245,16 +248,16 @@ export default async function HomePage() {
                 Branching Stories
               </p>
               <h2 className="section-heading mb-4">
-                One seed. Infinite paths.
+                One idea. Infinite paths.
               </h2>
               <p className="text-gray-400 leading-relaxed mb-6">
-                Every story is a tree. You write the trunk — the community grows the branches.
-                Readers vote on which paths are the most compelling, and the best stories
-                rise to the top.
+                Describe a concept and AI generates your story seed. Or write it yourself.
+                Either way, the community grows the branches — and readers vote on which
+                paths are the most compelling.
               </p>
               <a href="/submit" className="btn-primary inline-flex items-center gap-2">
-                <Feather size={16} />
-                Plant Your First Seed
+                <Sparkles size={16} />
+                Generate Your First Tale
               </a>
             </div>
 
@@ -377,25 +380,25 @@ export default async function HomePage() {
       <section className="mx-auto max-w-6xl px-4 pb-20">
         <div className="hero-gradient rounded-2xl border border-gray-200/60 dark:border-gray-800/60 p-10 md:p-16 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Your story is waiting to be told
+            What story will you create?
           </h2>
           <p className="text-gray-400 max-w-lg mx-auto mb-8">
-            Join thousands of writers building collaborative fiction.
-            Free to start. Earn tips from readers who love your work.
+            Give the AI an idea and watch it come to life. Or write your own.
+            Either way, the community takes it from there.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
-              href="/signup"
+              href="/submit"
               className="btn-primary btn-large shadow-lg shadow-brand-500/20"
             >
-              Create Your Free Account
+              Generate a Tale — Free
             </a>
-            <a href="/submit" className="btn-secondary btn-large">
-              Or just start writing
+            <a href="/stories" className="btn-secondary btn-large">
+              Read what others built
             </a>
           </div>
           <p className="mt-6 text-xs text-gray-600">
-            No credit card required. Write anonymously or create a profile.
+            No account required. Generate, write, or browse anonymously.
           </p>
         </div>
       </section>

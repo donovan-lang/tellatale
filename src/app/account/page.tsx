@@ -17,6 +17,8 @@ import {
   BookOpen,
   Shield,
   FileText,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
 
 interface ProfileData {
@@ -55,6 +57,8 @@ export default function AccountPage() {
   // Story preferences
   const [defaultAnonymous, setDefaultAnonymous] = useState(false);
   const [matureContent, setMatureContent] = useState(false);
+  const [claiming, setClaiming] = useState(false);
+  const [claimed, setClaimed] = useState(false);
 
   // Notification prefs
   const [notifyBranch, setNotifyBranch] = useState(true);
@@ -211,6 +215,21 @@ export default function AccountPage() {
         </div>
       </div>
 
+      {/* Pen name prompt */}
+      {(!penName || penName === "Anonymous") && (
+        <div className="mb-6 flex items-start gap-3 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+          <AlertCircle size={18} className="text-amber-500 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+              Set your display name
+            </p>
+            <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+              Your stories are showing as &ldquo;Anonymous&rdquo;. Set a display name below and hit Save — all your existing stories will be updated too.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="flex gap-1 mb-6 overflow-x-auto scrollbar-hide border-b border-gray-200 dark:border-gray-800 pb-px">
         {TABS.map((t) => (
@@ -246,7 +265,7 @@ export default function AccountPage() {
               className="input-field"
             />
             <p className="text-xs text-gray-600">
-              This is how other writers see you. Max 50 characters.
+              This is how other writers see you. When you save, all your existing stories and branches update to this name.
             </p>
           </div>
 
@@ -363,13 +382,20 @@ export default function AccountPage() {
           </div>
 
           <div className="card space-y-4">
-            <h2 className="font-semibold">Your Stories</h2>
+            <h2 className="font-semibold flex items-center gap-2">
+              <Pen size={16} className="text-brand-400" />
+              Your Stories
+            </h2>
             <p className="text-sm text-gray-500">
-              View and manage all stories and branches you&apos;ve written.
+              Manage all stories and branches you&apos;ve written.
             </p>
-            <p className="text-xs text-gray-600 italic">
-              Story management dashboard coming soon.
-            </p>
+            <a
+              href="/stories"
+              className="btn-primary inline-flex items-center gap-2 text-sm"
+            >
+              <BookOpen size={14} />
+              View Your Stories
+            </a>
           </div>
         </div>
       )}

@@ -31,7 +31,7 @@ export default async function StoryTreePage({ params }: { params: { id: string }
     return (
       <div className="text-center py-20">
         <p className="text-gray-400">Story not found.</p>
-        <a href="/explore" className="btn-primary mt-4 inline-block">Explore</a>
+        <a href="/stories" className="btn-primary mt-4 inline-block">Explore</a>
       </div>
     );
   }

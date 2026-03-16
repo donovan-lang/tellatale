@@ -175,7 +175,7 @@ export default function ExplorePage() {
   ];
 
   const NAV_LINKS = [
-    { href: "/explore", label: "Stories", icon: Flame, active: true },
+    { href: "/stories", label: "Stories", icon: Flame, active: true },
     { href: "/submit", label: "Write", icon: Pen },
     ...(user
       ? [{ href: "/account", label: "Settings", icon: Settings }]
@@ -205,7 +205,7 @@ export default function ExplorePage() {
             ) : (
               <div className="card p-4 space-y-3">
                 <p className="text-sm text-gray-400">
-                  Join the community to write, vote, and save stories.
+                  Generate tales with AI, write branches, vote, and save stories.
                 </p>
                 <a
                   href="/signup"
@@ -259,7 +259,7 @@ export default function ExplorePage() {
             {/* Quick stats */}
             <div className="card p-4 space-y-3">
               <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
-{"\u{1F4CA}"} Community
+{"\u{1F4CA}"} Platform Stats
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <div className="text-center">
@@ -676,10 +676,10 @@ export default function ExplorePage() {
             {/* Join CTA (logged out) */}
             {!user && !authLoading && (
               <div className="card p-4 bg-gradient-to-br from-brand-500/5 to-purple-500/5 border-brand-500/20">
-                <p className="text-sm font-semibold mb-2">Start writing</p>
+                <p className="text-sm font-semibold mb-2">Start creating</p>
                 <p className="text-xs text-gray-500 mb-3">
-                  Create an account to plant seeds, save chronicles, and earn
-                  tips.
+                  Generate tales with AI, branch stories, save chronicles, and
+                  earn tips.
                 </p>
                 <a
                   href="/signup"

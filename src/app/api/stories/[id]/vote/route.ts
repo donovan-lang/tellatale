@@ -6,6 +6,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { createNotification } from "@/lib/notify";
 import { isRateLimited, getClientIp } from "@/lib/spam-filter";
+import { checkAutoModeration } from "@/lib/auto-moderation";
 
 async function getUserId(): Promise<string | null> {
   try {
@@ -129,6 +130,11 @@ export async function POST(
       if (story?.author_id && story.author_id !== voterId) {
         createNotification(story.author_id, "vote", `Your story got an upvote!`, story.title || "Your branch", `/story/${story.slug || story.id}`);
       }
+    }
+
+    // Auto-moderation check on downvotes (non-blocking)
+    if (vote === -1) {
+      checkAutoModeration(storyId).catch(() => {});
     }
 
     return NextResponse.json({

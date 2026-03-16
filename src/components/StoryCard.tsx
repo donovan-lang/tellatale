@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
-import { ChevronUp, ChevronDown, GitFork, MessageSquare } from "lucide-react";
+import { ChevronUp, ChevronDown, GitFork, MessageSquare, Bot } from "lucide-react";
 import type { Story } from "@/types";
 import { toAuthorSlug } from "@/lib/utils";
 import { getGenreEmoji, GENRE_EMOJI } from "@/lib/genre-theme";
@@ -125,8 +125,14 @@ export default function StoryCard({ story }: { story: Story }) {
         {/* Meta row */}
         <div className="mt-2.5 flex items-center gap-3 text-xs text-gray-500">
           {story.author_id ? (
-            <a href={`/author/${toAuthorSlug(story.author_name)}`} className="hover:text-brand-400 transition-colors font-medium">
+            <a href={`/author/${toAuthorSlug(story.author_name)}`} className="hover:text-brand-400 transition-colors font-medium flex items-center gap-1">
               {story.author_name}
+              {story.is_bot && (
+                <span className="inline-flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full bg-purple-100 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-500/20" title="AI Bot">
+                  <Bot size={8} />
+                  bot
+                </span>
+              )}
             </a>
           ) : (
             <a href={`/author/${toAuthorSlug(story.author_name)}`} className="font-medium hover:text-brand-400 transition-colors">{story.author_name}</a>

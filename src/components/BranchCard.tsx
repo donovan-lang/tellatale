@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronUp, ChevronDown, Flag, MessageSquare } from "lucide-react";
+import { ChevronUp, ChevronDown, Flag, MessageSquare, Bot, Pencil, Trash2 } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
 import type { Story } from "@/types";
 import { toAuthorSlug } from "@/lib/utils";
 import DonateButton from "./DonateButton";
@@ -31,9 +32,14 @@ export default function BranchCard({
   rank: number;
   onClick?: () => void;
 }) {
+  const { user } = useAuth();
   const [votes, setVotes] = useState({ up: story.upvotes, down: story.downvotes });
   const [userVote, setUserVote] = useState<1 | -1 | 0>(0);
   const [voting, setVoting] = useState(false);
+  const [deleted, setDeleted] = useState(false);
+  const isOwner = user && story.author_id === user.id;
+
+  if (deleted) return null;
 
   const score = votes.up - votes.down;
   const borderColor = rank < RANK_BORDERS.length ? RANK_BORDERS[rank] : "border-l-gray-300 dark:border-l-gray-800";
@@ -106,9 +112,15 @@ export default function BranchCard({
             <a
               href={`/author/${toAuthorSlug(story.author_name)}`}
               onClick={(e) => e.stopPropagation()}
-              className="text-[10px] text-gray-500 hover:text-brand-500 transition-colors font-medium"
+              className="text-[10px] text-gray-500 hover:text-brand-500 transition-colors font-medium flex items-center gap-0.5"
             >
               {story.author_name}
+              {story.is_bot && (
+                <span className="inline-flex items-center gap-0.5 text-[8px] px-1 py-px rounded-full bg-purple-100 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400" title="AI Bot">
+                  <Bot size={7} />
+                  bot
+                </span>
+              )}
             </a>
           ) : (
             <a href={`/author/${toAuthorSlug(story.author_name)}`} onClick={(e) => e.stopPropagation()} className="text-[10px] text-gray-500 hover:text-brand-400 transition-colors font-medium">{story.author_name}</a>
@@ -119,6 +131,32 @@ export default function BranchCard({
           <span onClick={(e) => e.stopPropagation()} className="text-[10px]">
             <DonateButton storyId={story.id} />
           </span>
+          {isOwner && (
+            <span className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+              <a
+                href={`/story/${story.id}/edit`}
+                className="p-0.5 rounded text-gray-500 hover:text-brand-400 transition-colors"
+                title="Edit"
+              >
+                <Pencil size={9} />
+              </a>
+              <button
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  if (!confirm("Delete this branch? This cannot be undone.")) return;
+                  const res = await fetch(`/api/stories/${story.id}/edit`, { method: "DELETE" });
+                  if (res.ok) {
+                    setDeleted(true);
+                    window.location.reload();
+                  }
+                }}
+                className="p-0.5 rounded text-gray-500 hover:text-red-400 transition-colors"
+                title="Delete"
+              >
+                <Trash2 size={9} />
+              </button>
+            </span>
+          )}
         </div>
       </div>
 

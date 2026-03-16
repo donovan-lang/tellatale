@@ -161,9 +161,14 @@ export async function POST(req: NextRequest) {
           .eq("id", user.id)
           .single();
 
-        if (profile?.pen_name) {
-          resolvedAuthorName = profile.pen_name;
-        }
+        // Use pen_name, then user metadata, then email prefix — never fall back to "Anonymous" for authenticated users
+        resolvedAuthorName =
+          profile?.pen_name ||
+          user.user_metadata?.pen_name ||
+          user.user_metadata?.full_name ||
+          user.user_metadata?.name ||
+          user.email?.split("@")[0] ||
+          resolvedAuthorName;
       }
     } catch {
       // No auth session — post anonymously

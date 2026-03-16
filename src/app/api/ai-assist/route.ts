@@ -4,31 +4,38 @@ const GEMINI_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_URL =
   "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
-const SYSTEM_PROMPT = `You are a creative writing assistant for MakeATale, a collaborative choose-your-own-adventure platform. Users write short story seeds (max 500 chars) that end with a question or choice, and the community branches them with 1-2 sentence responses.
+const SYSTEM_PROMPT = `You are a skilled creative writing assistant for MakeATale, a collaborative choose-your-own-adventure platform.
 
-Your job is to help writers improve their stories. Be concise, atmospheric, and genre-appropriate. Match the tone and style of the existing content. Never break character or add meta-commentary.`;
+Your job is to help writers improve their stories. Follow these principles:
+- Match the EXACT tone, genre, and voice of the existing content
+- Be vivid and specific — use concrete sensory details, not vague abstractions
+- Avoid cliches ("a chill ran down her spine", "little did they know", "the air was thick with tension")
+- Vary sentence structure — mix short punchy sentences with longer flowing ones
+- Show don't tell — convey emotion through action and detail, not labels
+- Never break character or add meta-commentary
+- Write at a professional fiction level, not a generic AI level`;
 
 const ACTION_PROMPTS: Record<string, (content: string, title: string) => string> = {
   next_sentence: (content) =>
-    `Continue this story with exactly ONE evocative sentence that raises tension or introduces a new element:\n\n"${content}"\n\nRespond with only the sentence, no quotes or explanation.`,
+    `Continue this story with exactly ONE sentence. The sentence should be vivid and specific — use a concrete image, action, or sensory detail that advances the plot or deepens the scene. Avoid generic statements. Match the existing tone precisely.\n\n"${content}"\n\nRespond with only the sentence, no quotes or explanation.`,
 
   directions: (content) =>
-    `Given this story so far:\n\n"${content}"\n\nSuggest exactly 3 different directions this story could take. Each should be a single compelling sentence. Format as:\n1. ...\n2. ...\n3. ...`,
+    `Given this story so far:\n\n"${content}"\n\nSuggest exactly 3 SURPRISING and specific directions this story could take. Don't suggest obvious next steps — think of unexpected twists, genre-appropriate complications, or character revelations. Each should be a vivid, concrete sentence. Format as:\n1. ...\n2. ...\n3. ...`,
 
   grammar: (content) =>
-    `Fix any grammar, spelling, and punctuation errors in this text. Preserve the author's voice and style. Return ONLY the corrected text, nothing else:\n\n"${content}"`,
+    `Fix any grammar, spelling, and punctuation errors in this text. Preserve the author's voice and style exactly. Return ONLY the corrected text, nothing else:\n\n"${content}"`,
 
   polish: (content) =>
-    `Polish this creative writing for better flow, stronger word choices, and tighter prose. Keep the same meaning, length, and tone. Return ONLY the polished text:\n\n"${content}"`,
+    `Polish this creative writing. Replace weak verbs with strong ones. Cut unnecessary adverbs. Tighten flabby phrases. Replace cliches with fresh language. Improve rhythm by varying sentence lengths. Keep the same meaning, approximate length, and tone. Return ONLY the polished text:\n\n"${content}"`,
 
   shorten: (content) =>
-    `Condense this text to about 70% of its length while keeping the core impact and atmosphere. Return ONLY the shortened text:\n\n"${content}"`,
+    `Condense this text to about 70% of its length. Cut filler words, redundant descriptions, and anything that doesn't advance the story. Keep the strongest images and the core emotional beat. Return ONLY the shortened text:\n\n"${content}"`,
 
   stronger_ending: (content) =>
-    `Rewrite ONLY the final sentence of this text to be more impactful, surprising, or emotionally resonant. Return ONLY the new final sentence:\n\n"${content}"`,
+    `Rewrite ONLY the final sentence of this text. The new sentence should land with impact — a surprising image, an unanswered question, a visceral detail, or an emotional gut-punch. Avoid generic "dramatic" endings. Be specific to this story's world. Return ONLY the new final sentence:\n\n"${content}"`,
 
   expand: (content) =>
-    `Add 1-2 sentences of atmospheric detail or tension to continue this passage naturally. Return ONLY the new sentences to append:\n\n"${content}"`,
+    `Add 1-2 sentences that enrich this passage with specific sensory detail — what does the character see, hear, smell, or feel? Ground the scene in concrete physical reality. Don't summarize or explain emotion — show it through action or detail. Return ONLY the new sentences to append:\n\n"${content}"`,
 };
 
 export async function POST(req: NextRequest) {

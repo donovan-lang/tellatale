@@ -47,7 +47,7 @@ export default function NavBar() {
         <div className="hidden md:flex items-center gap-1">
           {user ? (
             <>
-              <a href="/explore" className={navLinkClass("/explore")}>
+              <a href="/stories" className={navLinkClass("/stories")}>
                 📚 Stories
               </a>
               <a href="/submit" className={navLinkClass("/submit")}>
@@ -59,7 +59,7 @@ export default function NavBar() {
               <a href="/#how-it-works" className="text-sm text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-1.5 rounded-lg transition-colors">
                 How It Works
               </a>
-              <a href="/explore" className={navLinkClass("/explore")}>
+              <a href="/stories" className={navLinkClass("/stories")}>
                 📚 Stories
               </a>
               <a href="/submit" className={navLinkClass("/submit")}>
@@ -121,13 +121,13 @@ export default function NavBar() {
         <div className="md:hidden border-t border-amber-200/60 dark:border-gray-800/60 px-4 py-4 space-y-1 bg-amber-50/98 dark:bg-gray-950/98 backdrop-blur-xl">
           {user ? (
             <>
-              <a href="/explore" className={navLinkClass("/explore") + " w-full"}>📚 Stories</a>
+              <a href="/stories" className={navLinkClass("/stories") + " w-full"}>📚 Stories</a>
               <a href="/submit" className={navLinkClass("/submit") + " w-full"}>✍️ Write</a>
             </>
           ) : (
             <>
               <a href="/#how-it-works" className="block text-sm text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-lg">How It Works</a>
-              <a href="/explore" className={navLinkClass("/explore") + " w-full"}>📚 Stories</a>
+              <a href="/stories" className={navLinkClass("/stories") + " w-full"}>📚 Stories</a>
               <a href="/submit" className={navLinkClass("/submit") + " w-full"}>✍️ Write</a>
             </>
           )}

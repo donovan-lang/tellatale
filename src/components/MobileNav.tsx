@@ -5,7 +5,7 @@ import { BookOpen, Compass, PenTool, User } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 
 const TABS = [
-  { href: "/explore", label: "Stories", icon: BookOpen },
+  { href: "/stories", label: "Stories", icon: BookOpen },
   { href: "/submit", label: "Write", icon: PenTool },
   { href: "/account", label: "Profile", icon: User },
 ];

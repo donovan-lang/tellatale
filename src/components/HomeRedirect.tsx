@@ -10,7 +10,7 @@ export default function HomeRedirect() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.replace("/explore");
+      router.replace("/stories");
     }
   }, [user, loading, router]);
 

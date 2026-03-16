@@ -8,16 +8,18 @@ import { ToastProvider } from "@/components/Toast";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://makeatale.com"),
-  title: "MakeATale — Collaborative Storytelling",
+  title: "MakeATale — AI-Powered Collaborative Storytelling",
   description:
-    "Write story seeds, the community branches them. Collaborative choose-your-own-adventure fiction. Tip your favorite writers.",
+    "Generate story seeds with AI or write your own. The community branches them into choose-your-own-adventure trees. Collaborative fiction where humans and AI build stories together.",
   keywords: [
-    "storytelling",
-    "AI",
-    "collaborative",
+    "AI storytelling",
+    "story generator",
+    "collaborative fiction",
     "choose your own adventure",
     "creative writing",
+    "AI writing",
     "community stories",
+    "branching narratives",
   ],
   manifest: "/manifest.json",
   themeColor: "#d946ef",
@@ -43,7 +45,7 @@ export default function RootLayout({
       <body className="min-h-screen">
         <AuthProvider>
           <ThemeProvider>
-          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "WebSite", name: "MakeATale", url: "https://makeatale.com", description: "Collaborative choose-your-own-adventure fiction" }) }} />
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "WebSite", name: "MakeATale", url: "https://makeatale.com", description: "AI-powered collaborative choose-your-own-adventure fiction" }) }} />
           <ToastProvider>
           <NavBar />
           {children}
@@ -63,8 +65,8 @@ export default function RootLayout({
                     </span>
                   </div>
                   <p className="text-xs text-gray-500 leading-relaxed">
-                    Where stories grow. Community-driven
-                    collaborative fiction.
+                    Where stories grow. AI-powered,
+                    community-driven collaborative fiction.
                   </p>
                 </div>
                 <div>
@@ -76,25 +78,25 @@ export default function RootLayout({
                     >
                       How It Works
                     </a>
-                    <a href="/#stories" className="block hover:text-gray-300">
+                    <a href="/stories" className="block hover:text-gray-300">
                       Browse Stories
                     </a>
                     <a href="/submit" className="block hover:text-gray-300">
-                      Write a Story
+                      Generate a Tale
                     </a>
                   </div>
                 </div>
                 <div>
-                  <h4 className="text-sm font-semibold mb-3">Community</h4>
+                  <h4 className="text-sm font-semibold mb-3">Developers</h4>
                   <div className="space-y-2 text-sm text-gray-500">
-                    <a href="#" className="block hover:text-gray-300">
-                      Discord
+                    <a href="/developers" className="block hover:text-gray-300">
+                      API Docs
                     </a>
-                    <a href="#" className="block hover:text-gray-300">
-                      Twitter
+                    <a href="/llms.txt" className="block hover:text-gray-300">
+                      llms.txt
                     </a>
-                    <a href="#" className="block hover:text-gray-300">
-                      Creator Fund
+                    <a href="/api/openapi" className="block hover:text-gray-300">
+                      OpenAPI Spec
                     </a>
                   </div>
                 </div>
@@ -115,7 +117,7 @@ export default function RootLayout({
               </div>
               <div className="mt-10 pt-6 border-t border-gray-800/60 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-600">
                 <p>2026 MakeATale. Built by indie.io</p>
-                <p>Driven by community. Powered by great writing.</p>
+                <p>Powered by AI. Driven by community.</p>
               </div>
             </div>
           </footer>

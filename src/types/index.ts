@@ -50,6 +50,7 @@ export interface Story {
   hidden_reason?: string | null;
   created_at: string;
   children_count?: number;
+  is_bot?: boolean;
 }
 
 export interface Vote {

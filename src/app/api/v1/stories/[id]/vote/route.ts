@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
 import { resolveAuth, hasScope } from "@/lib/api-auth";
+import { checkAutoModeration } from "@/lib/auto-moderation";
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const auth = await resolveAuth(req);
@@ -21,6 +22,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const { count: up } = await sb.from("votes").select("*", { count: "exact", head: true }).eq("story_id", params.id).eq("vote", 1);
   const { count: down } = await sb.from("votes").select("*", { count: "exact", head: true }).eq("story_id", params.id).eq("vote", -1);
   await sb.from("stories").update({ upvotes: up || 0, downvotes: down || 0 }).eq("id", params.id);
+
+  // Auto-moderation check on downvotes (non-blocking)
+  if (vote === -1) {
+    checkAutoModeration(params.id).catch(() => {});
+  }
 
   return NextResponse.json({ ok: true, upvotes: up || 0, downvotes: down || 0, your_vote: vote });
 }

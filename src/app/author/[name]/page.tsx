@@ -139,7 +139,7 @@ export default async function AuthorPage({
         <p className="mt-2 text-gray-600">
           No stories found for this author.
         </p>
-        <a href="/explore" className="btn-primary mt-4 inline-block">
+        <a href="/stories" className="btn-primary mt-4 inline-block">
           Explore stories
         </a>
       </div>

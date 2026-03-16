@@ -3,20 +3,33 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import StoryForm from "@/components/StoryForm";
+import TaleGenerator from "@/components/TaleGenerator";
 import {
   BookOpen,
   GitFork,
   ChevronUp,
   Clock,
   Loader2,
+  PenLine,
+  Sparkles,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import type { Story } from "@/types";
+
+type Tab = "write" | "generate";
 
 export default function SubmitPage() {
   const { user, loading: authLoading } = useAuth();
   const [myStories, setMyStories] = useState<Story[]>([]);
   const [loadingStories, setLoadingStories] = useState(false);
+  const [tab, setTab] = useState<Tab>("write");
+
+  // When AI generates a tale, switch to write tab with pre-filled values
+  const [generatedTale, setGeneratedTale] = useState<{
+    title: string;
+    content: string;
+    tags: string[];
+  } | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -31,6 +44,23 @@ export default function SubmitPage() {
       .catch(() => {})
       .finally(() => setLoadingStories(false));
   }, [user]);
+
+  function handleGenerated(tale: {
+    title: string;
+    content: string;
+    tags: string[];
+  }) {
+    setGeneratedTale(tale);
+    setTab("write");
+  }
+
+  // Reset generated tale when switching back to generate tab
+  function switchTab(t: Tab) {
+    if (t === "generate") {
+      setGeneratedTale(null);
+    }
+    setTab(t);
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -47,7 +77,55 @@ export default function SubmitPage() {
             </div>
           </div>
 
-          <StoryForm />
+          {/* Tab switcher */}
+          <div className="flex gap-1 p-1 mb-6 bg-gray-100 dark:bg-gray-800/70 rounded-xl">
+            <button
+              type="button"
+              onClick={() => switchTab("write")}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all ${
+                tab === "write"
+                  ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              }`}
+            >
+              <PenLine size={15} />
+              Write
+            </button>
+            <button
+              type="button"
+              onClick={() => switchTab("generate")}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all ${
+                tab === "generate"
+                  ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              }`}
+            >
+              <Sparkles size={15} />
+              Generate with AI
+            </button>
+          </div>
+
+          {/* AI generated badge */}
+          {tab === "write" && generatedTale && (
+            <div className="mb-4 flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 text-sm text-purple-700 dark:text-purple-300">
+              <Sparkles size={14} />
+              <span className="font-medium">AI-generated draft loaded.</span>
+              <span className="text-purple-500 dark:text-purple-400">
+                Edit it to make it yours, then publish.
+              </span>
+            </div>
+          )}
+
+          {tab === "write" ? (
+            <StoryForm
+              key={generatedTale ? `gen-${generatedTale.title}` : "manual"}
+              initialTitle={generatedTale?.title}
+              initialContent={generatedTale?.content}
+              initialTags={generatedTale?.tags}
+            />
+          ) : (
+            <TaleGenerator onGenerated={handleGenerated} />
+          )}
         </div>
 
         {/* Sidebar: Your Stories */}
@@ -130,13 +208,24 @@ export default function SubmitPage() {
               {/* Tips */}
               <div className="card p-4 bg-gray-100/50 dark:bg-gray-900/30 border-dashed border-gray-300 dark:border-gray-700">
                 <h3 className="text-xs font-semibold text-gray-400 mb-2">
-                  Writing Tips
+                  {tab === "generate" ? "AI Generation Tips" : "Writing Tips"}
                 </h3>
                 <ul className="text-xs text-gray-500 space-y-1.5">
-                  <li>End your seed with a question or choice</li>
-                  <li>Keep it short — leave room for imagination</li>
-                  <li>Set a scene, introduce tension, ask &ldquo;what if?&rdquo;</li>
-                  <li>Pick 1-3 categories to help readers find you</li>
+                  {tab === "generate" ? (
+                    <>
+                      <li>Be specific — &ldquo;a noir detective in 1940s Mars colony&rdquo; beats &ldquo;a mystery story&rdquo;</li>
+                      <li>Pick a genre and tone for focused results</li>
+                      <li>Regenerate for different takes on the same idea</li>
+                      <li>Always edit the AI draft — make it yours</li>
+                    </>
+                  ) : (
+                    <>
+                      <li>End your seed with a question or choice</li>
+                      <li>Keep it short — leave room for imagination</li>
+                      <li>Set a scene, introduce tension, ask &ldquo;what if?&rdquo;</li>
+                      <li>Pick 1-3 categories to help readers find you</li>
+                    </>
+                  )}
                 </ul>
               </div>
             </div>

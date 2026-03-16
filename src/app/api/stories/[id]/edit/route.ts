@@ -22,11 +22,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ error: "Not authorized" }, { status: 403 });
   }
 
-  const { content, teaser, title } = await req.json();
+  const { content, teaser, title, author_name } = await req.json();
   const updates: Record<string, any> = {};
   if (content !== undefined) updates.content = sanitizeContent(content).slice(0, 5000);
   if (teaser !== undefined) updates.teaser = sanitizeContent(teaser).slice(0, 300);
   if (title !== undefined) updates.title = sanitizeContent(title).slice(0, 200);
+  if (author_name !== undefined) updates.author_name = sanitizeContent(author_name).slice(0, 50);
 
   if (Object.keys(updates).length === 0) return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
 

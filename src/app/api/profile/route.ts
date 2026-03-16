@@ -124,6 +124,14 @@ export async function PATCH(req: NextRequest) {
       }
     }
 
+    // Bulk update author_name on all user's stories when pen_name changes
+    if (profileUpdates.pen_name) {
+      await supabase
+        .from("stories")
+        .update({ author_name: profileUpdates.pen_name as string })
+        .eq("author_id", user.id);
+    }
+
     // Update email preferences
     if (body.email_prefs) {
       const prefs = body.email_prefs;

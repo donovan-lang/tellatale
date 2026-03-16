@@ -156,7 +156,7 @@ function ReadContent() {
               <p className="text-gray-500 mb-4">
                 No stories in progress yet. Start reading to track your journey.
               </p>
-              <a href="/explore" className="btn-primary inline-block">
+              <a href="/stories" className="btn-primary inline-block">
                 Explore Stories
               </a>
             </div>
@@ -215,7 +215,7 @@ function ReadContent() {
               <p className="text-gray-500 mb-4">
                 No bookmarks yet. Bookmark decision points while reading to find them later.
               </p>
-              <a href="/explore" className="btn-primary inline-block">
+              <a href="/stories" className="btn-primary inline-block">
                 Explore Stories
               </a>
             </div>

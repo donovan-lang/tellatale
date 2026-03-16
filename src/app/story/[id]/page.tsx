@@ -99,7 +99,7 @@ export default async function StoryPage({
         <p className="mt-2 text-gray-600">
           This story may have been removed or doesn&apos;t exist yet.
         </p>
-        <a href="/explore" className="btn-primary mt-4 inline-block">
+        <a href="/stories" className="btn-primary mt-4 inline-block">
           Explore stories
         </a>
       </div>
@@ -117,7 +117,7 @@ export default async function StoryPage({
             This content has been removed by moderators for violating community
             guidelines.
           </p>
-          <a href="/explore" className="btn-primary mt-6 inline-block">
+          <a href="/stories" className="btn-primary mt-6 inline-block">
             Explore stories
           </a>
         </div>

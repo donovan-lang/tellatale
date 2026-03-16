@@ -53,19 +53,31 @@ const PLACEHOLDER_RESPONSES: Record<AiAction, (content: string) => string> = {
   expand: (c) => c + " The air grew thick with anticipation. Every shadow seemed to lean closer, listening.",
 };
 
-export default function StoryForm({ parentId }: { parentId?: string }) {
+interface StoryFormProps {
+  parentId?: string;
+  initialTitle?: string;
+  initialContent?: string;
+  initialTags?: string[];
+}
+
+export default function StoryForm({
+  parentId,
+  initialTitle = "",
+  initialContent = "",
+  initialTags = [],
+}: StoryFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const isBranch = !!parentId;
   const maxContent = isBranch ? 5000 : 3000;
   const maxTeaser = 300;
 
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(initialTitle);
   const [teaser, setTeaser] = useState("");
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState(initialContent);
   const [authorName, setAuthorName] = useState("");
   const [isEnding, setIsEnding] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>(initialTags);
   const [submitting, setSubmitting] = useState(false);
 
   // Anti-spam: honeypot + timestamp
@@ -183,6 +195,15 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
       }
       const { id } = await res.json();
       toast(isBranch ? "Choice added! Others can now vote on it." : "Story planted! The community can start branching.");
+
+      // Reset form fields for branches (form stays mounted on same page)
+      if (isBranch) {
+        setTeaser("");
+        setContent("");
+        setIsEnding(false);
+        setSuggestion(null);
+      }
+
       router.push(isBranch ? `/story/${parentId}` : `/story/${id}`);
       router.refresh();
     } catch (err: any) {
@@ -197,30 +218,35 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
     label: string;
     icon: typeof Wand2;
     description: string;
+    tooltip: string;
   }[] = [
     {
       action: "next_sentence",
       label: "Next Sentence",
       icon: ArrowRight,
       description: "Suggest what comes next",
+      tooltip: "AI writes one vivid sentence to continue your story. Click Insert to add it.",
     },
     {
       action: "directions",
       label: "Story Directions",
       icon: Compass,
       description: "3 ways this could go",
+      tooltip: "Get 3 different plot directions for inspiration. These won't be inserted — just ideas.",
     },
     {
       action: "grammar",
       label: "Grammar Pass",
       icon: CheckCheck,
       description: "Fix grammar & spelling",
+      tooltip: "AI fixes typos, grammar, and punctuation while keeping your voice. Click Apply to replace.",
     },
     {
       action: "polish",
       label: "Polish",
       icon: Sparkles,
       description: "Tighten prose & flow",
+      tooltip: "AI tightens word choices and improves flow without changing your meaning. Click Apply to replace.",
     },
   ];
 
@@ -230,18 +256,21 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
       label: "Shorten",
       icon: PenLine,
       description: "Make it more concise",
+      tooltip: "AI condenses your text to ~70% of its length while keeping the impact.",
     },
     {
       action: "stronger_ending",
       label: "Stronger Ending",
       icon: Lightbulb,
       description: "Rewrite the last line",
+      tooltip: "AI rewrites your final sentence to be more impactful or surprising.",
     },
     {
       action: "expand",
       label: "Expand",
       icon: Wand2,
       description: "Add detail & atmosphere",
+      tooltip: "AI adds 1-2 sentences of atmospheric detail to enrich your scene.",
     },
   ];
 
@@ -378,10 +407,10 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
           onClick={() => setAiOpen(!aiOpen)}
           className="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-purple-600 to-brand-600 text-white hover:from-purple-500 hover:to-brand-500 transition-all"
         >
-          <span className="flex items-center gap-2 text-sm font-semibold">
+          <span className="flex items-center gap-2 text-sm font-semibold" title="AI tools to help you write. Get suggestions, fix grammar, polish prose, and more. Your story stays yours — AI just helps.">
             <Wand2 size={16} />
             AI Writing Assist
-            <span className="text-[10px] text-white/70 font-normal">&mdash; try it!</span>
+            <span className="text-[10px] text-white/70 font-normal">&mdash; tools to improve your writing</span>
           </span>
           {aiOpen ? (
             <ChevronUp size={14} className="text-white/70" />
@@ -400,6 +429,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
                   type="button"
                   disabled={!hasContent || !!aiLoading}
                   onClick={() => callAi(a.action, a.label)}
+                  title={a.tooltip}
                   className="flex items-center gap-2.5 px-3 py-3 rounded-lg bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md hover:shadow-purple-100 dark:hover:shadow-none transition-all text-left disabled:opacity-60 disabled:cursor-not-allowed group"
                 >
                   <div className="w-8 h-8 rounded-lg bg-purple-600 dark:bg-purple-500 flex items-center justify-center shrink-0 group-hover:bg-purple-500 dark:group-hover:bg-purple-400 transition-colors shadow-sm">
@@ -430,6 +460,7 @@ export default function StoryForm({ parentId }: { parentId?: string }) {
                     type="button"
                     disabled={!hasContent || !!aiLoading}
                     onClick={() => callAi(a.action, a.label)}
+                    title={a.tooltip}
                     className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 hover:border-purple-400 dark:hover:border-purple-500 transition-all text-left disabled:opacity-60 disabled:cursor-not-allowed group"
                   >
                     {aiLoading === a.action ? (

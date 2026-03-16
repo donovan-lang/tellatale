@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
   if (user) {
     const { data: profile } = await sb.from("profiles").select("pen_name").eq("id", user.id).single();
     const name = profile?.pen_name || "Someone";
-    createNotification(followed_id, "follow", `${name} started following you`, null, "/explore");
+    createNotification(followed_id, "follow", `${name} started following you`, null, "/stories");
   }
 
   return NextResponse.json({ ok: true }, { status: 201 });
