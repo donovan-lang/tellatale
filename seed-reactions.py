@@ -10,12 +10,17 @@ stories = json.loads(result.stdout)
 emojis = ["\U0001F92F", "\U0001F602", "\U0001F631", "\U0001F60D", "\U0001F525"]
 values = []
 
+seen = set()
 for s in stories:
     sid = s["id"]
     num = random.randint(3, 15)
     for i in range(num):
         emoji = random.choice(emojis)
-        uid = f"seed_user_{random.randint(1, 200)}"
+        uid = f"seed_user_{random.randint(1, 500)}"
+        key = f"{sid}_{uid}"
+        if key in seen:
+            continue
+        seen.add(key)
         values.append(f"('{sid}', '{uid}', '{emoji}')")
 
 # Insert in batches
