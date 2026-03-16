@@ -23,7 +23,7 @@ const WH_TRENDING = process.env.DISCORD_WEBHOOK_TRENDING;
 const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const GUILD_ID = process.env.DISCORD_GUILD_ID || "1483185775100035093";
 const STATUS_FILE = process.env.AGENT_STATUS_FILE ||
-  path.join("C:", "Users", "PC", "Documents", "Claude", "tools", "makeatale_agent_status.json");
+  path.join(__dirname, "agent_status.json");
 
 // Channel IDs
 const CHANNELS = {
