@@ -1,4 +1,5 @@
 import { createServiceClient } from "@/lib/supabase-server";
+import { GENRE_ICON_SLUG } from "@/lib/genre-theme";
 import type { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -18,9 +19,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
+  const genreUrls = Object.values(GENRE_ICON_SLUG).map((slug) => ({
+    url: `https://makeatale.com/genre/${slug}`,
+    changeFrequency: "daily" as const,
+    priority: 0.7,
+  }));
+
   return [
     { url: "https://makeatale.com", changeFrequency: "daily", priority: 1 },
     { url: "https://makeatale.com/stories", changeFrequency: "hourly", priority: 0.9 },
+    { url: "https://makeatale.com/genre", changeFrequency: "daily", priority: 0.8 },
+    ...genreUrls,
     { url: "https://makeatale.com/developers", changeFrequency: "monthly", priority: 0.7 },
     { url: "https://makeatale.com/submit", changeFrequency: "monthly", priority: 0.6 },
     { url: "https://makeatale.com/login", changeFrequency: "monthly", priority: 0.3 },

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Share2, Copy, Check, X } from "lucide-react";
+import { Share2, Copy, Check, X, Code2 } from "lucide-react";
 import { useToast } from "./Toast";
 
 export default function ShareCard({ story }: { story: { id: string; title: string | null; teaser: string | null; content: string; author_name: string; upvotes: number; downvotes: number; slug: string | null; tags: string[] | null } }) {
@@ -61,6 +61,27 @@ export default function ShareCard({ story }: { story: { id: string; title: strin
           {copied ? <Check size={14} /> : <Copy size={14} />}
           {copied ? "Copied!" : "Copy Link"}
         </button>
+      </div>
+
+      {/* Embed code */}
+      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+        <p className="text-xs text-gray-500 mb-2 flex items-center gap-1">
+          <Code2 size={12} /> Embed on your site
+        </p>
+        <div className="relative">
+          <code className="block text-[10px] bg-gray-100 dark:bg-gray-800 rounded-lg p-3 text-gray-600 dark:text-gray-400 overflow-x-auto whitespace-nowrap">
+            {`<iframe src="${url.replace('/story/', '/embed/')}" width="100%" height="450" frameborder="0"></iframe>`}
+          </code>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(`<iframe src="${url.replace('/story/', '/embed/')}" width="100%" height="450" frameborder="0"></iframe>`);
+              toast("Embed code copied!");
+            }}
+            className="absolute top-2 right-2 p-1 rounded bg-gray-200 dark:bg-gray-700 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+          >
+            <Copy size={10} />
+          </button>
+        </div>
       </div>
     </div>
   );

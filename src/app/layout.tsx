@@ -107,6 +107,9 @@ export default function RootLayout({
                     <a href="/submit" className="block hover:text-gray-300">
                       Generate a Tale
                     </a>
+                    <a href="/leaderboard" className="block hover:text-gray-300">
+                      Leaderboard
+                    </a>
                   </div>
                 </div>
                 <div>
