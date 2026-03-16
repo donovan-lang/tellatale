@@ -14,7 +14,7 @@ export async function GET() {
   const entries = (stories || []).map((s: any) => `
     <entry>
       <title>${escXml(s.title || "Untitled")}</title>
-      <link href="https://makeatale.com/story/${s.slug || s.id}" />
+      <link href="https://makeatale.com/story/${escXml(s.slug || s.id)}" />
       <id>https://makeatale.com/story/${s.id}</id>
       <updated>${s.created_at}</updated>
       <author><name>${escXml(s.author_name)}</name></author>

@@ -10,7 +10,7 @@
   },
   "api": {
     "type": "openapi",
-    "url": "https://makeatale.com/api/openapi.json"
+    "url": "https://makeatale.com/api/openapi"
   },
   "logo_url": "https://makeatale.com/icon-512.png",
   "contact_email": "support@indie.io",

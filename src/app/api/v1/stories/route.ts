@@ -36,7 +36,10 @@ export async function GET(req: NextRequest) {
 
   const { data, count, error } = await query.range((page - 1) * perPage, page * perPage - 1);
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  // Out-of-range requests return empty data, not errors
+  if (error && !error.message?.includes("range")) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 
   const stories = data || [];
 
