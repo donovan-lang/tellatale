@@ -124,16 +124,16 @@ export default function RootLayout({
                   </div>
                 </div>
                 <div>
-                  <h4 className="text-sm font-semibold mb-3">Legal</h4>
+                  <h4 className="text-sm font-semibold mb-3">Community</h4>
                   <div className="space-y-2 text-sm text-gray-500">
+                    <a href={process.env.NEXT_PUBLIC_DISCORD_INVITE || "#"} className="block hover:text-gray-300" target="_blank" rel="noopener">
+                      Discord
+                    </a>
                     <a href="/privacy" className="block hover:text-gray-300">
                       Privacy
                     </a>
                     <a href="/terms" className="block hover:text-gray-300">
                       Terms
-                    </a>
-                    <a href="/terms" className="block hover:text-gray-300">
-                      Content Policy
                     </a>
                   </div>
                 </div>

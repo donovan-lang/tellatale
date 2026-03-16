@@ -5,6 +5,7 @@ import { createServiceClient } from "@/lib/supabase-server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { createNotification } from "@/lib/notify";
+import { postNewStoryToDiscord } from "@/lib/discord";
 import {
   isSpamContent,
   isHoneypotFilled,
@@ -258,6 +259,18 @@ export async function POST(req: NextRequest) {
         );
       }
     }
+
+    // Post to Discord (non-blocking)
+    postNewStoryToDiscord({
+      id: result.data.id,
+      title: isBranch ? null : sanitizeContent(title).slice(0, 200),
+      content: sanitizeContent(content).slice(0, 300),
+      author_name: resolvedAuthorName,
+      tags: Array.isArray(tags) ? tags.slice(0, 5) : null,
+      slug,
+      story_type: isBranch ? "branch" : "seed",
+      teaser: isBranch && teaser ? sanitizeContent(teaser).slice(0, 300) : null,
+    }).catch(() => {});
 
     return NextResponse.json({ id: result.data.id }, { status: 201 });
   } catch (err: any) {

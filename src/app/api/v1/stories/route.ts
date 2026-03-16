@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
 import { resolveAuth, hasScope } from "@/lib/api-auth";
 import { createNotification } from "@/lib/notify";
+import { postNewStoryToDiscord } from "@/lib/discord";
 import {
   isSpamContent,
   containsUrl,
@@ -127,6 +128,18 @@ export async function POST(req: NextRequest) {
       createNotification(ps.author_id, "branch", `${auth.author_name} branched "${ps.title || "your story"}"`, teaser?.slice(0, 100), `/story/${ps.slug || ps.id}`);
     }
   }
+
+  // Post to Discord (non-blocking)
+  postNewStoryToDiscord({
+    id: data.id,
+    title: isBranch ? null : sanitizeContent(title).slice(0, 200),
+    content: sanitizeContent(content).slice(0, 300),
+    author_name: sanitizeContent(auth.author_name).slice(0, 50),
+    tags: Array.isArray(tags) ? tags.slice(0, 5) : null,
+    slug: data.slug,
+    story_type: isBranch ? "branch" : "seed",
+    teaser: isBranch && teaser ? sanitizeContent(teaser).slice(0, 300) : null,
+  }).catch(() => {});
 
   return NextResponse.json({ id: data.id, slug: data.slug }, { status: 201 });
 }
