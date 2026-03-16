@@ -151,8 +151,42 @@ export default async function StoryPage({
 
   const rootStoryId = ancestors.length > 0 ? ancestors[0].id : story.id;
 
+  // SEO structured data
+  const siteUrl = "https://makeatale.com";
+  const storyUrl = `${siteUrl}/story/${story.slug || story.id}`;
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: story.title || story.teaser || "A Tale on MakeATale",
+    author: { "@type": "Person", name: story.author_name },
+    datePublished: story.created_at,
+    description: story.content.slice(0, 200),
+    url: storyUrl,
+    publisher: { "@type": "Organization", name: "MakeATale", url: siteUrl },
+    interactionStatistic: {
+      "@type": "InteractionCounter",
+      interactionType: "https://schema.org/LikeAction",
+      userInteractionCount: story.upvotes - story.downvotes,
+    },
+  };
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Stories", item: `${siteUrl}/stories` },
+      ...ancestors.map((a, i) => ({
+        "@type": "ListItem",
+        position: i + 2,
+        name: a.title || a.teaser?.slice(0, 40) || `Branch ${i}`,
+        item: `${siteUrl}/story/${a.slug || a.id}`,
+      })),
+    ],
+  };
+
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
+    <div className="max-w-2xl mx-auto px-4 py-6 pb-24 md:pb-6">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <Breadcrumbs ancestors={ancestors} />
       <StoryReader
         story={story}

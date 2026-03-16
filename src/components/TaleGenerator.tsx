@@ -25,6 +25,45 @@ const TONES = [
   { value: "dreamlike", label: "Dreamlike" },
 ] as const;
 
+const QUICK_TEMPLATES = [
+  {
+    label: "Noir Detective",
+    prompt: "A hard-boiled detective in a rain-soaked city gets a case that makes no sense",
+    genre: "Mystery",
+    tone: "gritty",
+  },
+  {
+    label: "Space Horror",
+    prompt: "A crew on a deep space mining vessel discovers something alive in the asteroid",
+    genre: "Horror",
+    tone: "tense",
+  },
+  {
+    label: "Medieval Quest",
+    prompt: "A young blacksmith finds a legendary weapon and must decide what to do with it",
+    genre: "Fantasy",
+    tone: "epic",
+  },
+  {
+    label: "Love Letter",
+    prompt: "Two strangers keep finding each other's notes in a library book",
+    genre: "Romance",
+    tone: "lighthearted",
+  },
+  {
+    label: "Time Loop",
+    prompt: "Someone is reliving the same hour over and over, but each loop something is different",
+    genre: "Sci-Fi",
+    tone: "mysterious",
+  },
+  {
+    label: "Haunted House",
+    prompt: "A family moves into their dream home. The house has other plans.",
+    genre: "Horror",
+    tone: "dark",
+  },
+] as const;
+
 interface GeneratedTale {
   title: string;
   content: string;
@@ -88,8 +127,36 @@ export default function TaleGenerator({ onGenerated, initialPrompt = "" }: TaleG
     generate();
   }
 
+  function applyTemplate(template: typeof QUICK_TEMPLATES[number]) {
+    setPrompt(template.prompt);
+    setGenre(template.genre);
+    setTone(template.tone);
+    setShowAdvanced(true);
+  }
+
   return (
     <div className="space-y-4">
+      {/* Quick Templates */}
+      <div>
+        <label className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 block font-medium">
+          Quick Templates
+        </label>
+        <div className="flex flex-wrap gap-1.5">
+          {QUICK_TEMPLATES.map((t) => (
+            <button
+              key={t.label}
+              type="button"
+              onClick={() => applyTemplate(t)}
+              disabled={loading}
+              className="px-3 py-1.5 rounded-full text-xs font-medium transition-all border bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-800/70 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-700/50 hover:border-purple-400 dark:hover:border-purple-500/50 hover:text-purple-600 dark:hover:text-purple-300 hover:from-purple-50 hover:to-purple-50 dark:hover:from-purple-500/10 dark:hover:to-purple-500/10 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <img src={getGenreIconPath(t.genre)} alt="" width={13} height={13} className="rounded-sm inline-block mr-1 -mt-0.5" />
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Prompt input */}
       <div>
         <label className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 block font-medium">

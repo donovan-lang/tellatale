@@ -18,6 +18,7 @@ import {
   ChevronRight,
   Loader2,
   X,
+  Search,
 } from "lucide-react";
 import { STORY_CATEGORIES } from "@/lib/demo-data";
 import { GENRE_EMOJI, getGenreIconPath } from "@/lib/genre-theme";
@@ -50,6 +51,11 @@ export default function ExplorePage() {
   const [readingList, setReadingList] = useState<any[]>([]);
   const [bookmarkList, setBookmarkList] = useState<any[]>([]);
   const [activeChallenge, setActiveChallenge] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [searchResults, setSearchResults] = useState<Story[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchActive, setSearchActive] = useState(false);
 
   const penName =
     user?.user_metadata?.pen_name ||
@@ -99,6 +105,33 @@ export default function ExplorePage() {
       })
       .catch(() => {});
   }, []);
+
+  // Search handler — fires on Enter or button click
+  const executeSearch = (query: string) => {
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    setSearchQuery(trimmed);
+    setSearchActive(true);
+    setSearchLoading(true);
+    fetch(`/api/v1/search?q=${encodeURIComponent(trimmed)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.data && Array.isArray(data.data)) {
+          setSearchResults(data.data);
+        } else {
+          setSearchResults([]);
+        }
+      })
+      .catch(() => setSearchResults([]))
+      .finally(() => setSearchLoading(false));
+  };
+
+  const clearSearch = () => {
+    setSearchActive(false);
+    setSearchQuery("");
+    setSearchInput("");
+    setSearchResults([]);
+  };
 
   // Filter stories by trending period
   const periodCutoff = (() => {
@@ -307,175 +340,251 @@ export default function ExplorePage() {
 
         {/* ====== MAIN FEED ====== */}
         <main className="flex-1 min-w-0">
-          {/* Continue Reading */}
-          {continueStory && continueStory.root_story && (
-            <a
-              href={`/story/${continueStory.current_story_id}`}
-              className="card mb-5 flex items-center gap-4 hover:border-brand-500/30 bg-gradient-to-r from-brand-500/5 to-transparent dark:from-brand-500/5"
-            >
-              <div className="w-10 h-10 rounded-lg bg-brand-500/10 flex items-center justify-center shrink-0">
-                <BookOpen size={18} className="text-brand-400" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-brand-400 font-semibold uppercase tracking-wider">Continue Reading</p>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate mt-0.5">
-                  {continueStory.root_story?.title || "Untitled story"}
-                </p>
-              </div>
-              <ChevronRight size={16} className="text-gray-400 shrink-0" />
-            </a>
-          )}
-
-          {/* Story of the Week spotlight */}
-          {trending.length > 0 && tab === "trending" && trendingPeriod === "week" && (
-            <div className="card mb-5 p-5 border-2 border-yellow-400/30 dark:border-yellow-400/20 bg-gradient-to-r from-yellow-50 dark:from-yellow-500/5 to-transparent">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-yellow-400/20 flex items-center justify-center shrink-0">
-                  <Trophy size={20} className="text-yellow-500" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] text-yellow-600 dark:text-yellow-400 font-bold uppercase tracking-wider">Story of the Week</p>
-                  <a href={`/story/${trending[0].slug || trending[0].id}`} className="text-base font-bold text-gray-900 dark:text-white hover:text-brand-500 transition-colors line-clamp-1 mt-1 block">
-                    {trending[0].title || "Untitled"}
-                  </a>
-                  <p className="text-xs text-gray-500 mt-1">by {trending[0].author_name} &middot; {trending[0].upvotes - trending[0].downvotes} votes</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Daily prompt banner */}
-          <div className="card mb-5 bg-gradient-to-r from-brand-500/5 to-purple-500/5 border-brand-500/20">
-            <div className="flex items-start gap-3">
-              <span className="text-2xl shrink-0 mt-0.5">{"\u{270D}\u{FE0F}"}</span>
-              <div className="flex-1">
-                <p className="text-xs text-brand-400 font-semibold uppercase tracking-wider mb-1">
-                  Daily Writing Prompt
-                </p>
-                <p className="text-sm text-gray-700 dark:text-gray-300 italic">
-                  &ldquo;{prompt}&rdquo;
-                </p>
-              </div>
-              <a
-                href="/submit"
-                className="btn-ghost text-xs text-brand-400 hover:text-brand-300 shrink-0 flex items-center gap-1"
+          {/* Search Bar */}
+          <div className="mb-5 relative">
+            <div className="relative">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") executeSearch(searchInput);
+                }}
+                placeholder="Search stories..."
+                className="input-field pl-9 pr-20"
+              />
+              {searchInput && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute right-12 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+                  aria-label="Clear search"
+                >
+                  <X size={16} />
+                </button>
+              )}
+              <button
+                onClick={() => executeSearch(searchInput)}
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-md bg-brand-500 hover:bg-brand-600 text-white text-xs font-medium transition-colors"
               >
-                Write <ChevronRight size={12} />
-              </a>
+                Search
+              </button>
             </div>
           </div>
 
-          {/* Feed tabs */}
-          <div className="flex items-center gap-1 mb-5 border-b border-gray-200 dark:border-gray-800 pb-px flex-wrap">
-            {TABS.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
-                  tab === t.id
-                    ? "text-brand-400 border-b-2 border-brand-400 -mb-px"
-                    : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-                }`}
-              >
-                <t.icon size={15} />
-                {t.label}
-              </button>
-            ))}
-            {/* Trending period pills */}
-            {tab === "trending" && (
-              <div className="flex items-center gap-1 ml-auto">
-                {TRENDING_PERIODS.map((p) => (
-                  <button
-                    key={p.id}
-                    onClick={() => setTrendingPeriod(p.id)}
-                    className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${
-                      trendingPeriod === p.id
-                        ? "bg-brand-500/20 text-brand-300 border border-brand-500/40"
-                        : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border border-transparent hover:border-gray-300 dark:hover:border-gray-700"
-                    }`}
-                  >
-                    {p.label}
-                  </button>
-                ))}
+          {/* Search Results (overlays normal feed when active) */}
+          {searchActive ? (
+            <div>
+              <div className="flex items-center justify-between mb-5">
+                <p className="text-sm text-gray-500">
+                  {searchLoading ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 size={14} className="animate-spin" />
+                      Searching...
+                    </span>
+                  ) : (
+                    <>{searchResults.length} result{searchResults.length !== 1 ? "s" : ""} for &lsquo;{searchQuery}&rsquo;</>
+                  )}
+                </p>
+                <button
+                  onClick={clearSearch}
+                  className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-300 transition-colors"
+                >
+                  <X size={14} />
+                  Clear search
+                </button>
               </div>
-            )}
-          </div>
-
-          {/* Active filter badge (mobile — tag cloud is in right sidebar on xl) */}
-          {filterTag && (
-            <div className="mb-4 flex items-center gap-2">
-              <span className="text-xs text-gray-500">Filtered:</span>
-              <span className="text-xs bg-brand-500/20 text-brand-300 px-2.5 py-1 rounded-full border border-brand-500/40">
-                {filterTag}
-              </span>
-              <button
-                onClick={() => setFilterTag(null)}
-                className="text-xs text-gray-600 hover:text-gray-400"
-              >
-                <X size={12} />
-              </button>
-            </div>
-          )}
-
-          {/* Stories / Reading / Bookmarks */}
-          {tab === "reading" ? (
-            <div className="space-y-3">
-              {readingList.length > 0 ? readingList.map((p: any) => (
-                <a key={p.root_story_id} href={`/story/${p.current_story_id}`} className="card flex items-center gap-4 hover:border-brand-500/30">
-                  <div className="w-10 h-10 rounded-lg bg-brand-500/10 flex items-center justify-center shrink-0">📖</div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold truncate text-sm">{p.root_story?.title || "Untitled story"}</p>
-                    <p className="text-[10px] text-gray-500 mt-0.5">Depth {p.current_story?.depth || 0} · {p.root_story?.tags?.join(", ") || ""}</p>
-                  </div>
-                  <span className="text-xs text-brand-400 shrink-0">Continue →</span>
-                </a>
-              )) : (
-                <div className="text-center py-16">
-                  <p className="text-2xl mb-2">📖</p>
-                  <p className="text-gray-500 text-sm">No stories in progress yet.</p>
-                  <p className="text-gray-400 text-xs mt-1">Start reading any story — your progress saves automatically.</p>
+              {searchLoading ? (
+                <div className="flex justify-center py-20">
+                  <Loader2 size={24} className="animate-spin text-gray-500" />
+                </div>
+              ) : searchResults.length > 0 ? (
+                <div className="space-y-4">
+                  {searchResults.map((story) => (
+                    <StoryCard key={story.id} story={story} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-20">
+                  <Search size={32} className="mx-auto text-gray-600 mb-3" />
+                  <p className="text-gray-500 mb-1">No stories found for &ldquo;{searchQuery}&rdquo;</p>
+                  <p className="text-gray-600 text-xs">Try different keywords or browse the feed below.</p>
                 </div>
               )}
-            </div>
-          ) : tab === "bookmarks" ? (
-            <div className="space-y-3">
-              {bookmarkList.length > 0 ? bookmarkList.map((b: any) => (
-                <a key={b.id} href={`/story/${b.story_id}`} className="card flex items-center gap-4 hover:border-brand-500/30">
-                  <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">🔖</div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold truncate text-sm">{b.root_story?.title || "Untitled"}</p>
-                    <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{b.story?.teaser || b.story?.content?.slice(0, 80) || "Saved point"}</p>
-                    {b.note && <p className="text-[10px] text-purple-400 mt-0.5 italic">{b.note}</p>}
-                  </div>
-                </a>
-              )) : (
-                <div className="text-center py-16">
-                  <p className="text-2xl mb-2">🔖</p>
-                  <p className="text-gray-500 text-sm">No bookmarks yet.</p>
-                  <p className="text-gray-400 text-xs mt-1">Bookmark decision points while reading to find them later.</p>
-                </div>
-              )}
-            </div>
-          ) : loading ? (
-            <div className="flex justify-center py-20">
-              <Loader2 size={24} className="animate-spin text-gray-500" />
-            </div>
-          ) : feed.length > 0 ? (
-            <div className="space-y-4">
-              {feed.map((story) => (
-                <StoryCard key={story.id} story={story} />
-              ))}
             </div>
           ) : (
-            <div className="text-center py-20">
-              <p className="text-2xl mb-3">📚</p>
-              <p className="text-gray-500 mb-4">
-                No stories yet. Be the first to plant a seed.
-              </p>
-              <a href="/submit" className="btn-primary inline-block">
-                📖🌱 Plant the first seed
-              </a>
-            </div>
+            <>
+              {/* Continue Reading */}
+              {continueStory && continueStory.root_story && (
+                <a
+                  href={`/story/${continueStory.current_story_id}`}
+                  className="card mb-5 flex items-center gap-4 hover:border-brand-500/30 bg-gradient-to-r from-brand-500/5 to-transparent dark:from-brand-500/5"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-brand-500/10 flex items-center justify-center shrink-0">
+                    <BookOpen size={18} className="text-brand-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-brand-400 font-semibold uppercase tracking-wider">Continue Reading</p>
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate mt-0.5">
+                      {continueStory.root_story?.title || "Untitled story"}
+                    </p>
+                  </div>
+                  <ChevronRight size={16} className="text-gray-400 shrink-0" />
+                </a>
+              )}
+
+              {/* Story of the Week spotlight */}
+              {trending.length > 0 && tab === "trending" && trendingPeriod === "week" && (
+                <div className="card mb-5 p-5 border-2 border-yellow-400/30 dark:border-yellow-400/20 bg-gradient-to-r from-yellow-50 dark:from-yellow-500/5 to-transparent">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-yellow-400/20 flex items-center justify-center shrink-0">
+                      <Trophy size={20} className="text-yellow-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] text-yellow-600 dark:text-yellow-400 font-bold uppercase tracking-wider">Story of the Week</p>
+                      <a href={`/story/${trending[0].slug || trending[0].id}`} className="text-base font-bold text-gray-900 dark:text-white hover:text-brand-500 transition-colors line-clamp-1 mt-1 block">
+                        {trending[0].title || "Untitled"}
+                      </a>
+                      <p className="text-xs text-gray-500 mt-1">by {trending[0].author_name} &middot; {trending[0].upvotes - trending[0].downvotes} votes</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Daily prompt banner */}
+              <div className="card mb-5 bg-gradient-to-r from-brand-500/5 to-purple-500/5 border-brand-500/20">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl shrink-0 mt-0.5">{"\u{270D}\u{FE0F}"}</span>
+                  <div className="flex-1">
+                    <p className="text-xs text-brand-400 font-semibold uppercase tracking-wider mb-1">
+                      Daily Writing Prompt
+                    </p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 italic">
+                      &ldquo;{prompt}&rdquo;
+                    </p>
+                  </div>
+                  <a
+                    href="/submit"
+                    className="btn-ghost text-xs text-brand-400 hover:text-brand-300 shrink-0 flex items-center gap-1"
+                  >
+                    Write <ChevronRight size={12} />
+                  </a>
+                </div>
+              </div>
+
+              {/* Feed tabs */}
+              <div className="flex items-center gap-1 mb-5 border-b border-gray-200 dark:border-gray-800 pb-px flex-wrap">
+                {TABS.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setTab(t.id)}
+                    className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+                      tab === t.id
+                        ? "text-brand-400 border-b-2 border-brand-400 -mb-px"
+                        : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    }`}
+                  >
+                    <t.icon size={15} />
+                    {t.label}
+                  </button>
+                ))}
+                {/* Trending period pills */}
+                {tab === "trending" && (
+                  <div className="flex items-center gap-1 ml-auto">
+                    {TRENDING_PERIODS.map((p) => (
+                      <button
+                        key={p.id}
+                        onClick={() => setTrendingPeriod(p.id)}
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${
+                          trendingPeriod === p.id
+                            ? "bg-brand-500/20 text-brand-300 border border-brand-500/40"
+                            : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border border-transparent hover:border-gray-300 dark:hover:border-gray-700"
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Active filter badge (mobile — tag cloud is in right sidebar on xl) */}
+              {filterTag && (
+                <div className="mb-4 flex items-center gap-2">
+                  <span className="text-xs text-gray-500">Filtered:</span>
+                  <span className="text-xs bg-brand-500/20 text-brand-300 px-2.5 py-1 rounded-full border border-brand-500/40">
+                    {filterTag}
+                  </span>
+                  <button
+                    onClick={() => setFilterTag(null)}
+                    className="text-xs text-gray-600 hover:text-gray-400"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              )}
+
+              {/* Stories / Reading / Bookmarks */}
+              {tab === "reading" ? (
+                <div className="space-y-3">
+                  {readingList.length > 0 ? readingList.map((p: any) => (
+                    <a key={p.root_story_id} href={`/story/${p.current_story_id}`} className="card flex items-center gap-4 hover:border-brand-500/30">
+                      <div className="w-10 h-10 rounded-lg bg-brand-500/10 flex items-center justify-center shrink-0">📖</div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold truncate text-sm">{p.root_story?.title || "Untitled story"}</p>
+                        <p className="text-[10px] text-gray-500 mt-0.5">Depth {p.current_story?.depth || 0} · {p.root_story?.tags?.join(", ") || ""}</p>
+                      </div>
+                      <span className="text-xs text-brand-400 shrink-0">Continue →</span>
+                    </a>
+                  )) : (
+                    <div className="text-center py-16">
+                      <p className="text-2xl mb-2">📖</p>
+                      <p className="text-gray-500 text-sm">No stories in progress yet.</p>
+                      <p className="text-gray-400 text-xs mt-1">Start reading any story — your progress saves automatically.</p>
+                    </div>
+                  )}
+                </div>
+              ) : tab === "bookmarks" ? (
+                <div className="space-y-3">
+                  {bookmarkList.length > 0 ? bookmarkList.map((b: any) => (
+                    <a key={b.id} href={`/story/${b.story_id}`} className="card flex items-center gap-4 hover:border-brand-500/30">
+                      <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">🔖</div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold truncate text-sm">{b.root_story?.title || "Untitled"}</p>
+                        <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{b.story?.teaser || b.story?.content?.slice(0, 80) || "Saved point"}</p>
+                        {b.note && <p className="text-[10px] text-purple-400 mt-0.5 italic">{b.note}</p>}
+                      </div>
+                    </a>
+                  )) : (
+                    <div className="text-center py-16">
+                      <p className="text-2xl mb-2">🔖</p>
+                      <p className="text-gray-500 text-sm">No bookmarks yet.</p>
+                      <p className="text-gray-400 text-xs mt-1">Bookmark decision points while reading to find them later.</p>
+                    </div>
+                  )}
+                </div>
+              ) : loading ? (
+                <div className="flex justify-center py-20">
+                  <Loader2 size={24} className="animate-spin text-gray-500" />
+                </div>
+              ) : feed.length > 0 ? (
+                <div className="space-y-4">
+                  {feed.map((story) => (
+                    <StoryCard key={story.id} story={story} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-20">
+                  <p className="text-2xl mb-3">📚</p>
+                  <p className="text-gray-500 mb-4">
+                    No stories yet. Be the first to plant a seed.
+                  </p>
+                  <a href="/submit" className="btn-primary inline-block">
+                    📖🌱 Plant the first seed
+                  </a>
+                </div>
+              )}
+            </>
           )}
         </main>
 
