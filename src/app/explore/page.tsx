@@ -167,7 +167,7 @@ export default function ExplorePage() {
     ...(user
       ? [{ href: "/read", label: "Read", icon: BookOpen }]
       : []),
-    { href: "/explore", label: "Explore", icon: Flame, active: true },
+    { href: "/explore", label: "Stories", icon: Flame, active: true },
     { href: "/submit", label: "Write", icon: Pen },
     ...(user
       ? [{ href: "/account", label: "Settings", icon: Settings }]
@@ -237,7 +237,7 @@ export default function ExplorePage() {
               href="/submit"
               className="btn-primary w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold"
             >
-              {"\u{1F331}"} Plant a Seed
+              📖🌱 Plant a Seed
             </a>
 
             {/* Surprise Me */}

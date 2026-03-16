@@ -77,7 +77,7 @@ export default function RootLayout({
                       How It Works
                     </a>
                     <a href="/#stories" className="block hover:text-gray-300">
-                      Explore Stories
+                      Browse Stories
                     </a>
                     <a href="/submit" className="block hover:text-gray-300">
                       Write a Story

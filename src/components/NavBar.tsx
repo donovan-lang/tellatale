@@ -51,7 +51,7 @@ export default function NavBar() {
                 {"\u{1F4D6}"} Read
               </a>
               <a href="/explore" className={navLinkClass("/explore")}>
-                {"\u{1F9ED}"} Explore
+                📚 Stories
               </a>
               <a href="/submit" className={navLinkClass("/submit")}>
                 {"\u{270D}\u{FE0F}"} Write
@@ -63,7 +63,7 @@ export default function NavBar() {
                 How It Works
               </a>
               <a href="/explore" className={navLinkClass("/explore")}>
-                Explore
+                📚 Stories
               </a>
               <a href="/submit" className={navLinkClass("/submit")}>
                 Write
@@ -128,7 +128,7 @@ export default function NavBar() {
                 {"\u{1F4D6}"} Read
               </a>
               <a href="/explore" className={navLinkClass("/explore") + " w-full"}>
-                {"\u{1F9ED}"} Explore
+                📚 Stories
               </a>
               <a href="/submit" className={navLinkClass("/submit") + " w-full"}>
                 {"\u{270D}\u{FE0F}"} Write
@@ -137,7 +137,7 @@ export default function NavBar() {
           ) : (
             <>
               <a href="/#how-it-works" className="block text-sm text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-lg">How It Works</a>
-              <a href="/explore" className={navLinkClass("/explore") + " w-full"}>Explore</a>
+              <a href="/explore" className={navLinkClass("/explore") + " w-full"}>📚 Stories</a>
               <a href="/submit" className={navLinkClass("/submit") + " w-full"}>Write</a>
             </>
           )}
