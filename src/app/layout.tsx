@@ -23,6 +23,27 @@ export const metadata: Metadata = {
   ],
   manifest: "/manifest.json",
   themeColor: "#d946ef",
+  icons: {
+    icon: [
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    title: "MakeATale — AI-Powered Collaborative Storytelling",
+    description: "Generate story seeds with AI or write your own. The community branches them into choose-your-own-adventure trees.",
+    images: [{ url: "/og-default.png", width: 1200, height: 630 }],
+    siteName: "MakeATale",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "MakeATale — AI-Powered Collaborative Storytelling",
+    description: "Generate story seeds with AI or write your own. The community grows them.",
+    images: ["/og-default.png"],
+  },
 };
 
 export default function RootLayout({
