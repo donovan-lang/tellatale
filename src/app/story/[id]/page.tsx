@@ -77,11 +77,26 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   if (!story) return { title: "Story not found — MakeATale" };
   const desc = story.content.slice(0, 155) + "...";
   const title = story.title ? `${story.title} | MakeATale` : "A Tale | MakeATale";
+  const baseUrl = process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : process.env.NEXT_PUBLIC_SITE_URL || "https://makeatale.com";
+  const ogImage = `${baseUrl}/api/og/${params.id}`;
   return {
     title,
     description: desc,
-    openGraph: { title, description: desc, type: "article", siteName: "MakeATale" },
-    twitter: { card: "summary_large_image", title, description: desc },
+    openGraph: {
+      title,
+      description: desc,
+      type: "article",
+      siteName: "MakeATale",
+      images: [{ url: ogImage, width: 1200, height: 630, alt: story.title || "A Tale on MakeATale" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: desc,
+      images: [ogImage],
+    },
   };
 }
 

@@ -22,7 +22,21 @@ export default function SubmitPage() {
   const { user, loading: authLoading } = useAuth();
   const [myStories, setMyStories] = useState<Story[]>([]);
   const [loadingStories, setLoadingStories] = useState(false);
+
+  // Read ?idea= param from URL on mount
+  const [initialIdea, setInitialIdea] = useState("");
   const [tab, setTab] = useState<Tab>("write");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const idea = params.get("idea") || "";
+      if (idea) {
+        setInitialIdea(idea);
+        setTab("generate");
+      }
+    }
+  }, []);
 
   // When AI generates a tale, switch to write tab with pre-filled values
   const [generatedTale, setGeneratedTale] = useState<{
@@ -124,7 +138,7 @@ export default function SubmitPage() {
               initialTags={generatedTale?.tags}
             />
           ) : (
-            <TaleGenerator onGenerated={handleGenerated} />
+            <TaleGenerator onGenerated={handleGenerated} initialPrompt={initialIdea} />
           )}
         </div>
 

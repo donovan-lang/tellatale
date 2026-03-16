@@ -15,6 +15,7 @@ import {
 import StoryCard from "@/components/StoryCard";
 import NewsletterSignup from "@/components/NewsletterSignup";
 import HomeRedirect from "@/components/HomeRedirect";
+import HeroGenerator from "@/components/HeroGenerator";
 import { createServiceClient } from "@/lib/supabase-server";
 import type { Story } from "@/types";
 
@@ -144,18 +145,8 @@ export default async function HomePage() {
             building fiction together.
           </p>
 
-          {/* CTA buttons */}
-          <div className="animate-fade-up animate-fade-up-delay-3 mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a
-              href="/submit"
-              className="btn-primary btn-large shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30"
-            >
-              Generate a Tale — Free
-            </a>
-            <a href="/stories" className="btn-secondary btn-large">
-              Explore Stories
-            </a>
-          </div>
+          {/* Inline generator */}
+          <HeroGenerator />
 
           {/* Stats bar */}
           <div className="animate-fade-up animate-fade-up-delay-4 mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">

@@ -435,28 +435,38 @@ export default function StoryReader({
                 )}
               </div>
 
-              <div className="space-y-2">
-                {sortedBranches.map((branch, i) => (
-                  <div key={branch.id} className="relative">
-                    {branch.author_id &&
-                      threadAuthorIds.has(branch.author_id) && (
-                        <div
-                          className="absolute -left-2 top-3 z-10"
-                          title="Author from this story thread"
-                        >
-                          <Star
-                            size={12}
-                            className="text-yellow-500 fill-yellow-500"
-                          />
-                        </div>
-                      )}
-                    <BranchCard
-                      story={branch}
-                      rank={i}
-                      onClick={() => router.push(`/story/${branch.id}`)}
-                    />
-                  </div>
-                ))}
+              <div className="relative pl-6">
+                {/* Vertical tree line */}
+                <div className="absolute left-2 top-0 bottom-4 w-px bg-gradient-to-b from-purple-500/60 via-purple-500/30 to-transparent" />
+
+                <div className="space-y-2">
+                  {sortedBranches.map((branch, i) => (
+                    <div key={branch.id} className="relative">
+                      {/* Horizontal connector arrow */}
+                      <div className="absolute -left-6 top-4 flex items-center" style={{width: 24}}>
+                        <div className="w-4 h-px bg-purple-500/40" />
+                        <div className="w-0 h-0 border-t-[3px] border-t-transparent border-b-[3px] border-b-transparent border-l-[5px] border-l-purple-500/50" />
+                      </div>
+                      {branch.author_id &&
+                        threadAuthorIds.has(branch.author_id) && (
+                          <div
+                            className="absolute -left-8 top-2.5 z-10"
+                            title="Author from this story thread"
+                          >
+                            <Star
+                              size={12}
+                              className="text-yellow-500 fill-yellow-500"
+                            />
+                          </div>
+                        )}
+                      <BranchCard
+                        story={branch}
+                        rank={i}
+                        onClick={() => router.push(`/story/${branch.id}`)}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {hasMore && (

@@ -33,10 +33,11 @@ interface GeneratedTale {
 
 interface TaleGeneratorProps {
   onGenerated: (tale: GeneratedTale) => void;
+  initialPrompt?: string;
 }
 
-export default function TaleGenerator({ onGenerated }: TaleGeneratorProps) {
-  const [prompt, setPrompt] = useState("");
+export default function TaleGenerator({ onGenerated, initialPrompt = "" }: TaleGeneratorProps) {
+  const [prompt, setPrompt] = useState(initialPrompt);
   const [genre, setGenre] = useState("");
   const [tone, setTone] = useState("");
   const [loading, setLoading] = useState(false);
