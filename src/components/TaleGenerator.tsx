@@ -10,7 +10,7 @@ import {
   Wand2,
 } from "lucide-react";
 import { STORY_CATEGORIES } from "@/lib/demo-data";
-import { GENRE_EMOJI } from "@/lib/genre-theme";
+import { GENRE_EMOJI, getGenreIconPath } from "@/lib/genre-theme";
 
 const TONES = [
   { value: "dark", label: "Dark" },
@@ -131,7 +131,7 @@ export default function TaleGenerator({ onGenerated }: TaleGeneratorProps) {
                     : "bg-gray-100 dark:bg-gray-800/70 text-gray-500 border border-gray-300 dark:border-gray-700/50 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-400 dark:hover:border-gray-600"
                 } disabled:opacity-50`}
               >
-                {GENRE_EMOJI[cat] || ""} {cat}
+                <img src={getGenreIconPath(cat)} alt="" width={14} height={14} className="rounded-sm inline-block" /> {cat}
               </button>
             );
           })}
@@ -219,7 +219,7 @@ export default function TaleGenerator({ onGenerated }: TaleGeneratorProps) {
                     key={tag}
                     className="text-[10px] px-2 py-0.5 rounded-full bg-purple-200/60 dark:bg-purple-800/40 text-purple-700 dark:text-purple-300"
                   >
-                    {GENRE_EMOJI[tag] || ""} {tag}
+                    <img src={getGenreIconPath(tag)} alt="" width={10} height={10} className="rounded-sm inline-block" /> {tag}
                   </span>
                 ))}
               </div>

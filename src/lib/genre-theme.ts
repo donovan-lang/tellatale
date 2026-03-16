@@ -13,6 +13,21 @@ export const GENRE_EMOJI: Record<string, string> = {
   Dystopia: "\u{26A1}",
 };
 
+export const GENRE_ICON_SLUG: Record<string, string> = {
+  Fantasy: "fantasy",
+  "Sci-Fi": "sci-fi",
+  Horror: "horror",
+  Mystery: "mystery",
+  Romance: "romance",
+  Adventure: "adventure",
+  Thriller: "thriller",
+  Comedy: "comedy",
+  Drama: "drama",
+  Surreal: "surreal",
+  Historical: "historical",
+  Dystopia: "dystopia",
+};
+
 export const GENRE_COLORS: Record<string, { light: string; dark: string; border: string }> = {
   Fantasy: { light: "bg-purple-50", dark: "dark:bg-purple-500/10", border: "border-purple-200 dark:border-purple-500/20" },
   "Sci-Fi": { light: "bg-blue-50", dark: "dark:bg-blue-500/10", border: "border-blue-200 dark:border-blue-500/20" },
@@ -31,6 +46,18 @@ export const GENRE_COLORS: Record<string, { light: string; dark: string; border:
 export function getGenreEmoji(tags: string[] | null | undefined): string {
   if (!tags || tags.length === 0) return "\u{1F4D6}";
   return GENRE_EMOJI[tags[0]] || "\u{1F4D6}";
+}
+
+/** Returns the path to the genre icon image (128px version) */
+export function getGenreIconPath(genre: string): string {
+  const slug = GENRE_ICON_SLUG[genre];
+  return slug ? `/genres/${slug}-128.png` : "/genres/default-128.png";
+}
+
+/** Returns the path for the first tag or default */
+export function getGenreIcon(tags: string[] | null | undefined): string {
+  if (!tags || tags.length === 0) return "/genres/default-128.png";
+  return getGenreIconPath(tags[0]);
 }
 
 export function getGenreTheme(tags: string[] | null | undefined): { light: string; dark: string; border: string } {

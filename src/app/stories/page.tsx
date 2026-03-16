@@ -20,7 +20,7 @@ import {
   X,
 } from "lucide-react";
 import { STORY_CATEGORIES } from "@/lib/demo-data";
-import { GENRE_EMOJI } from "@/lib/genre-theme";
+import { GENRE_EMOJI, getGenreIconPath } from "@/lib/genre-theme";
 import { toAuthorSlug } from "@/lib/utils";
 import type { Story } from "@/types";
 import OnboardingOverlay from "@/components/OnboardingOverlay";
@@ -542,7 +542,7 @@ export default function ExplorePage() {
                           : "bg-gray-50 dark:bg-gray-800/30 text-gray-600 border border-gray-200 dark:border-gray-800/50 text-xs"
                       }`}
                     >
-                      {GENRE_EMOJI[cat] || ""} {cat}
+                      <img src={getGenreIconPath(cat)} alt="" width={14} height={14} className="rounded-sm inline-block" /> {cat}
                       {count > 0 && (
                         <span className="ml-1 text-gray-600">{count}</span>
                       )}

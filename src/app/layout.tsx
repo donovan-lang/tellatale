@@ -84,13 +84,8 @@ export default function RootLayout({
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                 <div>
                   <div className="flex items-center gap-2 mb-4">
-                    <div className="w-6 h-6 rounded bg-gradient-to-br from-brand-500 to-purple-700 flex items-center justify-center text-xs font-black">
-                      M
-                    </div>
-                    <span className="font-bold">
-                      <span className="text-brand-400">Make</span>A
-                      <span className="text-brand-400">Tale</span>
-                    </span>
+                    <img src="/logos/icon-32.png" alt="MakeATale" width={24} height={24} className="rounded" />
+                    <img src="/logos/logo-trimmed.png" alt="MakeATale" className="h-5 w-auto" />
                   </div>
                   <p className="text-xs text-gray-500 leading-relaxed">
                     Where stories grow. AI-powered,

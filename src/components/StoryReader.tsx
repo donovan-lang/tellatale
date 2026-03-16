@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import type { Story } from "@/types";
 import { toAuthorSlug } from "@/lib/utils";
-import { getGenreEmoji, GENRE_EMOJI } from "@/lib/genre-theme";
+import { getGenreEmoji, getGenreIcon, getGenreIconPath, GENRE_EMOJI } from "@/lib/genre-theme";
 import BranchCard from "./BranchCard";
 import StoryForm from "./StoryForm";
 import ReportButton from "./ReportButton";
@@ -249,8 +249,8 @@ export default function StoryReader({
         )}
 
         {story.title && (
-          <h1 className="text-2xl font-bold mb-1 pr-10">
-            <span className="mr-2">{getGenreEmoji(story.tags)}</span>
+          <h1 className="text-2xl font-bold mb-1 pr-10 flex items-center gap-2">
+            <img src={getGenreIcon(story.tags)} alt="" width={28} height={28} className="shrink-0 rounded" />
             {story.title}
           </h1>
         )}
@@ -378,9 +378,10 @@ export default function StoryReader({
                 {story.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 border border-gray-300 dark:border-gray-700/50"
+                    className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 border border-gray-300 dark:border-gray-700/50 flex items-center gap-1"
                   >
-                    {GENRE_EMOJI[tag] || ""} {tag}
+                    <img src={getGenreIconPath(tag)} alt="" width={12} height={12} className="rounded-sm" />
+                    {tag}
                   </span>
                 ))}
               </div>

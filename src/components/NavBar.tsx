@@ -33,14 +33,19 @@ export default function NavBar() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         {/* Logo */}
         <a href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-purple-700 flex items-center justify-center text-sm font-black shadow-lg shadow-brand-500/20 group-hover:shadow-brand-500/40 transition-shadow duration-300">
-            M
-          </div>
-          <span className="text-xl font-bold tracking-tight">
-            <span className="text-brand-400">Make</span>
-            <span className="text-gray-900 dark:text-white">A</span>
-            <span className="text-brand-400">Tale</span>
-          </span>
+          <img
+            src="/logos/icon-48.png"
+            alt="MakeATale"
+            width={32}
+            height={32}
+            className="rounded-lg shadow-lg shadow-brand-500/20 group-hover:shadow-brand-500/40 transition-shadow duration-300"
+          />
+          <img
+            src="/logos/logo-trimmed.png"
+            alt="MakeATale"
+            height={28}
+            className="h-7 w-auto hidden sm:block"
+          />
         </a>
 
         {/* Desktop links */}
