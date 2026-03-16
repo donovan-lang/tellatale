@@ -111,7 +111,7 @@ export default function BranchCard({
               {story.author_name}
             </a>
           ) : (
-            <span className="text-[10px] text-gray-500 font-medium">{story.author_name}</span>
+            <a href={`/author/${toAuthorSlug(story.author_name)}`} onClick={(e) => e.stopPropagation()} className="text-[10px] text-gray-500 hover:text-brand-400 transition-colors font-medium">{story.author_name}</a>
           )}
           <span className="text-[10px] text-gray-400 dark:text-gray-600 flex items-center gap-0.5" title="Click to read and discuss">
             <MessageSquare size={9} />

@@ -93,7 +93,7 @@ export default function ChroniclePlaybackPage({
               {story.content}
             </p>
             <div className="mt-3 flex items-center gap-3 text-xs text-gray-500">
-              <span>{story.author_name}</span>
+              <a href={`/author/${story.author_name?.toLowerCase().replace(/[^a-z0-9 ]/g, "").replace(/ +/g, "-")}`} className="hover:text-brand-400 transition-colors">{story.author_name}</a>
               <span>Step {i + 1}</span>
               {story.is_ending && (
                 <span className="flex items-center gap-1 text-amber-400">

@@ -31,7 +31,7 @@ export default function RelatedStories({ tags, currentId }: { tags: string[] | n
           <a key={s.id} href={`/story/${s.slug || s.id}`} className="card p-3 flex items-center gap-3 hover:border-brand-500/30">
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{s.title || "Untitled"}</p>
-              <p className="text-[10px] text-gray-500 mt-0.5">{s.author_name} · {s.upvotes - s.downvotes} votes</p>
+              <p className="text-[10px] text-gray-500 mt-0.5"><span className="hover:text-brand-400 transition-colors cursor-pointer">{s.author_name}</span> · {s.upvotes - s.downvotes} votes</p>
             </div>
             {s.tags && s.tags.length > 0 && (
               <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-brand-500/10 text-brand-300 shrink-0">{s.tags[0]}</span>

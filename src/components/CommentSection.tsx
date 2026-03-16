@@ -127,7 +127,7 @@ function CommentItem({
                 {comment.author_name}
               </a>
             ) : (
-              <span className="text-xs font-semibold text-gray-800 dark:text-gray-200">{comment.author_name}</span>
+              <a href={`/author/${toAuthorSlug(comment.author_name)}`} className="text-xs font-semibold text-gray-800 dark:text-gray-200 hover:text-brand-400 transition-colors">{comment.author_name}</a>
             )}
             <span className="text-[10px] text-gray-400 dark:text-gray-600">
               {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}

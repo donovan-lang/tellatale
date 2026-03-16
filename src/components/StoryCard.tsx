@@ -129,7 +129,7 @@ export default function StoryCard({ story }: { story: Story }) {
               {story.author_name}
             </a>
           ) : (
-            <span className="font-medium">{story.author_name}</span>
+            <a href={`/author/${toAuthorSlug(story.author_name)}`} className="font-medium hover:text-brand-400 transition-colors">{story.author_name}</a>
           )}
           <span className="text-gray-700">&middot;</span>
           <span>{formatDistanceToNow(new Date(story.created_at), { addSuffix: true })}</span>

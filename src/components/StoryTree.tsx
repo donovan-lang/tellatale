@@ -54,7 +54,7 @@ function TreeNodeView({
           {s.title || s.teaser || s.content?.slice(0, 80)}
         </p>
         <div className="flex items-center gap-2 mt-1.5 text-[9px] text-gray-500">
-          <span>{s.author_name}</span>
+          <span className="hover:text-brand-400 transition-colors">{s.author_name}</span>
           <span className="flex items-center gap-0.5">
             <ChevronUp size={8} /> {score}
           </span>

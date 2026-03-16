@@ -218,7 +218,7 @@ export default function StoryReader({
                 {story.author_name}
               </a>
             ) : (
-              <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">{story.author_name}</p>
+              <a href={`/author/${toAuthorSlug(story.author_name)}`} className="text-sm font-semibold text-gray-800 dark:text-gray-200 hover:text-brand-400 transition-colors">{story.author_name}</a>
             )}
             <p className="text-[11px] text-gray-500">
               Depth {story.depth} &middot; Branch author
@@ -369,7 +369,7 @@ export default function StoryReader({
                   {story.author_name}
                 </a>
               ) : (
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{story.author_name}</p>
+                <a href={`/author/${toAuthorSlug(story.author_name)}`} className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-brand-400 transition-colors">{story.author_name}</a>
               )}
               <p className="text-[10px] text-gray-500">Seed author</p>
             </div>
