@@ -25,7 +25,7 @@ import { toAuthorSlug } from "@/lib/utils";
 import type { Story } from "@/types";
 import OnboardingOverlay from "@/components/OnboardingOverlay";
 
-type FeedTab = "trending" | "new" | "foryou";
+type FeedTab = "trending" | "new" | "foryou" | "reading" | "bookmarks";
 type TrendingPeriod = "day" | "week" | "month" | "all";
 
 // Writing prompts that rotate
@@ -47,6 +47,8 @@ export default function ExplorePage() {
   const [trendingPeriod, setTrendingPeriod] = useState<TrendingPeriod>("week");
   const [filterTag, setFilterTag] = useState<string | null>(null);
   const [continueStory, setContinueStory] = useState<any>(null);
+  const [readingList, setReadingList] = useState<any[]>([]);
+  const [bookmarkList, setBookmarkList] = useState<any[]>([]);
   const [activeChallenge, setActiveChallenge] = useState<any>(null);
 
   const penName =
@@ -67,16 +69,21 @@ export default function ExplorePage() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Fetch reading progress for "Continue Reading" card
+  // Fetch reading progress + bookmarks for integrated tabs
   useEffect(() => {
     if (!user) return;
     fetch("/api/reading-progress")
       .then(r => r.json())
       .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setContinueStory(data[0]);
+        if (Array.isArray(data)) {
+          setReadingList(data);
+          if (data.length > 0) setContinueStory(data[0]);
         }
       })
+      .catch(() => {});
+    fetch("/api/bookmarks")
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setBookmarkList(data); })
       .catch(() => {});
   }, [user]);
 
@@ -145,9 +152,13 @@ export default function ExplorePage() {
     .slice(0, 5);
 
   const TABS: { id: FeedTab; label: string; icon: typeof TrendingUp }[] = [
-    { id: "trending", label: "Trending", icon: TrendingUp },
-    { id: "new", label: "New", icon: Clock },
-    { id: "foryou", label: "For You", icon: Sparkles },
+    { id: "trending", label: "🔥 Trending", icon: TrendingUp },
+    { id: "new", label: "✨ New", icon: Clock },
+    { id: "foryou", label: "💜 For You", icon: Sparkles },
+    ...(user ? [
+      { id: "reading" as FeedTab, label: "📖 Reading", icon: BookOpen },
+      { id: "bookmarks" as FeedTab, label: "🔖 Saved", icon: BookMarked },
+    ] : []),
   ];
 
   const TRENDING_PERIODS: { id: TrendingPeriod; label: string }[] = [
@@ -164,9 +175,6 @@ export default function ExplorePage() {
   ];
 
   const NAV_LINKS = [
-    ...(user
-      ? [{ href: "/read", label: "Read", icon: BookOpen }]
-      : []),
     { href: "/explore", label: "Stories", icon: Flame, active: true },
     { href: "/submit", label: "Write", icon: Pen },
     ...(user
@@ -409,8 +417,46 @@ export default function ExplorePage() {
             </div>
           )}
 
-          {/* Stories */}
-          {loading ? (
+          {/* Stories / Reading / Bookmarks */}
+          {tab === "reading" ? (
+            <div className="space-y-3">
+              {readingList.length > 0 ? readingList.map((p: any) => (
+                <a key={p.root_story_id} href={`/story/${p.current_story_id}`} className="card flex items-center gap-4 hover:border-brand-500/30">
+                  <div className="w-10 h-10 rounded-lg bg-brand-500/10 flex items-center justify-center shrink-0">📖</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold truncate text-sm">{p.root_story?.title || "Untitled story"}</p>
+                    <p className="text-[10px] text-gray-500 mt-0.5">Depth {p.current_story?.depth || 0} · {p.root_story?.tags?.join(", ") || ""}</p>
+                  </div>
+                  <span className="text-xs text-brand-400 shrink-0">Continue →</span>
+                </a>
+              )) : (
+                <div className="text-center py-16">
+                  <p className="text-2xl mb-2">📖</p>
+                  <p className="text-gray-500 text-sm">No stories in progress yet.</p>
+                  <p className="text-gray-400 text-xs mt-1">Start reading any story — your progress saves automatically.</p>
+                </div>
+              )}
+            </div>
+          ) : tab === "bookmarks" ? (
+            <div className="space-y-3">
+              {bookmarkList.length > 0 ? bookmarkList.map((b: any) => (
+                <a key={b.id} href={`/story/${b.story_id}`} className="card flex items-center gap-4 hover:border-brand-500/30">
+                  <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">🔖</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold truncate text-sm">{b.root_story?.title || "Untitled"}</p>
+                    <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{b.story?.teaser || b.story?.content?.slice(0, 80) || "Saved point"}</p>
+                    {b.note && <p className="text-[10px] text-purple-400 mt-0.5 italic">{b.note}</p>}
+                  </div>
+                </a>
+              )) : (
+                <div className="text-center py-16">
+                  <p className="text-2xl mb-2">🔖</p>
+                  <p className="text-gray-500 text-sm">No bookmarks yet.</p>
+                  <p className="text-gray-400 text-xs mt-1">Bookmark decision points while reading to find them later.</p>
+                </div>
+              )}
+            </div>
+          ) : loading ? (
             <div className="flex justify-center py-20">
               <Loader2 size={24} className="animate-spin text-gray-500" />
             </div>
@@ -422,12 +468,12 @@ export default function ExplorePage() {
             </div>
           ) : (
             <div className="text-center py-20">
-              <BookOpen size={40} className="mx-auto text-gray-700 mb-4" />
+              <p className="text-2xl mb-3">📚</p>
               <p className="text-gray-500 mb-4">
                 No stories yet. Be the first to plant a seed.
               </p>
               <a href="/submit" className="btn-primary inline-block">
-                Plant the first seed
+                📖🌱 Plant the first seed
               </a>
             </div>
           )}

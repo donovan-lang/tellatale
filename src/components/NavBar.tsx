@@ -47,14 +47,11 @@ export default function NavBar() {
         <div className="hidden md:flex items-center gap-1">
           {user ? (
             <>
-              <a href="/read" className={navLinkClass("/read")}>
-                {"\u{1F4D6}"} Read
-              </a>
               <a href="/explore" className={navLinkClass("/explore")}>
                 📚 Stories
               </a>
               <a href="/submit" className={navLinkClass("/submit")}>
-                {"\u{270D}\u{FE0F}"} Write
+                ✍️ Write
               </a>
             </>
           ) : (
@@ -66,7 +63,7 @@ export default function NavBar() {
                 📚 Stories
               </a>
               <a href="/submit" className={navLinkClass("/submit")}>
-                Write
+                ✍️ Write
               </a>
             </>
           )}
@@ -124,21 +121,14 @@ export default function NavBar() {
         <div className="md:hidden border-t border-amber-200/60 dark:border-gray-800/60 px-4 py-4 space-y-1 bg-amber-50/98 dark:bg-gray-950/98 backdrop-blur-xl">
           {user ? (
             <>
-              <a href="/read" className={navLinkClass("/read") + " w-full"}>
-                {"\u{1F4D6}"} Read
-              </a>
-              <a href="/explore" className={navLinkClass("/explore") + " w-full"}>
-                📚 Stories
-              </a>
-              <a href="/submit" className={navLinkClass("/submit") + " w-full"}>
-                {"\u{270D}\u{FE0F}"} Write
-              </a>
+              <a href="/explore" className={navLinkClass("/explore") + " w-full"}>📚 Stories</a>
+              <a href="/submit" className={navLinkClass("/submit") + " w-full"}>✍️ Write</a>
             </>
           ) : (
             <>
               <a href="/#how-it-works" className="block text-sm text-gray-400 hover:text-gray-900 dark:hover:text-white px-3 py-2 rounded-lg">How It Works</a>
               <a href="/explore" className={navLinkClass("/explore") + " w-full"}>📚 Stories</a>
-              <a href="/submit" className={navLinkClass("/submit") + " w-full"}>Write</a>
+              <a href="/submit" className={navLinkClass("/submit") + " w-full"}>✍️ Write</a>
             </>
           )}
           <div className="pt-3 mt-2 border-t border-gray-200/60 dark:border-gray-800/60">
