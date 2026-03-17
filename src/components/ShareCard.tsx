@@ -62,6 +62,14 @@ export default function ShareCard({ story }: { story: { id: string; title: strin
           {copied ? "Copied!" : "Copy Link"}
         </button>
       </div>
+      <a
+        href={process.env.NEXT_PUBLIC_DISCORD_INVITE || "https://discord.gg/TJn25WNRVv"}
+        target="_blank"
+        rel="noopener"
+        className="mt-2 block text-center text-xs text-gray-500 hover:text-brand-400 transition-colors"
+      >
+        Discuss on Discord
+      </a>
 
       {/* Embed code */}
       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">

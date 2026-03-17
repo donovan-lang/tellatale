@@ -36,12 +36,38 @@ async function getStories(): Promise<Story[]> {
   }
 }
 
-const STATS = [
-  { label: "Stories planted", value: "2,847", icon: BookOpen },
-  { label: "Branches grown", value: "11,203", icon: GitFork },
-  { label: "AI tales generated", value: "1,420", icon: Sparkles },
-  { label: "Active writers", value: "934", icon: Users },
-];
+async function getStats() {
+  try {
+    const supabase = createServiceClient();
+
+    const [storiesRes, branchesRes, aiRes, writersRes] = await Promise.all([
+      supabase.from("stories").select("*", { count: "exact", head: true }).is("parent_id", null),
+      supabase.from("stories").select("*", { count: "exact", head: true }).not("parent_id", "is", null),
+      supabase.from("stories").select("*", { count: "exact", head: true }).eq("author_name", "TaleBot"),
+      supabase.from("stories").select("author_name"),
+    ]);
+
+    const distinctWriters = new Set(
+      (writersRes.data ?? []).map((r: { author_name: string }) => r.author_name)
+    ).size;
+
+    const fmt = (n: number) => n.toLocaleString("en-US");
+
+    return [
+      { label: "Stories planted", value: fmt(storiesRes.count ?? 0), icon: BookOpen },
+      { label: "Branches grown", value: fmt(branchesRes.count ?? 0), icon: GitFork },
+      { label: "AI tales generated", value: fmt(aiRes.count ?? 0), icon: Sparkles },
+      { label: "Active writers", value: fmt(distinctWriters), icon: Users },
+    ];
+  } catch {
+    return [
+      { label: "Stories planted", value: "0", icon: BookOpen },
+      { label: "Branches grown", value: "0", icon: GitFork },
+      { label: "AI tales generated", value: "0", icon: Sparkles },
+      { label: "Active writers", value: "0", icon: Users },
+    ];
+  }
+}
 
 const FEATURES = [
   {
@@ -110,7 +136,7 @@ const HOW_IT_WORKS = [
 ];
 
 export default async function HomePage() {
-  const stories = await getStories();
+  const [stories, stats] = await Promise.all([getStories(), getStats()]);
   const topStories = [...stories].sort(
     (a, b) => b.upvotes - b.downvotes - (a.upvotes - a.downvotes)
   );
@@ -150,7 +176,7 @@ export default async function HomePage() {
 
           {/* Stats bar */}
           <div className="animate-fade-up animate-fade-up-delay-4 mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
-            {STATS.map((stat) => (
+            {stats.map((stat) => (
               <div
                 key={stat.label}
                 className="bg-gray-100/50 dark:bg-gray-900/50 border border-gray-200/50 dark:border-gray-800/50 rounded-xl p-4 text-center"
@@ -364,6 +390,18 @@ export default async function HomePage() {
           <div className="flex justify-center">
             <NewsletterSignup source="homepage_section" />
           </div>
+          <p className="mt-4 text-xs text-gray-500">
+            or{" "}
+            <a
+              href={process.env.NEXT_PUBLIC_DISCORD_INVITE || "https://discord.gg/TJn25WNRVv"}
+              target="_blank"
+              rel="noopener"
+              className="text-brand-400 hover:text-brand-300 transition-colors"
+            >
+              join our Discord
+            </a>{" "}
+            for real-time updates and writer chat
+          </p>
         </div>
       </section>
 
@@ -391,6 +429,15 @@ export default async function HomePage() {
           <p className="mt-6 text-xs text-gray-600">
             No account required. Generate, write, or browse anonymously.
           </p>
+          <a
+            href={process.env.NEXT_PUBLIC_DISCORD_INVITE || "https://discord.gg/TJn25WNRVv"}
+            target="_blank"
+            rel="noopener"
+            className="mt-4 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-brand-400 transition-colors"
+          >
+            <Users size={14} />
+            Join our Discord community
+          </a>
         </div>
       </section>
     </>
