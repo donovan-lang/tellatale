@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import StoryCard from "@/components/StoryCard";
 import {
@@ -56,6 +56,11 @@ export default function ExplorePage() {
   const [searchResults, setSearchResults] = useState<Story[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchActive, setSearchActive] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(12);
+  const [searchPage, setSearchPage] = useState(1);
+  const [searchHasMore, setSearchHasMore] = useState(false);
+  const [searchLoadingMore, setSearchLoadingMore] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const penName =
     user?.user_metadata?.pen_name ||
@@ -106,31 +111,76 @@ export default function ExplorePage() {
       .catch(() => {});
   }, []);
 
-  // Search handler — fires on Enter or button click
-  const executeSearch = (query: string) => {
+  // Search handler — fires on Enter, button click, or after debounce
+  const executeSearch = useCallback((query: string, page = 1, append = false) => {
     const trimmed = query.trim();
     if (!trimmed) return;
     setSearchQuery(trimmed);
     setSearchActive(true);
-    setSearchLoading(true);
-    fetch(`/api/v1/search?q=${encodeURIComponent(trimmed)}`)
+    if (append) {
+      setSearchLoadingMore(true);
+    } else {
+      setSearchLoading(true);
+      setSearchPage(1);
+    }
+    const perPage = 20;
+    fetch(`/api/v1/search?q=${encodeURIComponent(trimmed)}&page=${page}&per_page=${perPage}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.data && Array.isArray(data.data)) {
-          setSearchResults(data.data);
+          if (append) {
+            setSearchResults((prev) => [...prev, ...data.data]);
+          } else {
+            setSearchResults(data.data);
+          }
+          setSearchPage(page);
+          setSearchHasMore(data.data.length >= perPage);
         } else {
-          setSearchResults([]);
+          if (!append) setSearchResults([]);
+          setSearchHasMore(false);
         }
       })
-      .catch(() => setSearchResults([]))
-      .finally(() => setSearchLoading(false));
-  };
+      .catch(() => {
+        if (!append) setSearchResults([]);
+        setSearchHasMore(false);
+      })
+      .finally(() => {
+        setSearchLoading(false);
+        setSearchLoadingMore(false);
+      });
+  }, []);
+
+  // Debounced search — fires 500ms after the user stops typing
+  const handleSearchInput = useCallback((value: string) => {
+    setSearchInput(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    const trimmed = value.trim();
+    if (!trimmed) {
+      setSearchActive(false);
+      setSearchQuery("");
+      setSearchResults([]);
+      return;
+    }
+    debounceRef.current = setTimeout(() => {
+      executeSearch(trimmed);
+    }, 500);
+  }, [executeSearch]);
+
+  // Clean up debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
 
   const clearSearch = () => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     setSearchActive(false);
     setSearchQuery("");
     setSearchInput("");
     setSearchResults([]);
+    setSearchPage(1);
+    setSearchHasMore(false);
   };
 
   // Filter stories by trending period
@@ -347,9 +397,12 @@ export default function ExplorePage() {
               <input
                 type="text"
                 value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
+                onChange={(e) => handleSearchInput(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") executeSearch(searchInput);
+                  if (e.key === "Enter") {
+                    if (debounceRef.current) clearTimeout(debounceRef.current);
+                    executeSearch(searchInput);
+                  }
                 }}
                 placeholder="Search stories..."
                 className="input-field pl-9 pr-20"
@@ -364,7 +417,10 @@ export default function ExplorePage() {
                 </button>
               )}
               <button
-                onClick={() => executeSearch(searchInput)}
+                onClick={() => {
+                  if (debounceRef.current) clearTimeout(debounceRef.current);
+                  executeSearch(searchInput);
+                }}
                 className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-md bg-brand-500 hover:bg-brand-600 text-white text-xs font-medium transition-colors"
               >
                 Search
@@ -403,12 +459,44 @@ export default function ExplorePage() {
                   {searchResults.map((story) => (
                     <StoryCard key={story.id} story={story} />
                   ))}
+                  {searchHasMore && (
+                    <div className="flex justify-center pt-4">
+                      <button
+                        onClick={() => executeSearch(searchQuery, searchPage + 1, true)}
+                        disabled={searchLoadingMore}
+                        className="btn-ghost flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-brand-400 hover:text-brand-300 border border-brand-500/30 hover:border-brand-500/50 rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        {searchLoadingMore ? (
+                          <>
+                            <Loader2 size={14} className="animate-spin" />
+                            Loading...
+                          </>
+                        ) : (
+                          "Load more results"
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-20">
                   <Search size={32} className="mx-auto text-gray-600 mb-3" />
                   <p className="text-gray-500 mb-1">No stories found for &ldquo;{searchQuery}&rdquo;</p>
-                  <p className="text-gray-600 text-xs">Try different keywords or browse the feed below.</p>
+                  <p className="text-gray-600 text-sm mt-2">Try different keywords or explore what others have created.</p>
+                  <div className="flex items-center justify-center gap-3 mt-5">
+                    <button
+                      onClick={clearSearch}
+                      className="btn-ghost text-sm px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg hover:border-gray-400 dark:hover:border-gray-600 transition-colors"
+                    >
+                      Browse all stories
+                    </button>
+                    <a
+                      href="/submit"
+                      className="btn-primary text-sm px-4 py-2 rounded-lg"
+                    >
+                      Write your own
+                    </a>
+                  </div>
                 </div>
               )}
             </div>
@@ -569,9 +657,19 @@ export default function ExplorePage() {
                 </div>
               ) : feed.length > 0 ? (
                 <div className="space-y-4">
-                  {feed.map((story) => (
+                  {feed.slice(0, visibleCount).map((story) => (
                     <StoryCard key={story.id} story={story} />
                   ))}
+                  {visibleCount < feed.length && (
+                    <div className="flex justify-center pt-4">
+                      <button
+                        onClick={() => setVisibleCount((prev) => prev + 12)}
+                        className="btn-ghost flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-brand-400 hover:text-brand-300 border border-brand-500/30 hover:border-brand-500/50 rounded-lg transition-colors"
+                      >
+                        Load more stories ({feed.length - visibleCount} remaining)
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-20">

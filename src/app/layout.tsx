@@ -4,6 +4,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import NavBar from "@/components/NavBar";
 import MobileNav from "@/components/MobileNav";
+import ScrollToTop from "@/components/ScrollToTop";
 import { ToastProvider } from "@/components/Toast";
 
 export const metadata: Metadata = {
@@ -157,6 +158,7 @@ export default function RootLayout({
             </div>
           </footer>
           <MobileNav />
+          <ScrollToTop />
         </ToastProvider>
         </ThemeProvider>
         </AuthProvider>

@@ -64,6 +64,18 @@ export default function StoryReader({
     return false;
   });
 
+  const fontSizes = ["text-sm", "text-[15px]", "text-base", "text-lg", "text-xl"];
+  const [fontSize, setFontSize] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("mat_font_size");
+      if (saved !== null) {
+        const idx = parseInt(saved, 10);
+        if (idx >= 0 && idx < 5) return idx;
+      }
+    }
+    return 1;
+  });
+
   // Auto-track reading progress
   useEffect(() => {
     if (!user) return;
@@ -255,13 +267,41 @@ export default function StoryReader({
           </h1>
         )}
 
-        {/* Reading time */}
-        <p className="text-[10px] text-gray-400 dark:text-gray-500 mb-3">
-          {Math.max(1, Math.ceil(story.content.split(/\s+/).length / 200))} min read
-          {story.depth > 0 && ` · Depth ${story.depth}`}
-        </p>
+        {/* Reading time & font size controls */}
+        <div className="flex items-center gap-2 mb-3">
+          <p className="text-[10px] text-gray-400 dark:text-gray-500">
+            {Math.max(1, Math.ceil(story.content.split(/\s+/).length / 200))} min read
+            {story.depth > 0 && ` · Depth ${story.depth}`}
+          </p>
+          <div className="flex items-center gap-0.5 ml-1">
+            <button
+              onClick={() => {
+                const next = Math.max(0, fontSize - 1);
+                setFontSize(next);
+                localStorage.setItem("mat_font_size", String(next));
+              }}
+              disabled={fontSize === 0}
+              className="px-1.5 py-0.5 text-[11px] font-medium text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              title="Decrease font size"
+            >
+              A-
+            </button>
+            <button
+              onClick={() => {
+                const next = Math.min(fontSizes.length - 1, fontSize + 1);
+                setFontSize(next);
+                localStorage.setItem("mat_font_size", String(next));
+              }}
+              disabled={fontSize === fontSizes.length - 1}
+              className="px-1.5 py-0.5 text-[11px] font-medium text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              title="Increase font size"
+            >
+              A+
+            </button>
+          </div>
+        </div>
 
-        <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap text-[15px]">
+        <p className={`text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap ${fontSizes[fontSize]}`}>
           {story.content}
         </p>
 

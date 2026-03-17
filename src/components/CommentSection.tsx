@@ -11,6 +11,7 @@ import {
   Flag,
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
+import { useToast } from "./Toast";
 import { getSupabase } from "@/lib/supabase-browser";
 import { toAuthorSlug } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
@@ -200,6 +201,7 @@ function CommentItem({
 
 export default function CommentSection({ storyId }: { storyId: string }) {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [comments, setComments] = useState<Comment[]>([]);
   const [content, setContent] = useState("");
   const [posting, setPosting] = useState(false);
@@ -262,7 +264,7 @@ export default function CommentSection({ storyId }: { storyId: string }) {
         if (!parentId) setContent("");
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to post comment");
+        toast(err.error || "Failed to post comment");
       }
     } catch {}
     setPosting(false);
@@ -348,9 +350,13 @@ export default function CommentSection({ storyId }: { storyId: string }) {
           ))}
         </div>
       ) : (
-        <p className="text-xs text-gray-400 dark:text-gray-600 text-center py-6">
-          No comments yet. Start the conversation.
-        </p>
+        <div className="text-center py-8">
+          <MessageSquare size={24} className="mx-auto text-gray-300 dark:text-gray-700 mb-2" />
+          <p className="text-sm text-gray-400 dark:text-gray-600">No comments yet</p>
+          <p className="text-xs text-gray-400 dark:text-gray-600 mt-1">
+            {user ? "Be the first to share your thoughts on this story." : "Log in to start the conversation."}
+          </p>
+        </div>
       )}
     </div>
   );

@@ -16,6 +16,7 @@ import StoryCard from "@/components/StoryCard";
 import NewsletterSignup from "@/components/NewsletterSignup";
 import HomeRedirect from "@/components/HomeRedirect";
 import HeroGenerator from "@/components/HeroGenerator";
+import ContinueReading from "@/components/ContinueReading";
 import { createServiceClient } from "@/lib/supabase-server";
 import type { Story } from "@/types";
 
@@ -317,6 +318,11 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ===== CONTINUE READING ===== */}
+      <div suppressHydrationWarning>
+        <ContinueReading />
+      </div>
 
       {/* ===== TOP STORIES ===== */}
       <section id="stories" className="mx-auto max-w-6xl px-4 py-20">

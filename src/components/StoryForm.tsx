@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Loader2,
@@ -83,6 +83,37 @@ export default function StoryForm({
   // Anti-spam: honeypot + timestamp
   const [honeypot, setHoneypot] = useState("");
   const [formLoadedAt] = useState(Date.now());
+  const [draftSaved, setDraftSaved] = useState(false);
+
+  // Auto-save drafts to localStorage
+  const draftKey = parentId ? `mat_draft_branch_${parentId}` : "mat_draft_seed";
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = localStorage.getItem(draftKey);
+    if (saved) {
+      try {
+        const draft = JSON.parse(saved);
+        if (draft.content) setContent(draft.content);
+        if (draft.title) setTitle(draft.title);
+        if (draft.teaser) setTeaser(draft.teaser);
+        if (draft.tags) setSelectedTags(draft.tags);
+        if (draft.authorName) setAuthorName(draft.authorName);
+      } catch {}
+    }
+  }, [draftKey]);
+
+  const saveDraft = useCallback(() => {
+    if (!content.trim() && !title.trim() && !teaser.trim()) return;
+    localStorage.setItem(draftKey, JSON.stringify({ content, title, teaser, tags: selectedTags, authorName }));
+    setDraftSaved(true);
+    setTimeout(() => setDraftSaved(false), 2000);
+  }, [content, title, teaser, selectedTags, authorName, draftKey]);
+
+  useEffect(() => {
+    const timer = setTimeout(saveDraft, 3000);
+    return () => clearTimeout(timer);
+  }, [content, title, teaser, saveDraft]);
 
   function toggleTag(tag: string) {
     setSelectedTags((prev) =>
@@ -164,7 +195,7 @@ export default function StoryForm({
     if (honeypot) return;
     // Client-side timing check
     if (Date.now() - formLoadedAt < 2000) {
-      alert("Please take a moment before submitting.");
+      toast("Please take a moment before submitting.");
       return;
     }
 
@@ -195,6 +226,7 @@ export default function StoryForm({
       }
       const { id } = await res.json();
       toast(isBranch ? "Choice added! Others can now vote on it." : "Story planted! The community can start branching.");
+      localStorage.removeItem(draftKey);
 
       // Reset form fields for branches (form stays mounted on same page)
       if (isBranch) {
@@ -208,7 +240,7 @@ export default function StoryForm({
       router.refresh();
     } catch (err: any) {
       console.error(err);
-      alert(err.message || "Failed to submit. Try again.");
+      toast(err.message || "Failed to submit. Try again.");
     }
     setSubmitting(false);
   }
@@ -388,11 +420,12 @@ export default function StoryForm({
           required
         />
         <div className="flex justify-between items-center mt-1.5">
-          <span className="text-[10px] text-gray-600">
+          <span className="text-[10px] text-gray-600 flex items-center gap-2">
             {isBranch ? "Full story content" : "Story seed"}
+            {draftSaved && <span className="text-green-500">Draft saved</span>}
           </span>
           <span className={`text-[10px] tabular-nums ${
-            content.length > maxContent * 0.9 ? "text-amber-400" : "text-gray-600"
+            content.length > maxContent * 0.95 ? "text-red-400 font-semibold" : content.length > maxContent * 0.8 ? "text-amber-400" : "text-gray-600"
           }`}>
             {content.length.toLocaleString()}/{maxContent.toLocaleString()}
           </span>
