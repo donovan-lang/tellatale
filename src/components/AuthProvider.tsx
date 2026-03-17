@@ -43,10 +43,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, s) => {
+    } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       setUser(s?.user ?? null);
       setLoading(false);
+
+      // On sign-in, try to claim referral (no-op if no mat_ref cookie)
+      if (event === "SIGNED_IN" && s?.access_token) {
+        fetch("/api/referral/claim", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${s.access_token}` },
+        }).catch(() => {});
+      }
     });
 
     return () => subscription.unsubscribe();

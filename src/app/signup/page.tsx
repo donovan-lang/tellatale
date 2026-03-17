@@ -68,9 +68,21 @@ export default function SignupPage() {
       return;
     }
 
-    // Save notification preferences
+    // Save notification preferences and claim referral
     if (data.user) {
       await saveEmailPrefs(data.user.id, email);
+      // Claim referral if user came via invite link (mat_ref cookie)
+      try {
+        const sb = getSupabase();
+        const { data: sessionData } = await sb.auth.getSession();
+        const token = sessionData.session?.access_token;
+        if (token) {
+          await fetch("/api/referral/claim", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${token}` },
+          });
+        }
+      } catch {}
     }
 
     setSuccess(true);

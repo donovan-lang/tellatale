@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Sparkles, GitFork, ThumbsUp, PenTool, ChevronRight } from "lucide-react";
+import { Sparkles, GitFork, ThumbsUp, PenTool, Users, ChevronRight } from "lucide-react";
 
 const STEPS = [
   {
@@ -27,6 +27,12 @@ const STEPS = [
     title: "AI helps you write better",
     body: "When writing, the AI Writing Assist panel offers tools to polish your prose, suggest next sentences, fix grammar, and more. Hover over each tool to learn what it does.",
     tip: "These tools appear below the text area when you're writing.",
+  },
+  {
+    icon: Users,
+    title: "Join the community",
+    body: "Connect with other writers on Discord. Share your stories, get feedback, participate in weekly writing challenges, and climb the leaderboard.",
+    tip: "Check out /challenges for writing prompts and /leaderboard to see top writers.",
   },
 ];
 

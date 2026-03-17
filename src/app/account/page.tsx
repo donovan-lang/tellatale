@@ -20,6 +20,7 @@ import {
   AlertCircle,
   RefreshCw,
 } from "lucide-react";
+import ReferralCard from "@/components/ReferralCard";
 
 interface ProfileData {
   pen_name: string;
@@ -322,6 +323,8 @@ export default function AccountPage() {
               disable tips.
             </p>
           </div>
+
+          <ReferralCard />
 
           <div className="card space-y-4">
             <h2 className="font-semibold flex items-center gap-2 text-red-400">
