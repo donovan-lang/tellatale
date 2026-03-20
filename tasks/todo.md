@@ -11,3 +11,7 @@
 - [ ] Read project files and implement the first concrete step toward: Interactive story generation platform (assigned 2026-03-19 23:03 via HQ)
 
 - [ ] Read project files and implement the first concrete step toward: Interactive story generation platform (assigned 2026-03-20 07:04 via HQ)
+
+- [ ] Read project files and implement the first concrete step toward: Interactive story generation platform (assigned 2026-03-20 11:04 via HQ)
+
+- [ ] In `src/story_engine.py`, create a placeholder function `generate_choices(story_context: str) -> list[str]` that returns a list of 2-3 hardcoded story choice strings, simulating branching narrative options for testing. (assigned 2026-03-20 14:42 via HQ)
