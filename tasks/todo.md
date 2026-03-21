@@ -15,3 +15,5 @@
 - [ ] Read project files and implement the first concrete step toward: Interactive story generation platform (assigned 2026-03-20 11:04 via HQ)
 
 - [ ] In `src/story_engine.py`, create a placeholder function `generate_choices(story_context: str) -> list[str]` that returns a list of 2-3 hardcoded story choice strings, simulating branching narrative options for testing. (assigned 2026-03-20 14:42 via HQ)
+
+- [ ] Read project files and implement the first concrete step toward: In src/story_engine.py, build interactive story generator: take theme/genre, generate branching narrative with choices (assigned 2026-03-21 07:28 via HQ)
