@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
 import { postNewStoryToDiscord } from "@/lib/discord";
+import { generateChoiceAwareBranches } from "@/lib/story_engine";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
 const SYSTEM_PROMPT = `You are TaleBot, a creative AI storyteller for MakeATale — a collaborative choose-your-own-adventure platform.
 
-Your job is to generate compelling branch options for popular stories that have no branches yet.
+Your job is to generate compelling branch options for stories in a branching narrative.
 
 Rules:
 - Match the tone, genre, and voice of the original story exactly
@@ -17,33 +16,9 @@ Rules:
 - Each branch should take the story in a genuinely DIFFERENT direction
 - Branches should feel like real choices — not just slight variations
 - Show don't tell — convey emotion through action and detail
+- If previous choices are mentioned in the context, respect that history and build upon it
 
 You MUST respond with valid JSON only. No markdown, no code fences, no explanation.`;
-
-function buildBranchPrompt(title: string, content: string, tags: string[] | null): string {
-  const genre = tags?.length ? `Genre: ${tags.join(", ")}` : "";
-  return `Story title: "${title}"
-${genre}
-
-Story content:
-"""
-${content}
-"""
-
-Generate exactly 2 branch options for this story. Each branch should take the story in a distinctly different direction, giving readers a meaningful choice.
-
-For each branch provide:
-- "teaser": A 1-2 sentence choice line that readers see BEFORE clicking (like "Open the mysterious door" or "Follow the stranger into the alley"). This should be compelling and hint at what's ahead without spoiling it.
-- "content": A 200-400 word continuation of the story from that choice point. Write it as the next scene, picking up seamlessly from where the original left off.
-
-Respond with ONLY this JSON (no markdown fences):
-{
-  "branches": [
-    { "teaser": "...", "content": "..." },
-    { "teaser": "...", "content": "..." }
-  ]
-}`;
-}
 
 interface BranchOutput {
   teaser: string;
@@ -114,52 +89,11 @@ export async function POST(req: NextRequest) {
       continue; // Already has branches, skip
     }
 
-    // Call Gemini to generate 2 branches
+    // Generate branches with choice-aware context
     let branches: BranchOutput[];
     try {
-      const geminiRes = await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          contents: [
-            {
-              parts: [
-                {
-                  text: buildBranchPrompt(
-                    story.title || "Untitled",
-                    story.content,
-                    story.tags
-                  ),
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.9,
-            maxOutputTokens: 2000,
-            responseMimeType: "application/json",
-          },
-        }),
-      });
-
-      if (!geminiRes.ok) {
-        const errText = await geminiRes.text();
-        console.error(`Gemini error for story ${story.id}:`, errText);
-        continue;
-      }
-
-      const geminiData = await geminiRes.json();
-      const rawText =
-        geminiData.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
-
-      if (!rawText) {
-        console.error(`Empty Gemini response for story ${story.id}`);
-        continue;
-      }
-
-      const parsed: GeminiResponse = JSON.parse(rawText);
-      branches = parsed.branches;
+      // Use the story engine to generate branches with full narrative context
+      branches = await generateChoiceAwareBranches(story.id, SYSTEM_PROMPT);
 
       if (!Array.isArray(branches) || branches.length === 0) {
         console.error(`Invalid branch structure for story ${story.id}`);
@@ -193,6 +127,8 @@ export async function POST(req: NextRequest) {
           metadata: {
             generated_by: "auto-brancher",
             model: "gemini-2.5-flash",
+            choice_aware: true,
+            narrative_context_included: true,
           },
         })
         .select("id")
