@@ -17,6 +17,8 @@ import {
   Clock,
   MessageCircle,
   Layers,
+  Sparkles,
+  Loader2,
 } from "lucide-react";
 import type { Story } from "@/types";
 import { toAuthorSlug } from "@/lib/utils";
@@ -63,6 +65,36 @@ export default function StoryReader({
     }
     return false;
   });
+
+  const [generatingBranches, setGeneratingBranches] = useState(false);
+
+  async function generateAIPaths() {
+    if (generatingBranches) return;
+    setGeneratingBranches(true);
+    try {
+      const res = await fetch("/api/branches/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ story_id: story.id, auto_insert: true }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        if (res.status === 409) {
+          toast("AI paths already exist — refresh to see them.");
+          router.refresh();
+        } else {
+          toast(data.error || "Failed to generate paths");
+        }
+        return;
+      }
+      toast(`${data.branches?.length || 2} AI paths generated!`);
+      router.refresh();
+    } catch {
+      toast("Something went wrong. Try again.");
+    } finally {
+      setGeneratingBranches(false);
+    }
+  }
 
   const fontSizes = ["text-sm", "text-[15px]", "text-base", "text-lg", "text-xl"];
   const [fontSize, setFontSize] = useState(() => {
@@ -519,6 +551,32 @@ export default function StoryReader({
                 </button>
               )}
             </>
+          )}
+
+          {/* AI path generator for branchless stories */}
+          {branches.length === 0 && (
+            <div className="mb-6 flex flex-col items-center gap-3 py-6 rounded-xl border border-dashed border-purple-500/30 bg-purple-500/5">
+              <p className="text-sm text-gray-500 text-center">
+                No paths yet. Let AI suggest some, or write your own below.
+              </p>
+              <button
+                onClick={generateAIPaths}
+                disabled={generatingBranches}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-brand-600 hover:from-purple-500 hover:to-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md shadow-purple-500/20"
+              >
+                {generatingBranches ? (
+                  <>
+                    <Loader2 size={15} className="animate-spin" />
+                    Generating paths...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={15} />
+                    Generate AI Paths
+                  </>
+                )}
+              </button>
+            </div>
           )}
 
           {/* Add choice form */}

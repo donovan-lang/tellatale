@@ -36,6 +36,9 @@ const ACTION_PROMPTS: Record<string, (content: string, title: string) => string>
 
   expand: (content) =>
     `Add 1-2 sentences that enrich this passage with specific sensory detail — what does the character see, hear, smell, or feel? Ground the scene in concrete physical reality. Don't summarize or explain emotion — show it through action or detail. Return ONLY the new sentences to append:\n\n"${content}"`,
+
+  generate_teaser: (content) =>
+    `Write a compelling "choice line" for this story branch — the 1-2 sentences readers see BEFORE clicking, like a choose-your-own-adventure option. It should be intriguing, slightly mysterious, and make the reader want to choose this path. Hint at what happens without spoiling it. Use a directive or present-tense voice (e.g. "Follow the stranger into the alley" or "She opens the letter and reads the truth").\n\nBranch content:\n"${content}"\n\nRespond with only the choice line (1-2 sentences), no quotes, no explanation.`,
 };
 
 export async function POST(req: NextRequest) {

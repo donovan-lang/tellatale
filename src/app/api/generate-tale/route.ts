@@ -31,7 +31,7 @@ Rules:
 Respond in EXACTLY this JSON format (no markdown fences, no extra text):
 {"title":"Story Title Here","content":"The full story seed text here...","tags":["Genre1","Genre2"]}
 
-The tags array should contain 1-3 genre tags from this list ONLY: Fantasy, Sci-Fi, Horror, Mystery, Romance, Adventure, Thriller, Comedy, Drama, Surreal, Historical, Dystopia.`;
+The tags array should contain 1-3 genre tags from this list ONLY: Fantasy, Sci-Fi, Horror, Mystery, Romance, Adventure, Thriller, Comedy, Drama, Surreal, Historical, Dystopia, Steampunk, Cyberpunk, Mythology, Noir, Gothic, Cosmic Horror, Slice-of-Life, Alternate History.`;
 
 export async function POST(req: NextRequest) {
   try {
@@ -130,6 +130,8 @@ export async function POST(req: NextRequest) {
     const VALID_TAGS = [
       "Fantasy", "Sci-Fi", "Horror", "Mystery", "Romance", "Adventure",
       "Thriller", "Comedy", "Drama", "Surreal", "Historical", "Dystopia",
+      "Steampunk", "Cyberpunk", "Mythology", "Noir", "Gothic",
+      "Cosmic Horror", "Slice-of-Life", "Alternate History",
     ];
 
     return NextResponse.json({

@@ -17,18 +17,26 @@ const SLUG_TO_GENRE: Record<string, string> = Object.fromEntries(
 /* ── related genres mapping ── */
 
 const RELATED_GENRES: Record<string, string[]> = {
-  Fantasy: ["Sci-Fi", "Adventure", "Surreal"],
-  "Sci-Fi": ["Fantasy", "Dystopia", "Thriller"],
-  Horror: ["Thriller", "Mystery", "Surreal"],
-  Mystery: ["Thriller", "Horror", "Drama"],
-  Romance: ["Drama", "Comedy", "Fantasy"],
-  Adventure: ["Fantasy", "Sci-Fi", "Thriller"],
-  Thriller: ["Mystery", "Horror", "Adventure"],
-  Comedy: ["Drama", "Romance", "Surreal"],
-  Drama: ["Romance", "Comedy", "Historical"],
-  Surreal: ["Fantasy", "Horror", "Comedy"],
-  Historical: ["Drama", "Adventure", "Mystery"],
-  Dystopia: ["Sci-Fi", "Thriller", "Horror"],
+  Fantasy: ["Sci-Fi", "Adventure", "Mythology"],
+  "Sci-Fi": ["Cyberpunk", "Dystopia", "Cosmic Horror"],
+  Horror: ["Gothic", "Cosmic Horror", "Thriller"],
+  Mystery: ["Noir", "Thriller", "Drama"],
+  Romance: ["Drama", "Slice-of-Life", "Comedy"],
+  Adventure: ["Fantasy", "Steampunk", "Alternate History"],
+  Thriller: ["Noir", "Mystery", "Horror"],
+  Comedy: ["Slice-of-Life", "Romance", "Surreal"],
+  Drama: ["Slice-of-Life", "Romance", "Historical"],
+  Surreal: ["Cosmic Horror", "Fantasy", "Comedy"],
+  Historical: ["Alternate History", "Drama", "Mythology"],
+  Dystopia: ["Cyberpunk", "Sci-Fi", "Thriller"],
+  Steampunk: ["Fantasy", "Adventure", "Alternate History"],
+  Cyberpunk: ["Sci-Fi", "Noir", "Dystopia"],
+  Mythology: ["Fantasy", "Historical", "Gothic"],
+  Noir: ["Mystery", "Thriller", "Cyberpunk"],
+  Gothic: ["Horror", "Romance", "Mythology"],
+  "Cosmic Horror": ["Horror", "Sci-Fi", "Surreal"],
+  "Slice-of-Life": ["Drama", "Comedy", "Romance"],
+  "Alternate History": ["Historical", "Steampunk", "Sci-Fi"],
 };
 
 /* ── genre-specific FAQs ── */
@@ -265,6 +273,22 @@ const GENRE_DESCRIPTIONS: Record<string, string> = {
     "Travel back in time through stories set against the backdrop of real historical events, cultures, and eras brought vividly to life.",
   Dystopia:
     "Peer into dark futures and broken societies. These cautionary tales explore what happens when power, technology, or nature goes wrong.",
+  Steampunk:
+    "Brass gears, airships, and Victorian invention collide with anachronistic technology. Step into a world where steam drives the impossible.",
+  Cyberpunk:
+    "High tech, low life. Stories of neon-soaked megacities, rogue AI, corporate dystopia, and the hackers who see through the cracks.",
+  Mythology:
+    "Gods, heroes, and ancient legends — fresh tales drawn from the world's oldest stories. From Norse to Yoruba to Mesoamerican.",
+  Noir:
+    "Cynical detectives, femme fatales, and rain-slicked streets. Morally gray characters navigate corrupt cities where everyone has an angle.",
+  Gothic:
+    "Crumbling estates, family secrets, and dread that creeps in slowly. Atmospheric tales where architecture is character and the past never dies.",
+  "Cosmic Horror":
+    "Encounter the unknowable, the ancient, the indifferent. These stories explore humanity's smallness against vast, alien intelligences beyond comprehension.",
+  "Slice-of-Life":
+    "Quiet, intimate stories about everyday moments — coffee shops, late-night kitchens, small kindnesses, and the beauty hiding in the ordinary.",
+  "Alternate History":
+    "What if the world had taken a different turn? Explore timelines where one decision rewrote everything — wars won by the wrong side, inventions that came centuries too early.",
 };
 
 /* ── data fetching ── */
@@ -309,20 +333,27 @@ export async function generateMetadata({
     "MakeATale",
   ];
 
+  const canonical = `https://makeatale.com/genre/${params.slug}`;
+  const ogImage = `https://makeatale.com/genres/${params.slug}-256.png`;
+
   return {
-    title: `${genre} Stories — Read, Write & Branch ${genre} Fiction | MakeATale`,
+    title: `${genre} Stories | MakeATale`,
     description,
     keywords,
+    alternates: { canonical },
     openGraph: {
-      title: `${genre} Stories — Read, Write & Branch ${genre} Fiction | MakeATale`,
+      title: `${genre} Stories on MakeATale`,
       description,
+      url: canonical,
       siteName: "MakeATale",
       type: "website",
+      images: [{ url: ogImage, width: 256, height: 256, alt: `${genre} genre icon` }],
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: `${genre} Stories | MakeATale`,
       description,
+      images: [ogImage],
     },
   };
 }
@@ -352,7 +383,7 @@ export default async function GenrePage({
         <div className="flex justify-center mb-4">
           <img
             src={getGenreIconPath(genre)}
-            alt={genre}
+            alt={`${genre} story genre icon`}
             width={80}
             height={80}
             className="rounded-xl"
@@ -397,7 +428,7 @@ export default async function GenrePage({
         <div className="text-center py-20">
           <img
             src={getGenreIconPath(genre)}
-            alt=""
+            alt={`${genre} genre icon`}
             width={48}
             height={48}
             className="mx-auto mb-4 rounded-lg opacity-40"
@@ -429,7 +460,7 @@ export default async function GenrePage({
           >
             <img
               src={getGenreIconPath(genre)}
-              alt=""
+              alt={`${genre} genre`}
               width={18}
               height={18}
               className="rounded-sm"

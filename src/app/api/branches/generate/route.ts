@@ -68,6 +68,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Guard: if auto_insert requested, check if AI branches already exist
+    if (auto_insert) {
+      const { count: existingAI } = await sb
+        .from("stories")
+        .select("id", { count: "exact", head: true })
+        .eq("parent_id", story_id)
+        .eq("author_name", "TaleBot");
+
+      if ((existingAI ?? 0) >= 2) {
+        return NextResponse.json(
+          { error: "AI branches already exist for this story" },
+          { status: 409 }
+        );
+      }
+    }
+
     // Get story context with full path
     let storyWithContext;
     try {

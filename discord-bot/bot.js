@@ -37,7 +37,19 @@ const commands = [
     .setName("story")
     .setDescription("Show a story from MakeATale")
     .addStringOption((opt) =>
-      opt.setName("id").setDescription("Story ID or slug").setRequired(true)
+      opt.setName("id").setDescription("Story ID or slug").setRequired(false)
+    )
+    .addStringOption((opt) =>
+      opt
+        .setName("genre")
+        .setDescription("Filter by genre")
+        .setRequired(false)
+        .addChoices(
+          { name: "Fantasy", value: "Fantasy" },
+          { name: "Sci-Fi", value: "Sci-Fi" },
+          { name: "Horror", value: "Horror" },
+          { name: "Mystery", value: "Mystery" }
+        )
     ),
   new SlashCommandBuilder()
     .setName("random")
@@ -128,11 +140,29 @@ client.on("interactionCreate", async (interaction) => {
     if (commandName === "story") {
       await interaction.deferReply();
       const id = interaction.options.getString("id");
-      const data = await apiFetch(`/stories/${id}`);
-      if (!data?.story) {
-        return interaction.editReply("Story not found.");
+      const genre = interaction.options.getString("genre") || "Fantasy";
+
+      // If ID provided, fetch specific story
+      if (id) {
+        const data = await apiFetch(`/stories/${id}`);
+        if (!data?.story) {
+          return interaction.editReply("Story not found.");
+        }
+        return interaction.editReply({ embeds: [storyEmbed(data.story)] });
       }
-      return interaction.editReply({ embeds: [storyEmbed(data.story)] });
+
+      // Otherwise, fetch random story of selected genre
+      const data = await apiFetch(`/stories?story_type=seed&per_page=50&sort=popular`);
+      if (!data?.data?.length) {
+        return interaction.editReply("No stories found.");
+      }
+
+      // Filter by genre (based on tags)
+      const genreStories = data.data.filter((s) => s.tags?.[0] === genre);
+      const candidates = genreStories.length > 0 ? genreStories : data.data;
+      const story = candidates[Math.floor(Math.random() * candidates.length)];
+
+      return interaction.editReply({ embeds: [storyEmbed(story)] });
     }
 
     if (commandName === "random") {

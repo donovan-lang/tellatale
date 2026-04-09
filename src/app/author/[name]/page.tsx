@@ -143,10 +143,26 @@ export async function generateMetadata({
 }) {
   const data = await getAuthorBySlug(params.name);
   if (!data) return { title: "Author Not Found — MakeATale" };
+  const canonical = `https://makeatale.com/author/${params.name}`;
+  const desc = data.bio
+    ? data.bio.slice(0, 160)
+    : `Read ${data.stats.total_seeds} story seeds and ${data.stats.total_branches} branches by ${data.name} on MakeATale — collaborative AI storytelling.`;
   return {
-    title: `${data.name} — MakeATale Author`,
-    description:
-      data.bio || `Read stories by ${data.name} on MakeATale.`,
+    title: `${data.name} — Stories on MakeATale`,
+    description: desc,
+    alternates: { canonical },
+    openGraph: {
+      title: `${data.name} on MakeATale`,
+      description: desc,
+      url: canonical,
+      type: "profile",
+      images: [{ url: "https://makeatale.com/logos/og-default.png" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${data.name} on MakeATale`,
+      description: desc,
+    },
   };
 }
 
@@ -185,8 +201,41 @@ export default async function AuthorPage({
   // Recent activity: last 5 stories (seeds + branches) by date
   const recentActivity = [...allStories].slice(0, 5);
 
+  // ── Schema.org Person + BreadcrumbList JSON-LD for SEO ──
+  const personSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name,
+    description: bio || `Author on MakeATale with ${stats.total_seeds} seeds and ${stats.total_branches} branches.`,
+    url: `https://makeatale.com/author/${params.name}`,
+    sameAs: [],
+    knowsAbout: genreBreakdown.slice(0, 5).map((g) => g.genre),
+    mainEntityOfPage: {
+      "@type": "ProfilePage",
+      "@id": `https://makeatale.com/author/${params.name}`,
+    },
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: "https://makeatale.com" },
+      { "@type": "ListItem", position: 2, name: "Stories", item: "https://makeatale.com/stories" },
+      { "@type": "ListItem", position: 3, name, item: `https://makeatale.com/author/${params.name}` },
+    ],
+  };
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       {/* ── Hero Header ── */}
       <div className="card p-0 mb-6 overflow-hidden">
         {/* Gradient banner */}

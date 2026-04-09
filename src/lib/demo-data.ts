@@ -244,6 +244,14 @@ export const STORY_CATEGORIES = [
   "Surreal",
   "Historical",
   "Dystopia",
+  "Steampunk",
+  "Cyberpunk",
+  "Mythology",
+  "Noir",
+  "Gothic",
+  "Cosmic Horror",
+  "Slice-of-Life",
+  "Alternate History",
 ] as const;
 
 export type StoryCategory = (typeof STORY_CATEGORIES)[number];

@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
   const sb = createServiceClient();
 
   // Find seed stories with upvotes >= 2, ordered by popularity
-  const { data: candidates, error: queryError } = await sb
+  const { data: seedCandidates, error: queryError } = await sb
     .from("stories")
     .select("id, title, content, tags, depth, slug, author_name")
     .is("parent_id", null)
@@ -67,7 +67,26 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (!candidates || candidates.length === 0) {
+  // Also find popular leaf branches (non-seeds with upvotes >= 2) to grow trees deeper
+  const { data: leafCandidates } = await sb
+    .from("stories")
+    .select("id, title, content, tags, depth, slug, author_name")
+    .not("parent_id", "is", null)
+    .eq("is_hidden", false)
+    .eq("is_ending", false)
+    .gte("upvotes", 2)
+    .order("upvotes", { ascending: false })
+    .limit(5);
+
+  // Merge: seeds first, then leaves (deduped)
+  const seenIds = new Set<string>();
+  const candidates = [...(seedCandidates || []), ...(leafCandidates || [])].filter((s) => {
+    if (seenIds.has(s.id)) return false;
+    seenIds.add(s.id);
+    return true;
+  });
+
+  if (candidates.length === 0) {
     return NextResponse.json({
       ok: true,
       branches_created: 0,

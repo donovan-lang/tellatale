@@ -11,6 +11,14 @@ export const GENRE_EMOJI: Record<string, string> = {
   Surreal: "\u{1F300}",
   Historical: "\u{1F3DB}\u{FE0F}",
   Dystopia: "\u{26A1}",
+  Steampunk: "\u{2699}\u{FE0F}",
+  Cyberpunk: "\u{1F310}",
+  Mythology: "\u{1F531}",
+  Noir: "\u{1F3A9}",
+  Gothic: "\u{1F987}",
+  "Cosmic Horror": "\u{1F30C}",
+  "Slice-of-Life": "\u{2615}",
+  "Alternate History": "\u{1F500}",
 };
 
 export const GENRE_ICON_SLUG: Record<string, string> = {
@@ -26,6 +34,14 @@ export const GENRE_ICON_SLUG: Record<string, string> = {
   Surreal: "surreal",
   Historical: "historical",
   Dystopia: "dystopia",
+  Steampunk: "steampunk",
+  Cyberpunk: "cyberpunk",
+  Mythology: "mythology",
+  Noir: "noir",
+  Gothic: "gothic",
+  "Cosmic Horror": "cosmic-horror",
+  "Slice-of-Life": "slice-of-life",
+  "Alternate History": "alternate-history",
 };
 
 export const GENRE_COLORS: Record<string, { light: string; dark: string; border: string }> = {
@@ -41,6 +57,14 @@ export const GENRE_COLORS: Record<string, { light: string; dark: string; border:
   Surreal: { light: "bg-violet-50", dark: "dark:bg-violet-500/10", border: "border-violet-200 dark:border-violet-500/20" },
   Historical: { light: "bg-stone-50", dark: "dark:bg-stone-500/10", border: "border-stone-200 dark:border-stone-500/20" },
   Dystopia: { light: "bg-slate-50", dark: "dark:bg-slate-500/10", border: "border-slate-200 dark:border-slate-500/20" },
+  Steampunk: { light: "bg-teal-50", dark: "dark:bg-teal-500/10", border: "border-teal-200 dark:border-teal-500/20" },
+  Cyberpunk: { light: "bg-cyan-50", dark: "dark:bg-cyan-500/10", border: "border-cyan-200 dark:border-cyan-500/20" },
+  Mythology: { light: "bg-lime-50", dark: "dark:bg-lime-500/10", border: "border-lime-200 dark:border-lime-500/20" },
+  Noir: { light: "bg-zinc-50", dark: "dark:bg-zinc-500/10", border: "border-zinc-200 dark:border-zinc-500/20" },
+  Gothic: { light: "bg-fuchsia-50", dark: "dark:bg-fuchsia-500/10", border: "border-fuchsia-200 dark:border-fuchsia-500/20" },
+  "Cosmic Horror": { light: "bg-rose-50", dark: "dark:bg-rose-500/10", border: "border-rose-200 dark:border-rose-500/20" },
+  "Slice-of-Life": { light: "bg-sky-50", dark: "dark:bg-sky-500/10", border: "border-sky-200 dark:border-sky-500/20" },
+  "Alternate History": { light: "bg-neutral-50", dark: "dark:bg-neutral-500/10", border: "border-neutral-200 dark:border-neutral-500/20" },
 };
 
 export function getGenreEmoji(tags: string[] | null | undefined): string {

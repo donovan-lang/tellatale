@@ -130,6 +130,24 @@ export default function StoryForm({
   const [aiLoading, setAiLoading] = useState<AiAction | null>(null);
   const [suggestion, setSuggestion] = useState<AiSuggestion | null>(null);
   const [showMore, setShowMore] = useState(false);
+  const [teaserGenerating, setTeaserGenerating] = useState(false);
+
+  async function generateTeaser() {
+    if (!content.trim() || teaserGenerating) return;
+    setTeaserGenerating(true);
+    try {
+      const res = await fetch("/api/ai-assist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "generate_teaser", content }),
+      });
+      const data = await res.json();
+      if (res.ok && data.text) {
+        setTeaser(data.text.slice(0, maxTeaser));
+      }
+    } catch {}
+    setTeaserGenerating(false);
+  }
 
   async function callAi(action: AiAction, label: string) {
     if (aiLoading) return;
@@ -326,8 +344,22 @@ export default function StoryForm({
           <p className="text-sm text-brand-400">What happens next?</p>
           {/* Teaser: the choice line readers see */}
           <div>
-            <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 block">
-              Choice line <span className="text-gray-600">(what readers see before clicking)</span>
+            <label className="text-xs text-gray-600 dark:text-gray-400 mb-1 flex items-center justify-between">
+              <span>Choice line <span className="text-gray-500">(what readers see before clicking)</span></span>
+              <button
+                type="button"
+                onClick={generateTeaser}
+                disabled={!content.trim() || teaserGenerating}
+                title="AI: Generate a choice line from your content"
+                className="flex items-center gap-1 text-[11px] text-purple-500 hover:text-purple-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                {teaserGenerating ? (
+                  <Loader2 size={11} className="animate-spin" />
+                ) : (
+                  <Wand2 size={11} />
+                )}
+                AI suggest
+              </button>
             </label>
             <input
               type="text"
