@@ -6,6 +6,7 @@ import { LogOut, Menu, X, Loader2 } from "lucide-react";
 import { useState } from "react";
 import ThemeToggle from "./ThemeToggle";
 import NotificationBell from "./NotificationBell";
+import CreditBalance from "./CreditBalance";
 
 export default function NavBar() {
   const { user, loading, signOut } = useAuth();
@@ -77,6 +78,7 @@ export default function NavBar() {
         {/* Desktop auth area */}
         <div className="hidden md:flex items-center gap-2">
           <ThemeToggle />
+          {user && <CreditBalance />}
           {user && <NotificationBell />}
           {loading ? (
             <div className="px-4 py-2">

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
 import { generateChoiceAwareBranches, getStoryWithContext } from "@/lib/story_engine";
+import { useCredit } from "@/lib/credits";
 
 const SYSTEM_PROMPT = `You are TaleBot, a creative AI storyteller for MakeATale — a collaborative choose-your-own-adventure platform.
 
@@ -43,6 +44,15 @@ You MUST respond with valid JSON only. No markdown, no code fences, no explanati
  */
 export async function POST(req: NextRequest) {
   try {
+    // Credit gate
+    const credit = await useCredit(req, "branches/generate");
+    if (!credit.allowed) {
+      return NextResponse.json(
+        { error: credit.reason, credits_remaining: 0 },
+        { status: 402 }
+      );
+    }
+
     const { story_id, auto_insert = true } = await req.json();
 
     if (!story_id) {

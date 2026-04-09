@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { useCredit } from "@/lib/credits";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_URL =
@@ -51,6 +52,15 @@ export async function POST(req: NextRequest) {
     }
 
     const { action, content, title } = await req.json();
+
+    // Credit gate (check after parsing body so we know the action for logging)
+    const credit = await useCredit(req, "ai-assist", action);
+    if (!credit.allowed) {
+      return NextResponse.json(
+        { error: credit.reason, credits_remaining: 0 },
+        { status: 402 }
+      );
+    }
 
     if (!action || !content?.trim()) {
       return NextResponse.json(

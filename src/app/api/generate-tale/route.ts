@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { useCredit } from "@/lib/credits";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_URL =
@@ -39,6 +40,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "AI not configured" },
         { status: 503 }
+      );
+    }
+
+    // Credit gate
+    const credit = await useCredit(req, "generate-tale");
+    if (!credit.allowed) {
+      return NextResponse.json(
+        { error: credit.reason, credits_remaining: 0 },
+        { status: 402 }
       );
     }
 
