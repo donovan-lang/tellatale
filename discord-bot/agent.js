@@ -38,6 +38,9 @@ const GENRE_COLOR = {
   Mystery: 0xf59e0b, Romance: 0xec4899, Adventure: 0x10b981,
   Thriller: 0xf97316, Comedy: 0xeab308, Drama: 0x6366f1,
   Surreal: 0x8b5cf6, Historical: 0x78716c, Dystopia: 0x64748b,
+  Steampunk: 0x14b8a6, Cyberpunk: 0x06b6d4, Mythology: 0x84cc16,
+  Noir: 0x52525b, Gothic: 0xc026d3, "Cosmic Horror": 0xf43f5e,
+  "Slice-of-Life": 0x0ea5e9, "Alternate History": 0x737373,
 };
 
 // ── State ────────────────────────────────────────────────────────
