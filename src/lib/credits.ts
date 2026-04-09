@@ -13,7 +13,7 @@ import { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createServiceClient } from "./supabase-server";
 
-const FREE_DAILY_CREDITS = 5;
+const FREE_DAILY_CREDITS = 50;
 
 export interface CreditResult {
   allowed: boolean;
