@@ -7,6 +7,15 @@ ALTER TABLE stories ADD COLUMN IF NOT EXISTS story_type text NOT NULL DEFAULT 's
 ALTER TABLE stories ADD COLUMN IF NOT EXISTS is_ending boolean NOT NULL DEFAULT false;
 
 ALTER TABLE stories ADD COLUMN IF NOT EXISTS tags text[] DEFAULT NULL;
+ALTER TABLE stories ADD COLUMN IF NOT EXISTS teaser text;
+ALTER TABLE stories ADD COLUMN IF NOT EXISTS slug text;
+ALTER TABLE stories ADD COLUMN IF NOT EXISTS is_hidden boolean NOT NULL DEFAULT false;
+ALTER TABLE stories ADD COLUMN IF NOT EXISTS hidden_reason text;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_stories_slug ON stories(slug) WHERE slug IS NOT NULL;
+
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS slug text;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_banned boolean NOT NULL DEFAULT false;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_slug ON profiles(slug) WHERE slug IS NOT NULL;
 
 -- Backfill: existing stories with parent_id are branches
 UPDATE stories SET story_type = 'branch' WHERE parent_id IS NOT NULL;
