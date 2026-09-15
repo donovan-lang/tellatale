@@ -30,7 +30,8 @@ export async function notifyDonovan(m: IntakeMessage): Promise<boolean> {
         topic: m.topic.slice(0, 40),
         url: (m.url || "").slice(0, 300),
         email: (m.email || "").slice(0, 120),
-        message: m.message.slice(0, 2800),
+        // The intake's Slack header is codexery-generic, so tag the body with the site.
+        message: `[MakeATale] ${m.message}`.slice(0, 2800),
       }),
       signal: ctrl.signal,
       cache: "no-store",

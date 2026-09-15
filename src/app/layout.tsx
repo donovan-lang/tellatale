@@ -89,7 +89,7 @@ export default function RootLayout({
                 <div>
                   <div className="flex items-center gap-2 mb-4">
                     <img src="/logos/icon-32.png" alt="MakeATale" width={24} height={24} className="rounded" />
-                    <img src="/logos/logo-trimmed.png" alt="MakeATale" className="h-5 w-auto" />
+                    <img src="/logos/logo-trimmed-h80.png" alt="MakeATale" width={72} height={20} loading="lazy" decoding="async" className="h-5 w-auto" />
                   </div>
                   <p className="text-xs text-gray-500 leading-relaxed">
                     Where stories grow. AI-powered,

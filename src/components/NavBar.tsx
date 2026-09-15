@@ -42,8 +42,9 @@ export default function NavBar() {
             className="rounded-lg shadow-lg shadow-brand-500/20 group-hover:shadow-brand-500/40 transition-shadow duration-300"
           />
           <img
-            src="/logos/logo-trimmed.png"
+            src="/logos/logo-trimmed-h80.png"
             alt="MakeATale"
+            width={100}
             height={28}
             className="h-7 w-auto hidden sm:block"
           />
