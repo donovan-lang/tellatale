@@ -148,6 +148,9 @@ export default function RootLayout({
                     <a href="/terms" className="block hover:text-gray-300">
                       Terms
                     </a>
+                    <a href="/contact" className="block hover:text-gray-300">
+                      Contact
+                    </a>
                   </div>
                 </div>
               </div>

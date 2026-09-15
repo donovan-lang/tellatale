@@ -5,6 +5,7 @@ import { createServiceClient } from "@/lib/supabase-server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { isRateLimited, getClientIp, sanitizeContent } from "@/lib/spam-filter";
+import { notifyDonovan } from "@/lib/intake-notify";
 
 export async function POST(req: NextRequest) {
   try {
@@ -59,12 +60,35 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, message: "Already reported" });
     }
 
-    await sb.from("reports").insert({
+    const cleanReason = sanitizeContent(reason).slice(0, 500);
+    const { error: insertError } = await sb.from("reports").insert({
       story_id,
       reporter_id: reporterId,
-      reason: sanitizeContent(reason).slice(0, 500),
+      reason: cleanReason,
     });
 
+    // Tell Donovan which story and why, via the shared intake -> Slack DM route.
+    // Sent even if the insert failed so a report is never silently lost.
+    const { data: story } = await sb
+      .from("stories")
+      .select("title, slug, author_name")
+      .eq("id", story_id)
+      .maybeSingle();
+    const link = `https://makeatale.com/story/${story?.slug || story_id}`;
+    await notifyDonovan({
+      topic: "makeatale-story-report",
+      url: link,
+      message:
+        `Story: ${story?.title || "(untitled)"} by ${story?.author_name || "unknown"}\n` +
+        `Story ID: ${story_id}\n` +
+        `Reporter: ${reporterId.startsWith("anon_") ? "anonymous" : `user ${reporterId}`}\n` +
+        `Reason: ${cleanReason}` +
+        (insertError ? `\n\n(!) Report was NOT saved to the database: ${insertError.message}` : ""),
+    });
+
+    if (insertError) {
+      return NextResponse.json({ error: "An error occurred" }, { status: 500 });
+    }
     return NextResponse.json({ ok: true });
   } catch (err: any) {
     return NextResponse.json({ error: "An error occurred" }, { status: 500 });

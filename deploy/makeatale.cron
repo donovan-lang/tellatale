@@ -1,0 +1,13 @@
+# /etc/cron.d/makeatale — replaces the Vercel crons in vercel.json (times are UTC, same as Vercel).
+# INSTALL ONLY AT DNS CUTOVER. While Vercel is still serving makeatale.com its crons are live,
+# and running both would double-send drip emails and double-generate branches.
+# NOTE: every /api/cron/* route exports POST only. Vercel crons send GET, so on Vercel these
+# jobs have most likely been returning 405 and never ran. Hence -X POST below.
+# Reads CRON_SECRET from the shared env file so the secret never lives in this file.
+CRON_TZ=UTC
+SHELL=/bin/bash
+0 14 * * *   root  . /opt/apps/makeatale-shared/cron.env && curl -s -m 300 -X POST -H "Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3002/api/cron/welcome-drip   >> /var/log/makeatale-cron.log 2>&1
+0 14 * * 1   root  . /opt/apps/makeatale-shared/cron.env && curl -s -m 300 -X POST -H "Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3002/api/cron/weekly-digest  >> /var/log/makeatale-cron.log 2>&1
+0 */6 * * *  root  . /opt/apps/makeatale-shared/cron.env && curl -s -m 300 -X POST -H "Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3002/api/cron/auto-branch    >> /var/log/makeatale-cron.log 2>&1
+0 13 * * 1   root  . /opt/apps/makeatale-shared/cron.env && curl -s -m 300 -X POST -H "Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3002/api/cron/auto-challenge >> /var/log/makeatale-cron.log 2>&1
+0 17 * * *   root  . /opt/apps/makeatale-shared/cron.env && curl -s -m 300 -X POST -H "Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3002/api/cron/discord-digest >> /var/log/makeatale-cron.log 2>&1

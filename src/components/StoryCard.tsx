@@ -79,7 +79,7 @@ export default function StoryCard({ story }: { story: Story }) {
       <div className="flex-1 min-w-0">
         <a href={`/story/${story.slug || story.id}`} className="block group/link">
           <div className="flex items-center gap-2">
-            <img src={getGenreIcon(story.tags)} alt={story.tags?.[0] ? `${story.tags[0]} genre icon` : "Story icon"} width={22} height={22} className="shrink-0 rounded" />
+            <img src={getGenreIcon(story.tags)} alt={story.tags?.[0] ? `${story.tags[0]} genre icon` : "Story icon"} width={22} height={22} loading="lazy" decoding="async" className="shrink-0 rounded" />
             <h2 className="text-base font-semibold group-hover/link:text-brand-400 transition-colors duration-200 line-clamp-1 flex-1">
               {displayTitle}
             </h2>
@@ -116,7 +116,7 @@ export default function StoryCard({ story }: { story: Story }) {
                 key={tag}
                 className="text-[10px] px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-300 border border-brand-500/20 flex items-center gap-1"
               >
-                <img src={getGenreIconPath(tag)} alt="" width={12} height={12} className="rounded-sm" />
+                <img src={getGenreIconPath(tag)} alt="" width={12} height={12} loading="lazy" decoding="async" className="rounded-sm" />
                 {tag}
               </span>
             ))}
