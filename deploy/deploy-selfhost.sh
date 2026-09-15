@@ -30,7 +30,9 @@ ln -sf "$SHARED/.env.local" "$REL/.env.local"
 
 cd "$REL"
 echo "==> npm ci"
-npm ci --no-audit --no-fund
+# The committed lockfile has drifted from package.json (e.g. utf-8-validate peer of the Solana
+# deps). Vercel tolerates that; npm ci does not. Fall back to npm install rather than fail.
+npm ci --no-audit --no-fund || { echo "npm ci failed (lockfile drift) - falling back to npm install"; npm install --no-audit --no-fund; }
 echo "==> next build"
 NODE_OPTIONS="--max-old-space-size=2048" npm run build
 
