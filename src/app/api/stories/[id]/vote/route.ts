@@ -1,3 +1,4 @@
+import { supabaseServerUrl } from "@/lib/supabase-url";
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
@@ -12,7 +13,7 @@ async function getUserId(): Promise<string | null> {
   try {
     const cookieStore = cookies();
     const authClient = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      supabaseServerUrl(),
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {

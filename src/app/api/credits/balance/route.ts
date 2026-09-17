@@ -1,3 +1,4 @@
+import { supabaseServerUrl } from "@/lib/supabase-url";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getBalance } from "@/lib/credits";
@@ -10,7 +11,7 @@ export async function GET(req: NextRequest) {
     }
 
     const client = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      supabaseServerUrl(),
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
     const { data: { user } } = await client.auth.getUser(authHeader.slice(7));

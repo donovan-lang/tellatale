@@ -1,3 +1,4 @@
+import { supabaseServerUrl } from "@/lib/supabase-url";
 export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
@@ -6,7 +7,7 @@ import { createClient } from "@supabase/supabase-js";
 async function getUser(req: NextRequest) {
   const auth = req.headers.get("authorization");
   if (!auth?.startsWith("Bearer ")) return null;
-  const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  const sb = createClient(supabaseServerUrl(), process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
   const { data: { user } } = await sb.auth.getUser(auth.slice(7));
   return user;
 }

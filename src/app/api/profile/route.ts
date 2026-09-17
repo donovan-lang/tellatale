@@ -1,3 +1,4 @@
+import { supabaseServerUrl } from "@/lib/supabase-url";
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
@@ -11,7 +12,7 @@ async function getUserFromRequest(req: NextRequest) {
   if (authHeader?.startsWith("Bearer ")) {
     const token = authHeader.slice(7);
     const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      supabaseServerUrl(),
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
     const {
@@ -112,7 +113,7 @@ export async function PATCH(req: NextRequest) {
       // Update user metadata for NavBar
       if (profileUpdates.pen_name) {
         const adminClient = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          supabaseServerUrl(),
           process.env.SUPABASE_SERVICE_ROLE_KEY!
         );
         await adminClient.auth.admin.updateUserById(user.id, {

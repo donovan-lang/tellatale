@@ -1,3 +1,4 @@
+import { supabaseServerUrl } from "@/lib/supabase-url";
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
@@ -9,7 +10,7 @@ async function getUserFromRequest(req: NextRequest) {
   if (authHeader?.startsWith("Bearer ")) {
     const token = authHeader.slice(7);
     const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      supabaseServerUrl(),
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
     const {
