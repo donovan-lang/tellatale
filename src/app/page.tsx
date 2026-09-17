@@ -20,6 +20,10 @@ import ContinueReading from "@/components/ContinueReading";
 import { createServiceClient } from "@/lib/supabase-server";
 import type { Story } from "@/types";
 
+// Self-host: always render per request. Workstation builds have no DB/service key, so a static
+// prerender here would bake an empty page (it happened: "/" came out static in the 9/17 PC build).
+export const dynamic = "force-dynamic";
+
 async function getStories(): Promise<Story[]> {
   try {
     const supabase = createServiceClient();

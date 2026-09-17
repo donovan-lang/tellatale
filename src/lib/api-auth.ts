@@ -1,3 +1,4 @@
+import { supabaseServerUrl } from "@/lib/supabase-url";
 import { createHash, randomBytes } from "crypto";
 import { NextRequest } from "next/server";
 import { createServiceClient } from "./supabase-server";
@@ -71,7 +72,7 @@ export async function resolveAuth(req: NextRequest): Promise<AuthResult> {
   if (authHeader?.startsWith("Bearer ")) {
     const token = authHeader.slice(7);
     const authClient = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      supabaseServerUrl(),
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
     const { data: { user } } = await authClient.auth.getUser(token);

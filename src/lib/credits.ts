@@ -1,3 +1,4 @@
+import { supabaseServerUrl } from "@/lib/supabase-url";
 /**
  * MakeATale Credit System
  *
@@ -39,7 +40,7 @@ async function getUserFromRequest(req: NextRequest): Promise<string | null> {
 
   const token = authHeader.slice(7);
   const client = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    supabaseServerUrl(),
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
   const { data: { user } } = await client.auth.getUser(token);
@@ -78,7 +79,7 @@ async function resolveUser(req: NextRequest): Promise<string | null> {
     if (!accessToken) return null;
 
     const client = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      supabaseServerUrl(),
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
     const { data: { user } } = await client.auth.getUser(accessToken);

@@ -1,8 +1,9 @@
+import { supabaseServerUrl } from "@/lib/supabase-url";
 import { createClient } from "@supabase/supabase-js";
 
 export function createServiceClient() {
   return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    supabaseServerUrl(),
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
       global: {

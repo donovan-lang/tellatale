@@ -1,6 +1,9 @@
 import { createServiceClient } from "@/lib/supabase-server";
 import { NextResponse } from "next/server";
 
+// Self-host: render per request (build machines have no DB/service key; never bake data at build time).
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const sb = createServiceClient();
   const { data: stories } = await sb

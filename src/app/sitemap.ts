@@ -3,6 +3,9 @@ import { GENRE_ICON_SLUG } from "@/lib/genre-theme";
 import { toAuthorSlug } from "@/lib/utils";
 import type { MetadataRoute } from "next";
 
+// Self-host: render per request (build machines have no DB/service key; never bake data at build time).
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = createServiceClient();
 

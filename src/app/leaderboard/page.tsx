@@ -2,6 +2,9 @@ import { createServiceClient } from "@/lib/supabase-server";
 import { getGenreIconPath } from "@/lib/genre-theme";
 import type { Metadata } from "next";
 
+// Self-host: render per request (build machines have no DB/service key; never bake data at build time).
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Leaderboard | MakeATale",
   description: "Top writers on MakeATale ranked by votes earned this week.",
