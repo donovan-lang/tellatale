@@ -89,6 +89,9 @@ export async function POST(req: NextRequest) {
         system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
         contents: [{ parts: [{ text: userPrompt }] }],
         generationConfig: {
+          // gemini-2.5-flash "thinks" by default and those tokens count against maxOutputTokens; with a
+          // 2k budget the JSON body came back truncated -> "Failed to parse AI response" (2026-09-17).
+          thinkingConfig: { thinkingBudget: 0 },
           temperature: 0.9,
           maxOutputTokens: 2048,
           responseMimeType: "application/json",
