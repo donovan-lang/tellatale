@@ -18,7 +18,7 @@
 - [x] Fix unbounded narrative-context growth in `buildNarrativeContext` — deep trees were sending full content of every ancestor node to Gemini. Now caps full detail to last 3 nodes, condenses older ones to a teaser trail + 2-sentence opening summary
 - [ ] Consider: validate branch length/tone before insert (README's own "Future Enhancements" item, still open)
 - [ ] Consider: dedup check so the 2 generated branches per story aren't too similar to each other
-- [ ] Consider: apply same retry/context-cap treatment to `/api/cron/auto-challenge` (currently untouched, separate feature from branching)
+- [x] Apply retry treatment to `/api/cron/auto-challenge` via shared `gemini.ts` (completed 2026-09-22; no narrative context there, so context-cap didn't apply)
 - [x] Add genre-specific craft directives + micro-exemplars (`src/lib/genre-craft.ts`), wired into both `generate-tale` (seed) and `story_engine.buildBranchPromptWithContext` (branches) — anchors the model to a concrete genre voice instead of generic "be vivid" instructions
 - [ ] Next quality lever discussed with Donovan: draft-then-revise pass (2x cost/latency) — not started, needs his go-ahead given credit-system cost impact
 - [ ] Also discussed: swapping generation model from gemini-2.5-flash to a higher-quality model — cost/latency tradeoff, needs Donovan's call
