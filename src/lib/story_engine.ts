@@ -125,9 +125,15 @@ function summarize(content: string): string {
   return short.length < content.length ? `${short}..` : short;
 }
 
+// Above this Jaccard similarity (on word shingles), two branches are
+// considered too similar to present as a meaningful choice.
+const BRANCH_SIMILARITY_THRESHOLD = 0.5;
+
 /**
  * Generates branch options for a story, including full narrative context of choices made.
  * This ensures branches are aware of the story's history and choices.
+ * If the two branches come back too similar to each other, retries once with
+ * an instruction to differentiate them further.
  */
 export async function generateChoiceAwareBranches(
   storyId: string,
@@ -148,21 +154,74 @@ export async function generateChoiceAwareBranches(
     tags
   );
 
-  const raw = await callGemini({
-    systemPrompt,
-    userPrompt,
-    temperature: 0.9,
-    maxOutputTokens: 2000,
-    jsonMode: true,
-  });
+  const fetchBranches = async (extraInstruction?: string) => {
+    const raw = await callGemini({
+      systemPrompt,
+      userPrompt: extraInstruction ? `${userPrompt}\n\n${extraInstruction}` : userPrompt,
+      temperature: 0.9,
+      maxOutputTokens: 2000,
+      jsonMode: true,
+    });
 
-  const parsed = parseGeminiJSON<{ branches?: { teaser: string; content: string }[] }>(raw);
+    const parsed = parseGeminiJSON<{ branches?: { teaser: string; content: string }[] }>(raw);
 
-  if (!parsed.branches || !Array.isArray(parsed.branches)) {
-    throw new Error("Invalid branch response structure");
+    if (!parsed.branches || !Array.isArray(parsed.branches)) {
+      throw new Error("Invalid branch response structure");
+    }
+
+    return parsed.branches;
+  };
+
+  let branches = await fetchBranches();
+
+  if (branchesTooSimilar(branches)) {
+    branches = await fetchBranches(
+      "IMPORTANT: Your previous attempt produced two branches that were too similar to each other. " +
+        "The two branches MUST diverge in a meaningfully different direction (different action, tone, or consequence) — not just reworded versions of the same event."
+    );
   }
 
-  return parsed.branches;
+  return branches;
+}
+
+/** True if the first two branches are near-duplicates of each other. */
+function branchesTooSimilar(branches: { teaser: string; content: string }[]): boolean {
+  if (branches.length < 2) return false;
+  const [a, b] = branches;
+  const similarity = jaccardSimilarity(
+    `${a.teaser} ${a.content}`,
+    `${b.teaser} ${b.content}`
+  );
+  return similarity >= BRANCH_SIMILARITY_THRESHOLD;
+}
+
+/** Word-shingle Jaccard similarity between two strings, 0 (disjoint) to 1 (identical). */
+function jaccardSimilarity(a: string, b: string): number {
+  const setA = wordShingles(a);
+  const setB = wordShingles(b);
+  if (setA.size === 0 || setB.size === 0) return 0;
+
+  let intersection = 0;
+  setA.forEach((shingle) => {
+    if (setB.has(shingle)) intersection++;
+  });
+  const union = setA.size + setB.size - intersection;
+  return union === 0 ? 0 : intersection / union;
+}
+
+/** Lowercased, punctuation-stripped 3-word shingles, for near-duplicate detection. */
+function wordShingles(text: string, size = 3): Set<string> {
+  const words = text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .split(/\s+/)
+    .filter(Boolean);
+
+  const shingles = new Set<string>();
+  for (let i = 0; i <= words.length - size; i++) {
+    shingles.add(words.slice(i, i + size).join(" "));
+  }
+  return shingles;
 }
 
 /**
