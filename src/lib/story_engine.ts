@@ -1,4 +1,12 @@
 import { createServiceClient } from "./supabase-server";
+import { callGemini, parseGeminiJSON } from "./gemini";
+import { buildGenreCraftBlock } from "./genre-craft";
+
+// How many of the most recent nodes get their full content in the prompt.
+// Older nodes are condensed to a one-line summary so deep trees (10+ branches)
+// don't blow past context/token limits or dilute the model's attention on
+// what actually just happened.
+const FULL_DETAIL_NODE_COUNT = 3;
 
 export interface StoryNode {
   id: string;
@@ -65,14 +73,30 @@ export async function buildStoryPath(storyId: string): Promise<StoryPath> {
 function buildNarrativeContext(nodes: StoryNode[]): string {
   if (nodes.length === 0) return "";
 
-  // Start with the seed story
-  let context = `## Story So Far\n\n`;
-  context += `**Opening:**\n${nodes[0].content}\n\n`;
+  // Nodes older than this stay in full-detail range; anything before it gets condensed.
+  const condensedCutoff = Math.max(1, nodes.length - FULL_DETAIL_NODE_COUNT);
 
-  // Add each branch/continuation with the choice that led there
-  for (let i = 1; i < nodes.length; i++) {
+  let context = `## Story So Far\n\n`;
+
+  if (condensedCutoff > 1) {
+    // Condense everything before the recent window into a short choice trail,
+    // so early history isn't lost but doesn't dominate the token budget.
+    context += `**Earlier in this journey:** `;
+    context += nodes
+      .slice(1, condensedCutoff)
+      .map((n) => n.teaser)
+      .filter(Boolean)
+      .join(" → ");
+    context += `\n\n`;
+    context += `**Opening summary:**\n${summarize(nodes[0].content)}\n\n`;
+  } else {
+    context += `**Opening:**\n${nodes[0].content}\n\n`;
+  }
+
+  // Full detail for the most recent nodes, including the choice that led there
+  const recentStart = Math.max(1, condensedCutoff);
+  for (let i = recentStart; i < nodes.length; i++) {
     const node = nodes[i];
-    const prevNode = nodes[i - 1];
 
     if (node.teaser) {
       context += `**The choice made:** "${node.teaser}"\n\n`;
@@ -92,6 +116,16 @@ function buildNarrativeContext(nodes: StoryNode[]): string {
 }
 
 /**
+ * Condenses a story node's content to roughly its first two sentences, for use
+ * in the narrative context once a node has aged out of the full-detail window.
+ */
+function summarize(content: string): string {
+  const sentences = content.match(/[^.!?]+[.!?]+/g) || [content];
+  const short = sentences.slice(0, 2).join(" ").trim();
+  return short.length < content.length ? `${short}..` : short;
+}
+
+/**
  * Generates branch options for a story, including full narrative context of choices made.
  * This ensures branches are aware of the story's history and choices.
  */
@@ -106,14 +140,6 @@ export async function generateChoiceAwareBranches(
   let storyTitle = storyPath.nodes[storyPath.nodes.length - 1]?.title || "Untitled";
   let tags = storyPath.nodes[0]?.tags || [];
 
-  const GEMINI_KEY = process.env.GEMINI_API_KEY;
-  const GEMINI_URL =
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
-
-  if (!GEMINI_KEY) {
-    throw new Error("GEMINI_API_KEY not configured");
-  }
-
   // Build the enhanced prompt that includes narrative context
   const userPrompt = buildBranchPromptWithContext(
     storyTitle,
@@ -122,40 +148,15 @@ export async function generateChoiceAwareBranches(
     tags
   );
 
-  const res = await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      system_instruction: { parts: [{ text: systemPrompt }] },
-      contents: [
-        {
-          parts: [{ text: userPrompt }],
-        },
-      ],
-      generationConfig: {
-        temperature: 0.9,
-        maxOutputTokens: 2000,
-        responseMimeType: "application/json",
-      },
-    }),
+  const raw = await callGemini({
+    systemPrompt,
+    userPrompt,
+    temperature: 0.9,
+    maxOutputTokens: 2000,
+    jsonMode: true,
   });
 
-  if (!res.ok) {
-    const err = await res.text();
-    console.error("Gemini error:", err);
-    throw new Error(`Gemini API error: ${err}`);
-  }
-
-  const data = await res.json();
-  const raw = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
-
-  if (!raw) {
-    throw new Error("Empty Gemini response");
-  }
-
-  // Parse JSON response
-  const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
-  const parsed = JSON.parse(cleaned);
+  const parsed = parseGeminiJSON<{ branches?: { teaser: string; content: string }[] }>(raw);
 
   if (!parsed.branches || !Array.isArray(parsed.branches)) {
     throw new Error("Invalid branch response structure");
@@ -178,6 +179,9 @@ function buildBranchPromptWithContext(
 
   if (tags && tags.length > 0) {
     prompt += `Genre: ${tags.join(", ")}\n`;
+    // Anchor to the primary genre's voice so branches read like the genre,
+    // not generic continuation prose.
+    prompt += buildGenreCraftBlock(tags[0]);
   }
 
   prompt += "\n";

@@ -151,6 +151,8 @@ Gemini then generates branches that:
 - System prompt remains consistent (rules for writing quality branches)
 - Temperature: 0.9 (creative but stable)
 - Max tokens: 2000
+- **Context window capping:** only the most recent 3 nodes (`FULL_DETAIL_NODE_COUNT`) get their full content in the prompt. Anything older is condensed to a one-line choice trail (teasers) plus a 2-sentence summary of the opening. Keeps deep trees (10+ branches) from blowing past token limits or diluting the model's attention on the current scene.
+- **Retries:** Gemini calls go through `src/lib/gemini.ts`, which retries transient errors (429/5xx, network failures) with exponential backoff before giving up.
 
 ### Error Handling
 - Validates story exists before processing

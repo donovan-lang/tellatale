@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { useCredit } from "@/lib/credits";
+import { callGemini } from "@/lib/gemini";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
 const SYSTEM_PROMPT = `You are a skilled creative writing assistant for MakeATale, a collaborative choose-your-own-adventure platform.
 
@@ -79,35 +78,18 @@ export async function POST(req: NextRequest) {
 
     const userPrompt = promptFn(content.trim(), title?.trim() || "");
 
-    const res = await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents: [{ parts: [{ text: userPrompt }] }],
-        generationConfig: {
-          temperature: action === "grammar" ? 0.1 : 0.8,
-          maxOutputTokens: 300,
-        },
-      }),
-    });
-
-    if (!res.ok) {
-      const err = await res.text();
+    let text: string;
+    try {
+      text = await callGemini({
+        systemPrompt: SYSTEM_PROMPT,
+        userPrompt,
+        temperature: action === "grammar" ? 0.1 : 0.8,
+        maxOutputTokens: 300,
+      });
+    } catch (err) {
       console.error("Gemini error:", err);
       return NextResponse.json(
         { error: "AI service error" },
-        { status: 502 }
-      );
-    }
-
-    const data = await res.json();
-    const text =
-      data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
-
-    if (!text) {
-      return NextResponse.json(
-        { error: "Empty AI response" },
         { status: 502 }
       );
     }

@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { useCredit } from "@/lib/credits";
+import { callGemini, parseGeminiJSON } from "@/lib/gemini";
+import { buildGenreCraftBlock } from "@/lib/genre-craft";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+
+const VALID_TAGS = [
+  "Fantasy", "Sci-Fi", "Horror", "Mystery", "Romance", "Adventure",
+  "Thriller", "Comedy", "Drama", "Surreal", "Historical", "Dystopia",
+  "Steampunk", "Cyberpunk", "Mythology", "Noir", "Gothic",
+  "Cosmic Horror", "Slice-of-Life", "Alternate History",
+];
 
 const TONES = [
   "dark",
@@ -82,22 +89,21 @@ export async function POST(req: NextRequest) {
     userPrompt +=
       "\n\nRemember: respond with ONLY the JSON object, no markdown fences.";
 
-    const res = await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents: [{ parts: [{ text: userPrompt }] }],
-        generationConfig: {
-          temperature: 0.9,
-          maxOutputTokens: 2048,
-          responseMimeType: "application/json",
-        },
-      }),
-    });
+    // Anchor the model to a concrete genre voice/style sample rather than
+    // relying on the generic rules alone.
+    const genreCraft = VALID_TAGS.includes(genre) ? buildGenreCraftBlock(genre) : "";
+    const systemPrompt = SYSTEM_PROMPT + genreCraft;
 
-    if (!res.ok) {
-      const err = await res.text();
+    let raw: string;
+    try {
+      raw = await callGemini({
+        systemPrompt,
+        userPrompt,
+        temperature: 0.9,
+        maxOutputTokens: 2048,
+        jsonMode: true,
+      });
+    } catch (err) {
       console.error("Gemini error:", err);
       return NextResponse.json(
         { error: "AI service error" },
@@ -105,22 +111,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const data = await res.json();
-    const raw =
-      data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
-
-    if (!raw) {
-      return NextResponse.json(
-        { error: "Empty AI response" },
-        { status: 502 }
-      );
-    }
-
     // Parse JSON from response (strip markdown fences if present)
     let parsed: { title: string; content: string; tags: string[] };
     try {
-      const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
-      parsed = JSON.parse(cleaned);
+      parsed = parseGeminiJSON(raw);
     } catch {
       return NextResponse.json(
         { error: "Failed to parse AI response" },
@@ -135,14 +129,6 @@ export async function POST(req: NextRequest) {
         { status: 502 }
       );
     }
-
-    // Enforce limits
-    const VALID_TAGS = [
-      "Fantasy", "Sci-Fi", "Horror", "Mystery", "Romance", "Adventure",
-      "Thriller", "Comedy", "Drama", "Surreal", "Historical", "Dystopia",
-      "Steampunk", "Cyberpunk", "Mythology", "Noir", "Gothic",
-      "Cosmic Horror", "Slice-of-Life", "Alternate History",
-    ];
 
     return NextResponse.json({
       title: parsed.title.slice(0, 200),

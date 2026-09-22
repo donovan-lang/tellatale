@@ -12,3 +12,13 @@
 - [x] Fix auto-branch cron to also grow deep leaf nodes, not just seeds (completed 2026-03-23)
 - [x] Add AI teaser generator (Wand2 "AI suggest" button) to branch choice line field (completed 2026-03-23)
 - [x] Guard /api/branches/generate against duplicate AI branch spam (409 if ≥2 TaleBot branches exist) (completed 2026-03-23)
+
+## Story generation improvements (2026-09-11)
+- [x] Extract shared `src/lib/gemini.ts` (retry/backoff on 429/5xx + JSON parsing helper); wired into story_engine, generate-tale, ai-assist
+- [x] Fix unbounded narrative-context growth in `buildNarrativeContext` — deep trees were sending full content of every ancestor node to Gemini. Now caps full detail to last 3 nodes, condenses older ones to a teaser trail + 2-sentence opening summary
+- [ ] Consider: validate branch length/tone before insert (README's own "Future Enhancements" item, still open)
+- [ ] Consider: dedup check so the 2 generated branches per story aren't too similar to each other
+- [ ] Consider: apply same retry/context-cap treatment to `/api/cron/auto-challenge` (currently untouched, separate feature from branching)
+- [x] Add genre-specific craft directives + micro-exemplars (`src/lib/genre-craft.ts`), wired into both `generate-tale` (seed) and `story_engine.buildBranchPromptWithContext` (branches) — anchors the model to a concrete genre voice instead of generic "be vivid" instructions
+- [ ] Next quality lever discussed with Donovan: draft-then-revise pass (2x cost/latency) — not started, needs his go-ahead given credit-system cost impact
+- [ ] Also discussed: swapping generation model from gemini-2.5-flash to a higher-quality model — cost/latency tradeoff, needs Donovan's call
