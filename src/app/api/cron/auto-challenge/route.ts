@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
+import { callGemini, parseGeminiJSON } from "@/lib/gemini";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
 const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_NEW_STORIES;
 const SITE_URL = "https://makeatale.com";
@@ -133,45 +132,15 @@ export async function POST(req: NextRequest) {
   // Call Gemini to generate a challenge
   let challenge: ChallengeOutput;
   try {
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents: [
-          {
-            parts: [{ text: buildChallengePrompt() }],
-          },
-        ],
-        generationConfig: {
-          temperature: 1.0,
-          maxOutputTokens: 500,
-          responseMimeType: "application/json",
-        },
-      }),
+    const rawText = await callGemini({
+      systemPrompt: SYSTEM_PROMPT,
+      userPrompt: buildChallengePrompt(),
+      temperature: 1.0,
+      maxOutputTokens: 500,
+      jsonMode: true,
     });
 
-    if (!geminiRes.ok) {
-      const errText = await geminiRes.text();
-      console.error("Gemini error:", errText);
-      return NextResponse.json(
-        { error: "Gemini API failed", detail: errText },
-        { status: 502 }
-      );
-    }
-
-    const geminiData = await geminiRes.json();
-    const rawText =
-      geminiData.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
-
-    if (!rawText) {
-      return NextResponse.json(
-        { error: "Empty response from Gemini" },
-        { status: 502 }
-      );
-    }
-
-    challenge = JSON.parse(rawText);
+    challenge = parseGeminiJSON<ChallengeOutput>(rawText);
 
     if (!challenge.title || !challenge.prompt) {
       return NextResponse.json(
