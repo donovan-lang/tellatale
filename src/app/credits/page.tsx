@@ -118,7 +118,7 @@ export default function CreditsPage() {
       <div className="text-center mb-10">
         <h1 className="text-3xl font-bold mb-3">AI Story Credits</h1>
         <p className="text-gray-400 max-w-lg mx-auto">
-          Every account gets <strong className="text-brand-400">5 free AI generations per day</strong>.
+          Every account gets <strong className="text-brand-400">20 free AI generations per day</strong>.
           Need more? Purchase credits to unlock unlimited AI-powered storytelling.
         </p>
       </div>
@@ -202,7 +202,7 @@ export default function CreditsPage() {
       {/* Free tier info */}
       <div className="mt-10 text-center text-sm text-gray-500">
         <p>
-          <strong>Free tier:</strong> 5 AI generations per day, resets at midnight UTC.
+          <strong>Free tier:</strong> 20 AI generations per day, resets at midnight UTC.
         </p>
         <p className="mt-1">
           Reading, writing without AI, voting, and commenting are always free.

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { FREE_DAILY_CREDITS } from "@/lib/credits";
 
 const STRIPE_SECRET = process.env.STRIPE_SECRET_KEY;
 const SITE_URL = "https://makeatale.com";
@@ -84,6 +85,6 @@ export async function GET() {
       price: `$${(tier.price_cents / 100).toFixed(2)}`,
       per_credit: `$${(tier.price_cents / 100 / tier.credits).toFixed(3)}`,
     })),
-    free_daily: 5,
+    free_daily: FREE_DAILY_CREDITS,
   });
 }
