@@ -10,6 +10,8 @@ export interface GeminiCallOptions {
   temperature?: number;
   maxOutputTokens?: number;
   jsonMode?: boolean;
+  /** Gemini structured-output schema; enforces valid JSON of this shape (implies jsonMode). */
+  responseSchema?: Record<string, unknown>;
   retries?: number;
 }
 
@@ -57,7 +59,10 @@ async function callGeminiModel(opts: GeminiCallOptions, model: string, key: stri
           generationConfig: {
             temperature: opts.temperature ?? 0.9,
             maxOutputTokens: opts.maxOutputTokens ?? 2000,
-            ...(opts.jsonMode ? { responseMimeType: "application/json" } : {}),
+            // Thinking tokens count against maxOutputTokens; at default level they can eat the whole budget.
+            thinkingConfig: { thinkingLevel: "low" },
+            ...(opts.jsonMode || opts.responseSchema ? { responseMimeType: "application/json" } : {}),
+            ...(opts.responseSchema ? { responseSchema: opts.responseSchema } : {}),
           },
         }),
       });

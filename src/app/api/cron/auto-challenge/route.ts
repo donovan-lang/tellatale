@@ -137,7 +137,15 @@ export async function POST(req: NextRequest) {
       userPrompt: buildChallengePrompt(),
       temperature: 1.0,
       maxOutputTokens: 500,
-      jsonMode: true,
+      responseSchema: {
+        type: "OBJECT",
+        properties: {
+          title: { type: "STRING" },
+          description: { type: "STRING" },
+          prompt: { type: "STRING" },
+        },
+        required: ["title", "description", "prompt"],
+      },
     });
 
     challenge = parseGeminiJSON<ChallengeOutput>(rawText);

@@ -160,7 +160,20 @@ export async function generateChoiceAwareBranches(
       userPrompt: extraInstruction ? `${userPrompt}\n\n${extraInstruction}` : userPrompt,
       temperature: 0.9,
       maxOutputTokens: 2000,
-      jsonMode: true,
+      responseSchema: {
+        type: "OBJECT",
+        properties: {
+          branches: {
+            type: "ARRAY",
+            items: {
+              type: "OBJECT",
+              properties: { teaser: { type: "STRING" }, content: { type: "STRING" } },
+              required: ["teaser", "content"],
+            },
+          },
+        },
+        required: ["branches"],
+      },
     });
 
     const parsed = parseGeminiJSON<{ branches?: { teaser: string; content: string }[] }>(raw);

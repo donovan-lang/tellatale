@@ -101,7 +101,15 @@ export async function POST(req: NextRequest) {
         userPrompt,
         temperature: 0.9,
         maxOutputTokens: 2048,
-        jsonMode: true,
+        responseSchema: {
+          type: "OBJECT",
+          properties: {
+            title: { type: "STRING" },
+            content: { type: "STRING" },
+            tags: { type: "ARRAY", items: { type: "STRING" } },
+          },
+          required: ["title", "content", "tags"],
+        },
       });
     } catch (err) {
       console.error("Gemini error:", err);
