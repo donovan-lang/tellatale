@@ -20,6 +20,7 @@ import {
 import { STORY_CATEGORIES } from "@/lib/demo-data";
 import { GENRE_EMOJI, getGenreIconPath } from "@/lib/genre-theme";
 import { useToast } from "./Toast";
+import { authJsonHeaders } from "@/lib/supabase-browser";
 
 type AiAction =
   | "next_sentence"
@@ -138,7 +139,7 @@ export default function StoryForm({
     try {
       const res = await fetch("/api/ai-assist", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await authJsonHeaders(),
         body: JSON.stringify({ action: "generate_teaser", content }),
       });
       const data = await res.json();
@@ -157,7 +158,7 @@ export default function StoryForm({
     try {
       const res = await fetch("/api/ai-assist", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await authJsonHeaders(),
         body: JSON.stringify({ action, content, title, parent_id: parentId }),
       });
       const data = await res.json();

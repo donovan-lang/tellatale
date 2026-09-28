@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
 import { postNewStoryToDiscord } from "@/lib/discord";
 import { generateChoiceAwareBranches } from "@/lib/story_engine";
+import { GEMINI_MODEL } from "@/lib/gemini";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
@@ -145,7 +146,7 @@ export async function POST(req: NextRequest) {
           downvotes: 0,
           metadata: {
             generated_by: "auto-brancher",
-            model: "gemini-2.5-flash",
+            model: GEMINI_MODEL,
             choice_aware: true,
             narrative_context_included: true,
           },

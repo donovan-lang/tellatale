@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { STORY_CATEGORIES } from "@/lib/demo-data";
 import { GENRE_EMOJI, getGenreIconPath } from "@/lib/genre-theme";
+import { authJsonHeaders } from "@/lib/supabase-browser";
 
 const TONES = [
   { value: "dark", label: "Dark" },
@@ -93,7 +94,7 @@ export default function TaleGenerator({ onGenerated, initialPrompt = "" }: TaleG
     try {
       const res = await fetch("/api/generate-tale", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await authJsonHeaders(),
         body: JSON.stringify({
           prompt: prompt.trim(),
           genre: genre || undefined,

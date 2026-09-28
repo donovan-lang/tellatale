@@ -34,6 +34,7 @@ import Reactions from "./Reactions";
 import BestPath from "./BestPath";
 import { useToast } from "./Toast";
 import FullPathReader from "./FullPathReader";
+import { authJsonHeaders } from "@/lib/supabase-browser";
 
 type BranchSort = "top" | "new" | "discussed";
 
@@ -74,7 +75,7 @@ export default function StoryReader({
     try {
       const res = await fetch("/api/branches/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await authJsonHeaders(),
         body: JSON.stringify({ story_id: story.id, auto_insert: true }),
       });
       const data = await res.json();

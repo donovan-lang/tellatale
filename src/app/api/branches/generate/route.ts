@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
 import { generateChoiceAwareBranches, getStoryWithContext } from "@/lib/story_engine";
 import { useCredit } from "@/lib/credits";
+import { GEMINI_MODEL } from "@/lib/gemini";
 
 const SYSTEM_PROMPT = `You are TaleBot, a creative AI storyteller for MakeATale — a collaborative choose-your-own-adventure platform.
 
@@ -149,7 +150,7 @@ export async function POST(req: NextRequest) {
             downvotes: 0,
             metadata: {
               generated_by: "api-branches-generate",
-              model: "gemini-2.5-flash",
+              model: GEMINI_MODEL,
               choice_aware: true,
               narrative_context_included: true,
             },

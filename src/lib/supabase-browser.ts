@@ -11,3 +11,12 @@ export function getSupabase() {
   }
   return client;
 }
+
+/** JSON headers plus the signed-in user's Bearer token (session lives in localStorage, not cookies). */
+export async function authJsonHeaders(): Promise<Record<string, string>> {
+  const { data } = await getSupabase().auth.getSession();
+  const token = data.session?.access_token;
+  return token
+    ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+    : { "Content-Type": "application/json" };
+}
