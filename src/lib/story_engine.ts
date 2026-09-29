@@ -238,7 +238,8 @@ const BRANCH_SIMILARITY_THRESHOLD = 0.5;
  */
 export async function generateChoiceAwareBranches(
   storyId: string,
-  systemPrompt: string
+  systemPrompt: string,
+  opts: { direction?: string } = {}
 ): Promise<{ teaser: string; content: string }[]> {
   const storyPath = await buildStoryPath(storyId);
 
@@ -256,7 +257,8 @@ export async function generateChoiceAwareBranches(
     storyContent,
     storyPath,
     tags,
-    formatBible(bible, root?.metadata?.seed_input)
+    formatBible(bible, root?.metadata?.seed_input),
+    opts.direction
   );
 
   const fetchBranches = async (extraInstruction?: string) => {
@@ -351,7 +353,8 @@ export function buildBranchPromptWithContext(
   currentContent: string,
   storyPath: StoryPath,
   tags: string[],
-  bibleBlock = ""
+  bibleBlock = "",
+  readerDirection?: string
 ): string {
   let prompt = `Story title: "${title}"\n`;
 
@@ -395,6 +398,13 @@ ${
 ${
   bibleBlock
     ? "Honor the Story Bible: use the established character names, setting, point of view, and tense, and keep the author's original idea at the heart of both branches. New characters are fine; renaming or contradicting existing ones is not."
+    : ""
+}
+
+${
+  readerDirection
+    ? `READER'S REQUEST: A reader asked for the story to go this way: "${readerDirection.replace(/"/g, "'")}"
+Branch 1 must follow this request faithfully — its teaser and content should clearly deliver what the reader asked for, while staying true to the story so far. Branch 2 must offer a meaningfully different alternative, so the reader still has a real choice.`
     : ""
 }
 

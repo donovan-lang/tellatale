@@ -68,6 +68,7 @@ export default function StoryReader({
   });
 
   const [generatingBranches, setGeneratingBranches] = useState(false);
+  const [pathDirection, setPathDirection] = useState("");
 
   async function generateAIPaths() {
     if (generatingBranches) return;
@@ -76,7 +77,11 @@ export default function StoryReader({
       const res = await fetch("/api/branches/generate", {
         method: "POST",
         headers: await authJsonHeaders(),
-        body: JSON.stringify({ story_id: story.id, auto_insert: true }),
+        body: JSON.stringify({
+          story_id: story.id,
+          auto_insert: true,
+          direction: pathDirection.trim() || undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -560,6 +565,17 @@ export default function StoryReader({
               <p className="text-sm text-gray-500 text-center">
                 No paths yet. Let AI suggest some, or write your own below.
               </p>
+              <input
+                type="text"
+                value={pathDirection}
+                onChange={(e) => setPathDirection(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && generateAIPaths()}
+                maxLength={200}
+                disabled={generatingBranches}
+                placeholder="Optional: where should the story go? (e.g. she refuses and runs)"
+                aria-label="Optional direction for AI paths"
+                className="w-full max-w-md px-3 py-2 rounded-lg text-sm bg-white/5 border border-purple-500/30 placeholder:text-gray-500 focus:outline-none focus:border-purple-400"
+              />
               <button
                 onClick={generateAIPaths}
                 disabled={generatingBranches}

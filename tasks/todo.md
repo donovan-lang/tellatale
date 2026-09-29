@@ -27,9 +27,10 @@
 Goal: generation (esp. background/branch gen) follows what the person fed it. DreamGen's structure: a persistent
 scenario card (plot, characters, style) + per-turn instruction, re-sent every generation. Ours currently loses the
 person's original idea entirely after the seed is saved, and deep branches only see the first 2 sentences of the opening.
-- [ ] Phase 0: add `stories.metadata jsonb` migration — branch routes write `metadata` but the column never existed, so AI branch inserts fail
-- [ ] Phase 1: persist the person's input on the seed (idea, genre, tone) + generate a story bible (characters, setting, conflict, POV/tense, style) → root `metadata`
-- [ ] Phase 2: feed the bible into every branch prompt (replaces the 2-sentence opening summary); keep last 3 nodes in full
-- [ ] Phase 3: optional reader steering on "Generate AI Paths" ("where should it go?") → one branch follows it, the other contrasts
+- [x] Phase 0 (done 2026-09-29, applied in Supabase): add `stories.metadata jsonb` migration — branch routes write `metadata` but the column never existed, so AI branch inserts fail
+- [x] Phase 1 (done 2026-09-29, ce42e5d): persist the person's input on the seed (idea, genre, tone) + generate a story bible (characters, setting, conflict, POV/tense, style) → root `metadata`
+- [x] Phase 2 (done 2026-09-29, ce42e5d): feed the bible into every branch prompt (replaces the 2-sentence opening summary); keep last 3 nodes in full
+- [x] Phase 3 (done 2026-09-29, code only — steering adherence not yet measured): optional reader steering on "Generate AI Paths" ("where should it go?") → one branch follows it, the other contrasts
 - [ ] Phase 4: Gemini eval harness — word-range hit rate, prompt-detail adherence, character consistency across branches, steering adherence; baseline before Phase 1, re-run after each phase
 - [ ] Known quality gap from baseline: seeds undershoot the 400–800 word target (~280–400w)
+- [ ] BLOCKER for prod scale: GEMINI_API_KEY is on Google's FREE tier (5 RPM gemini-3.6-flash, 15 RPM flash-lite, per project). A few concurrent users + auto-branch cron will 429. Needs billing enabled on the Google Cloud project — Donovan's call.
