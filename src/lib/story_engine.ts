@@ -2,6 +2,7 @@ import { createServiceClient } from "./supabase-server";
 import { callGemini, parseGeminiJSON } from "./gemini";
 import { buildGenreCraftBlock } from "./genre-craft";
 import type { SeedInput } from "@/types/seed-input";
+import { formatParagraphs } from "./utils";
 
 // How many of the most recent nodes get their full content in the prompt.
 // Older nodes are condensed to a one-line summary so deep trees (10+ branches)
@@ -301,7 +302,7 @@ export async function generateChoiceAwareBranches(
     );
   }
 
-  return branches;
+  return branches.map((b) => ({ ...b, content: formatParagraphs(b.content) }));
 }
 
 /** True if the first two branches are near-duplicates of each other. */
@@ -388,7 +389,7 @@ ${currentContent}
 
 For each branch provide:
 - "teaser": A 1-2 sentence choice line that readers see BEFORE clicking (like "Open the mysterious door" or "Follow the stranger into the alley"). This should be compelling and hint at what's ahead without spoiling it.
-- "content": A 200-400 word continuation of the story from that choice point. Write it as the next scene, picking up seamlessly from where the current scene left off.
+- "content": A 200-400 word continuation of the story from that choice point. Write it as the next scene, picking up seamlessly from where the current scene left off. Use short paragraphs of 1-4 sentences separated by a blank line (a "\\n\\n" escape in the JSON string), with each line of dialogue in its own paragraph.
 
 ${
   storyPath.nodes.length > 1

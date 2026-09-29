@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { useCredit } from "@/lib/credits";
 import { callGemini, parseGeminiJSON } from "@/lib/gemini";
 import { buildGenreCraftBlock } from "@/lib/genre-craft";
+import { formatParagraphs } from "@/lib/utils";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
@@ -35,6 +36,7 @@ Rules:
 - Write in second person ("you") OR third person — pick whichever fits the genre better.
 - No meta-commentary, no author notes, no "what do you do?" prompts. Just end at the decision point naturally.
 - Be vivid, atmospheric, and specific. No generic fantasy/sci-fi cliches unless the user asks for them.
+- Format for easy reading: short paragraphs of 1-4 sentences separated by a blank line (a "\\n\\n" escape in the JSON string). Every line of dialogue starts its own paragraph. Never return one unbroken block of text.
 
 Respond in EXACTLY this JSON format (no markdown fences, no extra text):
 {"title":"Story Title Here","content":"The full story seed text here...","tags":["Genre1","Genre2"]}
@@ -140,7 +142,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       title: parsed.title.slice(0, 200),
-      content: parsed.content.slice(0, 3000),
+      content: formatParagraphs(parsed.content).slice(0, 3000),
       tags: (parsed.tags || []).filter((t: string) => VALID_TAGS.includes(t)).slice(0, 3),
     });
   } catch (err: any) {

@@ -21,7 +21,7 @@ import {
   Loader2,
 } from "lucide-react";
 import type { Story } from "@/types";
-import { toAuthorSlug } from "@/lib/utils";
+import { toAuthorSlug, toParagraphs } from "@/lib/utils";
 import { getGenreEmoji, getGenreIcon, getGenreIconPath, GENRE_EMOJI } from "@/lib/genre-theme";
 import BranchCard from "./BranchCard";
 import StoryForm from "./StoryForm";
@@ -339,9 +339,11 @@ export default function StoryReader({
           </div>
         </div>
 
-        <p className={`text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap ${fontSizes[fontSize]}`}>
-          {story.content}
-        </p>
+        <div className={`text-gray-700 dark:text-gray-300 leading-relaxed space-y-4 ${fontSizes[fontSize]}`}>
+          {toParagraphs(story.content).map((para, i) => (
+            <p key={i}>{para}</p>
+          ))}
+        </div>
 
         {/* Vote bar */}
         <div className="mt-4 flex items-center gap-3 pt-3 border-t border-amber-200/60 dark:border-gray-800/60">
