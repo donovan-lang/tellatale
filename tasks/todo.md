@@ -34,3 +34,5 @@ person's original idea entirely after the seed is saved, and deep branches only 
 - [ ] Phase 4: Gemini eval harness — word-range hit rate, prompt-detail adherence, character consistency across branches, steering adherence; baseline before Phase 1, re-run after each phase
 - [ ] Known quality gap from baseline: seeds undershoot the 400–800 word target (~280–400w)
 - [ ] BLOCKER for prod scale: GEMINI_API_KEY is on Google's FREE tier (5 RPM gemini-3.6-flash, 15 RPM flash-lite, per project). A few concurrent users + auto-branch cron will 429. Needs billing enabled on the Google Cloud project — Donovan's call.
+- Eval result (2026-09-29, depth 8, 5 cases, Gemini judge): bible vs no bible — idea fidelity 3.6→4.6, consistency 4.0→4.6, contradictions 4→1, branches in 200–400w 24/40→34/40. Small n, single run; re-run to confirm. Without bible: Comedy drifted into a "cat syndicate" plot, Noir changed how the brother died.
+- [ ] Next: measure steering adherence (Phase 3); fix seed length undershoot (target 400–800w, getting ~300–450)
