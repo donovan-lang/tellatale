@@ -4,7 +4,7 @@
  *
  *   npx tsx scripts/compare-models.ts
  *
- * Needs GEMINI_API_KEY and ANTHROPIC_API_KEY (env or .env.local).
+ * Needs GEMINI_API_KEY; Claude models run only if ANTHROPIC_API_KEY is set (env or .env.local).
  * Writes scripts/output/compare-<timestamp>.html and prints a summary.
  */
 import * as fs from "fs";
@@ -20,10 +20,8 @@ for (const line of fs.readFileSync(".env.local", "utf8").split(/\r?\n/)) {
   const m = line.match(/^([A-Z_]+)=(.*)$/);
   if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^"|"$/g, "");
 }
-if (!process.env.ANTHROPIC_API_KEY) {
-  console.error("ANTHROPIC_API_KEY missing — add it to .env.local");
-  process.exit(1);
-}
+const HAS_CLAUDE = !!process.env.ANTHROPIC_API_KEY;
+if (!HAS_CLAUDE) console.log("ANTHROPIC_API_KEY not set — running Gemini only.");
 
 // ── production prompt (read from the route so this never drifts) ───────────
 const routeSrc = fs.readFileSync("src/app/api/generate-tale/route.ts", "utf8");
@@ -118,7 +116,7 @@ async function runGemini(system: string, user: string): Promise<Result> {
 }
 
 // ── Claude ─────────────────────────────────────────────────────────────────
-const anthropic = new Anthropic();
+const anthropic = HAS_CLAUDE ? new Anthropic() : (null as unknown as Anthropic);
 const CLAUDE_PRICING: Record<string, [number, number]> = {
   "claude-sonnet-5": [2, 10],
   "claude-haiku-4-5": [1, 5],
@@ -173,8 +171,12 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&l
     console.log(`[${i + 1}/${CASES.length}] ${c.genre}: ${c.idea.slice(0, 60)}…`);
     const results = await Promise.all([
       runGemini(system, user),
-      runClaude("claude-sonnet-5", "Claude Sonnet 5", system, user),
-      runClaude("claude-haiku-4-5", "Claude Haiku 4.5", system, user),
+      ...(HAS_CLAUDE
+        ? [
+            runClaude("claude-sonnet-5", "Claude Sonnet 5", system, user),
+            runClaude("claude-haiku-4-5", "Claude Haiku 4.5", system, user),
+          ]
+        : []),
     ]);
     for (const r of results) {
       const s = r.story;
