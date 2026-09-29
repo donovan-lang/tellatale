@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
-import { getSupabase } from "@/lib/supabase-browser";
+import { getSupabase, authFetch } from "@/lib/supabase-browser";
 import {
   User,
   Mail,
@@ -40,6 +40,14 @@ interface ProfileData {
 
 type Tab = "profile" | "story" | "notifications" | "payment";
 
+interface DraftSummary {
+  draft_key: string;
+  title: string | null;
+  teaser: string | null;
+  content: string | null;
+  updated_at: string;
+}
+
 export default function AccountPage() {
   const { user, loading: authLoading, signOut } = useAuth();
   const router = useRouter();
@@ -60,6 +68,8 @@ export default function AccountPage() {
   const [matureContent, setMatureContent] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [claimed, setClaimed] = useState(false);
+
+  const [drafts, setDrafts] = useState<DraftSummary[] | null>(null);
 
   // Notification prefs
   const [notifyBranch, setNotifyBranch] = useState(true);
@@ -148,6 +158,10 @@ export default function AccountPage() {
       return;
     }
     loadProfile(user);
+    authFetch("/api/drafts")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) => setDrafts(Array.isArray(data) ? data : []))
+      .catch(() => setDrafts([]));
   }, [user, authLoading, router, loadProfile]);
 
   async function handleSave() {
@@ -382,6 +396,44 @@ export default function AccountPage() {
               Some stories may contain mature themes. Enable this to include
               them in your feed.
             </p>
+          </div>
+
+          <div className="card space-y-4">
+            <h2 className="font-semibold flex items-center gap-2">
+              <FileText size={16} className="text-brand-400" />
+              Your Drafts
+            </h2>
+            {drafts === null ? (
+              <Loader2 size={16} className="animate-spin text-gray-500" />
+            ) : drafts.length === 0 ? (
+              <p className="text-sm text-gray-500">
+                No drafts. Anything you start writing while signed in is saved here automatically.
+              </p>
+            ) : (
+              <ul className="divide-y divide-gray-200 dark:divide-gray-800">
+                {drafts.map((d) => {
+                  const isSeed = d.draft_key === "seed";
+                  const href = isSeed ? "/submit" : `/story/${d.draft_key.slice("branch:".length)}`;
+                  const label =
+                    (isSeed ? d.title : d.teaser) ||
+                    d.content?.slice(0, 60) ||
+                    "Untitled draft";
+                  return (
+                    <li key={d.draft_key}>
+                      <a href={href} className="flex items-center justify-between gap-3 py-2.5 text-sm hover:text-brand-400 transition-colors">
+                        <span className="truncate">
+                          <span className="text-xs text-gray-500 mr-2">{isSeed ? "New story" : "Branch"}</span>
+                          {label}
+                        </span>
+                        <span className="text-xs text-gray-500 shrink-0">
+                          {new Date(d.updated_at).toLocaleDateString()}
+                        </span>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
 
           <div className="card space-y-4">

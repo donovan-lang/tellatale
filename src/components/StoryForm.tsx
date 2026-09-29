@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Loader2,
@@ -56,6 +56,26 @@ const PLACEHOLDER_RESPONSES: Record<AiAction, (content: string) => string> = {
   expand: (c) => c + " The air grew thick with anticipation. Every shadow seemed to lean closer, listening.",
 };
 
+/** A draft as kept in localStorage (and mapped from the /api/drafts row). */
+interface StoredDraft {
+  title?: string;
+  teaser?: string;
+  content?: string;
+  tags?: string[];
+  authorName?: string;
+  seedInput?: SeedInput;
+  savedAt?: string;
+}
+
+function readLocalDraft(key: string): StoredDraft | null {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 interface StoryFormProps {
   parentId?: string;
   initialTitle?: string;
@@ -74,7 +94,7 @@ export default function StoryForm({
 }: StoryFormProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const isBranch = !!parentId;
   const maxContent = isBranch ? 5000 : 3000;
   const maxTeaser = 300;
@@ -90,40 +110,143 @@ export default function StoryForm({
   // Anti-spam: honeypot + timestamp
   const [honeypot, setHoneypot] = useState("");
   const [formLoadedAt] = useState(Date.now());
-  const [draftSaved, setDraftSaved] = useState(false);
+  const [seedInputState, setSeedInputState] = useState<SeedInput | undefined>(seedInput);
 
-  // Auto-save drafts to localStorage
-  const draftKey = parentId ? `mat_draft_branch_${parentId}` : "mat_draft_seed";
+  // ── Drafts ──────────────────────────────────────────────────
+  // Signed in: saved to the account (/api/drafts) with a per-user localStorage copy as backup.
+  // Signed out: localStorage only. On load, whichever copy is newest wins.
+  const serverDraftKey = parentId ? `branch:${parentId}` : "seed";
+  const anonDraftKey = parentId ? `mat_draft_branch_${parentId}` : "mat_draft_seed";
+  const localDraftKey = user ? `${anonDraftKey}_${user.id}` : anonDraftKey;
+  const [draftReady, setDraftReady] = useState(false);
+  const [draftStatus, setDraftStatus] = useState<"account" | "device" | null>(null);
+  const [restoredDraft, setRestoredDraft] = useState(false);
+  const submittingRef = useRef(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (authLoading) return;
+    setDraftReady(false);
     // A freshly generated AI tale is newer than any saved draft — don't overwrite it
-    if (initialContent) return;
-    const saved = localStorage.getItem(draftKey);
-    if (saved) {
-      try {
-        const draft = JSON.parse(saved);
+    if (initialContent) {
+      setDraftReady(true);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const local = readLocalDraft(localDraftKey) ?? (user ? readLocalDraft(anonDraftKey) : null);
+      let remote: StoredDraft | null = null;
+      if (user) {
+        try {
+          const res = await authFetch(`/api/drafts?key=${encodeURIComponent(serverDraftKey)}`);
+          if (res.ok) {
+            const row = await res.json();
+            if (row) {
+              remote = {
+                title: row.title ?? "",
+                teaser: row.teaser ?? "",
+                content: row.content ?? "",
+                tags: row.tags ?? [],
+                seedInput: row.seed_input ?? undefined,
+                savedAt: row.updated_at,
+              };
+            }
+          }
+        } catch {}
+      }
+      const draft =
+        local && remote
+          ? Date.parse(local.savedAt || "0") > Date.parse(remote.savedAt || "0") ? local : remote
+          : local ?? remote;
+      if (cancelled) return;
+      if (draft && (draft.content || draft.title || draft.teaser)) {
         if (draft.content) setContent(draft.content);
         if (draft.title) setTitle(draft.title);
         if (draft.teaser) setTeaser(draft.teaser);
-        if (draft.tags) setSelectedTags(draft.tags);
+        if (draft.tags?.length) setSelectedTags(draft.tags);
         if (draft.authorName) setAuthorName(draft.authorName);
+        if (draft.seedInput) setSeedInputState(draft.seedInput);
+        setRestoredDraft(true);
+      }
+      setDraftReady(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, user?.id, localDraftKey, serverDraftKey]);
+
+  const saveDraft = useCallback(async () => {
+    if (!draftReady || submittingRef.current) return;
+    if (!content.trim() && !title.trim() && !teaser.trim()) return;
+    const draft: StoredDraft = {
+      content,
+      title,
+      teaser,
+      tags: selectedTags,
+      authorName,
+      seedInput: seedInputState,
+      savedAt: new Date().toISOString(),
+    };
+    try {
+      localStorage.setItem(localDraftKey, JSON.stringify(draft));
+    } catch {}
+
+    let status: "account" | "device" = "device";
+    if (user) {
+      try {
+        const res = await authFetch("/api/drafts", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            key: serverDraftKey,
+            title,
+            teaser,
+            content,
+            tags: selectedTags,
+            seed_input: seedInputState ?? null,
+          }),
+        });
+        if (res.ok) status = "account";
+      } catch {}
+      // A draft started before signing in now lives on the account
+      try {
+        localStorage.removeItem(anonDraftKey);
       } catch {}
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draftKey]);
-
-  const saveDraft = useCallback(() => {
-    if (!content.trim() && !title.trim() && !teaser.trim()) return;
-    localStorage.setItem(draftKey, JSON.stringify({ content, title, teaser, tags: selectedTags, authorName }));
-    setDraftSaved(true);
-    setTimeout(() => setDraftSaved(false), 2000);
-  }, [content, title, teaser, selectedTags, authorName, draftKey]);
+    setDraftStatus(status);
+    setTimeout(() => setDraftStatus(null), 2000);
+  }, [draftReady, content, title, teaser, selectedTags, authorName, seedInputState, user, localDraftKey, anonDraftKey, serverDraftKey]);
 
   useEffect(() => {
     const timer = setTimeout(saveDraft, 3000);
     return () => clearTimeout(timer);
   }, [saveDraft]);
+
+  async function clearDraft() {
+    try {
+      localStorage.removeItem(localDraftKey);
+      localStorage.removeItem(anonDraftKey);
+    } catch {}
+    if (user) {
+      try {
+        await authFetch(`/api/drafts?key=${encodeURIComponent(serverDraftKey)}`, { method: "DELETE" });
+      } catch {}
+    }
+  }
+
+  async function discardDraft() {
+    if (!confirm("Discard this draft? This can't be undone.")) return;
+    submittingRef.current = true; // block the pending autosave while clearing
+    await clearDraft();
+    setTitle(initialTitle);
+    setTeaser("");
+    setContent(initialContent);
+    setSelectedTags(initialTags);
+    setAuthorName("");
+    setSeedInputState(seedInput);
+    setRestoredDraft(false);
+    submittingRef.current = false;
+  }
 
   function toggleTag(tag: string) {
     setSelectedTags((prev) =>
@@ -228,6 +351,7 @@ export default function StoryForm({
     }
 
     setSubmitting(true);
+    submittingRef.current = true;
 
     try {
       const res = await authFetch("/api/stories", {
@@ -243,7 +367,7 @@ export default function StoryForm({
           parent_id: parentId || null,
           is_ending: isBranch ? isEnding : false,
           tags: !isBranch && selectedTags.length > 0 ? selectedTags : null,
-          seed_input: !isBranch ? seedInput ?? null : null,
+          seed_input: !isBranch ? seedInputState ?? null : null,
           _hp: honeypot,
           _ts: formLoadedAt,
         }),
@@ -255,7 +379,8 @@ export default function StoryForm({
       }
       const { id } = await res.json();
       toast(isBranch ? "Choice added! Others can now vote on it." : "Story planted! The community can start branching.");
-      localStorage.removeItem(draftKey);
+      await clearDraft();
+      setRestoredDraft(false);
 
       // Reset form fields for branches (form stays mounted on same page)
       if (isBranch) {
@@ -271,6 +396,7 @@ export default function StoryForm({
       console.error(err);
       toast(err.message || "Failed to submit. Try again.");
     }
+    submittingRef.current = false;
     setSubmitting(false);
   }
 
@@ -468,7 +594,19 @@ export default function StoryForm({
         <div className="flex justify-between items-center mt-1.5">
           <span className="text-[10px] text-gray-600 flex items-center gap-2">
             {isBranch ? "Full story content" : "Story seed"}
-            {draftSaved && <span className="text-green-500">Draft saved</span>}
+            {draftStatus && (
+              <span className="text-green-500">
+                {draftStatus === "account" ? "Saved to your account" : user ? "Saved on this device" : "Draft saved"}
+              </span>
+            )}
+            {restoredDraft && !draftStatus && (
+              <span className="text-gray-500">
+                Draft restored ·{" "}
+                <button type="button" onClick={discardDraft} className="underline hover:text-red-400">
+                  Discard
+                </button>
+              </span>
+            )}
           </span>
           <span className={`text-[10px] tabular-nums ${
             content.length > maxContent * 0.95 ? "text-red-400 font-semibold" : content.length > maxContent * 0.8 ? "text-amber-400" : "text-gray-600"
