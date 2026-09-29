@@ -12,6 +12,7 @@ import {
 import { STORY_CATEGORIES } from "@/lib/demo-data";
 import { GENRE_EMOJI, getGenreIconPath } from "@/lib/genre-theme";
 import { authJsonHeaders } from "@/lib/supabase-browser";
+import type { SeedInput } from "@/types/seed-input";
 
 const TONES = [
   { value: "dark", label: "Dark" },
@@ -69,6 +70,7 @@ interface GeneratedTale {
   title: string;
   content: string;
   tags: string[];
+  seed_input?: SeedInput;
 }
 
 interface TaleGeneratorProps {
@@ -109,7 +111,10 @@ export default function TaleGenerator({ onGenerated, initialPrompt = "" }: TaleG
         return;
       }
 
-      setGenerated(data);
+      setGenerated({
+        ...data,
+        seed_input: { idea: prompt.trim(), genre: genre || undefined, tone: tone || undefined },
+      });
     } catch {
       setError("Something went wrong. Try again.");
     } finally {

@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
       parent_id,
       is_ending,
       tags,
+      seed_input,
       _hp,
       _ts,
     } = body;
@@ -223,6 +224,18 @@ export async function POST(req: NextRequest) {
       story_type: isBranch ? "branch" : "seed",
       is_ending: isBranch ? !!is_ending : false,
       tags: Array.isArray(tags) ? tags.slice(0, 5) : null,
+      // Original Generate-tab input, so branch generation can honor the author's intent
+      ...(!isBranch && typeof seed_input?.idea === "string" && seed_input.idea.trim()
+        ? {
+            metadata: {
+              seed_input: {
+                idea: sanitizeContent(seed_input.idea).slice(0, 500),
+                genre: typeof seed_input.genre === "string" ? seed_input.genre.slice(0, 40) : undefined,
+                tone: typeof seed_input.tone === "string" ? seed_input.tone.slice(0, 40) : undefined,
+              },
+            },
+          }
+        : {}),
     };
 
     let result = await supabase

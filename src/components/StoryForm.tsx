@@ -21,6 +21,7 @@ import { STORY_CATEGORIES } from "@/lib/demo-data";
 import { GENRE_EMOJI, getGenreIconPath } from "@/lib/genre-theme";
 import { useToast } from "./Toast";
 import { authJsonHeaders } from "@/lib/supabase-browser";
+import type { SeedInput } from "@/types/seed-input";
 
 type AiAction =
   | "next_sentence"
@@ -59,6 +60,8 @@ interface StoryFormProps {
   initialTitle?: string;
   initialContent?: string;
   initialTags?: string[];
+  /** Present when the seed came from the Generate tab; saved so branches can honor the original idea. */
+  seedInput?: SeedInput;
 }
 
 export default function StoryForm({
@@ -66,6 +69,7 @@ export default function StoryForm({
   initialTitle = "",
   initialContent = "",
   initialTags = [],
+  seedInput,
 }: StoryFormProps) {
   const router = useRouter();
   const { toast } = useToast();
@@ -234,6 +238,7 @@ export default function StoryForm({
           parent_id: parentId || null,
           is_ending: isBranch ? isEnding : false,
           tags: !isBranch && selectedTags.length > 0 ? selectedTags : null,
+          seed_input: !isBranch ? seedInput ?? null : null,
           _hp: honeypot,
           _ts: formLoadedAt,
         }),

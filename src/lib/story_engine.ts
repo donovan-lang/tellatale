@@ -1,6 +1,7 @@
 import { createServiceClient } from "./supabase-server";
 import { callGemini, parseGeminiJSON } from "./gemini";
 import { buildGenreCraftBlock } from "./genre-craft";
+import type { SeedInput } from "@/types/seed-input";
 
 // How many of the most recent nodes get their full content in the prompt.
 // Older nodes are condensed to a one-line summary so deep trees (10+ branches)
@@ -17,6 +18,21 @@ export interface StoryNode {
   tags: string[] | null;
   author_name: string;
   story_type: "seed" | "branch" | "ending";
+  metadata?: { seed_input?: SeedInput; bible?: StoryBible; [key: string]: unknown } | null;
+}
+
+/**
+ * Persistent facts about a story (DreamGen-style scenario card), extracted once from the
+ * seed and re-sent with every branch so deep paths keep names, setting, and voice straight.
+ */
+export interface StoryBible {
+  premise: string;
+  characters: { name: string; description: string }[];
+  setting: string;
+  central_conflict: string;
+  pov: string;
+  tense: string;
+  style: string;
 }
 
 export interface StoryPath {
@@ -40,7 +56,7 @@ export async function buildStoryPath(storyId: string): Promise<StoryPath> {
   while (currentId) {
     const { data: storyData, error } = await sb
       .from("stories")
-      .select("id, title, content, teaser, parent_id, tags, author_name, story_type")
+      .select("id, title, content, teaser, parent_id, tags, author_name, story_type, metadata")
       .eq("id", currentId)
       .single();
 
@@ -70,7 +86,7 @@ export async function buildStoryPath(storyId: string): Promise<StoryPath> {
  * Builds a cohesive narrative context string from a story path.
  * This context is fed to Gemini so it understands the story journey so far.
  */
-function buildNarrativeContext(nodes: StoryNode[]): string {
+export function buildNarrativeContext(nodes: StoryNode[]): string {
   if (nodes.length === 0) return "";
 
   // Nodes older than this stay in full-detail range; anything before it gets condensed.
@@ -125,6 +141,91 @@ function summarize(content: string): string {
   return short.length < content.length ? `${short}..` : short;
 }
 
+const BIBLE_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    premise: { type: "STRING" },
+    characters: {
+      type: "ARRAY",
+      items: {
+        type: "OBJECT",
+        properties: { name: { type: "STRING" }, description: { type: "STRING" } },
+        required: ["name", "description"],
+      },
+    },
+    setting: { type: "STRING" },
+    central_conflict: { type: "STRING" },
+    pov: { type: "STRING" },
+    tense: { type: "STRING" },
+    style: { type: "STRING" },
+  },
+  required: ["premise", "characters", "setting", "central_conflict", "pov", "tense", "style"],
+};
+
+/**
+ * Returns the root story's bible, generating and caching it in `metadata.bible` on first use.
+ * Works for AI-generated and human-written seeds alike. Failures are non-fatal: branches
+ * fall back to narrative context alone.
+ */
+export async function ensureStoryBible(root: StoryNode): Promise<StoryBible | null> {
+  if (root.metadata?.bible) return root.metadata.bible;
+
+  try {
+    const bible = await generateStoryBible(root);
+
+    const sb = createServiceClient();
+    const { error } = await sb
+      .from("stories")
+      .update({ metadata: { ...(root.metadata || {}), bible } })
+      .eq("id", root.id);
+    if (error) console.warn("[story_engine] could not cache bible:", error.message);
+
+    return bible;
+  } catch (err) {
+    console.warn("[story_engine] bible generation failed:", err);
+    return null;
+  }
+}
+
+/** Extracts a bible from the seed via Gemini (no caching; see ensureStoryBible). */
+export async function generateStoryBible(root: StoryNode): Promise<StoryBible> {
+  const seedInput = root.metadata?.seed_input;
+  const raw = await callGemini({
+    systemPrompt:
+      "You extract a concise story bible from the opening of an interactive story. " +
+      "Record only what the text states or clearly implies — never invent characters or facts. " +
+      "Keep every field short: premise and conflict one sentence each, character descriptions under 20 words, " +
+      "style one sentence describing voice, mood, and prose rhythm.",
+    userPrompt:
+      (seedInput ? `The author's original idea: "${seedInput.idea}"\n\n` : "") +
+      `Title: ${root.title || "Untitled"}\n\nOpening:\n"""\n${root.content}\n"""`,
+    temperature: 0.2,
+    maxOutputTokens: 1000,
+    responseSchema: BIBLE_SCHEMA,
+  });
+  return parseGeminiJSON<StoryBible>(raw);
+}
+
+export function formatBible(bible: StoryBible | null, seedInput?: SeedInput): string {
+  if (!bible && !seedInput) return "";
+  let out = "## Story Bible (canon — stay consistent with this)\n";
+  if (seedInput) {
+    out += `Author's original idea: "${seedInput.idea}"\n`;
+    if (seedInput.tone) out += `Requested tone: ${seedInput.tone}\n`;
+  }
+  if (bible) {
+    out += `Premise: ${bible.premise}\n`;
+    out += `Setting: ${bible.setting}\n`;
+    out += `Central conflict: ${bible.central_conflict}\n`;
+    if (bible.characters.length) {
+      out += `Characters:\n${bible.characters.map((c) => `- ${c.name}: ${c.description}`).join("\n")}\n`;
+    }
+    out += `Narration: ${bible.pov}, ${bible.tense} tense. Keep this point of view and tense.\n`;
+    out += `Style: ${bible.style}\n`;
+  }
+  return out + "\n";
+}
+
 // Above this Jaccard similarity (on word shingles), two branches are
 // considered too similar to present as a meaningful choice.
 const BRANCH_SIMILARITY_THRESHOLD = 0.5;
@@ -146,12 +247,16 @@ export async function generateChoiceAwareBranches(
   let storyTitle = storyPath.nodes[storyPath.nodes.length - 1]?.title || "Untitled";
   let tags = storyPath.nodes[0]?.tags || [];
 
+  const root = storyPath.nodes[0];
+  const bible = root ? await ensureStoryBible(root) : null;
+
   // Build the enhanced prompt that includes narrative context
   const userPrompt = buildBranchPromptWithContext(
     storyTitle,
     storyContent,
     storyPath,
-    tags
+    tags,
+    formatBible(bible, root?.metadata?.seed_input)
   );
 
   const fetchBranches = async (extraInstruction?: string) => {
@@ -241,11 +346,12 @@ function wordShingles(text: string, size = 3): Set<string> {
  * Builds a branch generation prompt that includes the full story context and choices.
  * This is the key function that feeds choice context back into Gemini.
  */
-function buildBranchPromptWithContext(
+export function buildBranchPromptWithContext(
   title: string,
   currentContent: string,
   storyPath: StoryPath,
-  tags: string[]
+  tags: string[],
+  bibleBlock = ""
 ): string {
   let prompt = `Story title: "${title}"\n`;
 
@@ -257,6 +363,7 @@ function buildBranchPromptWithContext(
   }
 
   prompt += "\n";
+  prompt += bibleBlock;
 
   // Include full narrative context if there's a story path
   if (storyPath.nodes.length > 1) {
@@ -285,6 +392,11 @@ ${
     ? "IMPORTANT: Remember all the previous choices and narrative developments. Your branches should feel like organic continuations of this specific story path, not generic branches."
     : ""
 }
+${
+  bibleBlock
+    ? "Honor the Story Bible: use the established character names, setting, point of view, and tense, and keep the author's original idea at the heart of both branches. New characters are fine; renaming or contradicting existing ones is not."
+    : ""
+}
 
 Respond with ONLY this JSON (no markdown fences):
 {
@@ -307,7 +419,7 @@ export async function getStoryWithContext(
   const sb = createServiceClient();
   const { data: story, error } = await sb
     .from("stories")
-    .select("id, title, content, teaser, parent_id, tags, author_name, story_type")
+    .select("id, title, content, teaser, parent_id, tags, author_name, story_type, metadata")
     .eq("id", storyId)
     .single();
 
