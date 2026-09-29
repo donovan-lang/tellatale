@@ -22,3 +22,14 @@
 - [x] Add genre-specific craft directives + micro-exemplars (`src/lib/genre-craft.ts`), wired into both `generate-tale` (seed) and `story_engine.buildBranchPromptWithContext` (branches) — anchors the model to a concrete genre voice instead of generic "be vivid" instructions
 - [ ] Next quality lever discussed with Donovan: draft-then-revise pass (2x cost/latency) — not started, needs his go-ahead given credit-system cost impact
 - [ ] Also discussed: swapping generation model from gemini-2.5-flash to a higher-quality model — cost/latency tradeoff, needs Donovan's call
+
+## Story gen rescope — DreamGen-style, staying on Gemini (started 2026-09-29)
+Goal: generation (esp. background/branch gen) follows what the person fed it. DreamGen's structure: a persistent
+scenario card (plot, characters, style) + per-turn instruction, re-sent every generation. Ours currently loses the
+person's original idea entirely after the seed is saved, and deep branches only see the first 2 sentences of the opening.
+- [ ] Phase 0: add `stories.metadata jsonb` migration — branch routes write `metadata` but the column never existed, so AI branch inserts fail
+- [ ] Phase 1: persist the person's input on the seed (idea, genre, tone) + generate a story bible (characters, setting, conflict, POV/tense, style) → root `metadata`
+- [ ] Phase 2: feed the bible into every branch prompt (replaces the 2-sentence opening summary); keep last 3 nodes in full
+- [ ] Phase 3: optional reader steering on "Generate AI Paths" ("where should it go?") → one branch follows it, the other contrasts
+- [ ] Phase 4: Gemini eval harness — word-range hit rate, prompt-detail adherence, character consistency across branches, steering adherence; baseline before Phase 1, re-run after each phase
+- [ ] Known quality gap from baseline: seeds undershoot the 400–800 word target (~280–400w)
