@@ -102,7 +102,42 @@ async function walk(seed: StoryNode, bible: StoryBible | null, variant: Variant)
 const wordCount = (s: string) => s.trim().split(/\s+/).filter(Boolean).length;
 const has = (text: string, term: string) => text.toLowerCase().includes(term.toLowerCase());
 const secondPerson = (s: string) => (s.match(/\byou(r|rs|rself)?\b/gi)?.length || 0) / Math.max(1, wordCount(s)) > 0.015;
-const firstName = (n: string) => n.replace(/^(the|a|an)\s+/i, "").split(/[\s,]/)[0];
+// Distinctive name token: drop quoted nicknames, articles, titles ("Dr. Clara Vance" -> "Clara", "Sir Reginald" -> "Reginald").
+const firstName = (n: string) =>
+  n
+    .replace(/['"‘’“”][^'"‘’“”]*['"‘’“”]/g, " ")
+    .replace(/^\s*(the|a|an|dr|mr|mrs|ms|sir|lady|lord|captain|detective)\.?\s+/i, "")
+    .trim()
+    .split(/[\s,]/)[0];
+
+const JUDGE_SCHEMA = {
+  type: "OBJECT",
+  properties: {
+    consistency: { type: "INTEGER" },
+    idea_fidelity: { type: "INTEGER" },
+    contradictions: { type: "ARRAY", items: { type: "STRING" } },
+  },
+  required: ["consistency", "idea_fidelity", "contradictions"],
+};
+
+/** LLM judge: scores the final two levels against the seed + original idea (1–5 each). */
+async function judge(seed: StoryNode, idea: string, nodes: StoryNode[]) {
+  const raw = await callGemini({
+    systemPrompt:
+      "You are a strict continuity editor for interactive fiction. Score honestly; 5 is rare. " +
+      "consistency (1-5): do the final scenes keep characters' names, roles, relationships, setting facts, point of view, and tense consistent with the opening? " +
+      "idea_fidelity (1-5): is the author's original idea still recognizably at the heart of the story, rather than drifting into an unrelated plot? " +
+      "contradictions: list concrete contradictions with the opening (empty if none).",
+    userPrompt:
+      `Author's original idea: "${idea}"\n\nOPENING:\n"""\n${seed.content}\n"""\n\n` +
+      `FINAL SCENES (after ${nodes.length - 1} choices: ${nodes.slice(1).map((n) => n.teaser).join(" -> ")}):\n` +
+      `"""\n${nodes.slice(-2).map((n) => n.content).join("\n\n---\n\n")}\n"""`,
+    temperature: 0,
+    maxOutputTokens: 800,
+    responseSchema: JUDGE_SCHEMA,
+  });
+  return parseGeminiJSON<{ consistency: number; idea_fidelity: number; contradictions: string[] }>(raw);
+}
 
 function score(nodes: StoryNode[], c: (typeof CASES)[number], bible: StoryBible | null) {
   const deep = nodes.slice(-2).map((n) => n.content).join("\n");
@@ -126,7 +161,8 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&
 (async () => {
   console.log(`Depth ${DEPTH}, ${CASES.length} cases, 2 variants each…`);
   const runs = [];
-  for (const [i, c] of CASES.entries()) {
+  for (let i = 0; i < CASES.length; i++) {
+    const c = CASES[i];
     runs.push(await (async () => {
       try {
         const seedRaw = await callGemini({
@@ -143,8 +179,13 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&
         const bible = await generateStoryBible(seed);
         const plain = await walk(seed, bible, "no bible");
         const withBible = await walk(seed, bible, "bible");
+        const jPlain = await judge(seed, c.idea, plain);
+        const jBible = await judge(seed, c.idea, withBible);
         console.log(`  ✓ case ${i + 1} (${c.genre})`);
-        return { c, seed, bible, plain, withBible, sPlain: score(plain, c, bible), sBible: score(withBible, c, bible) };
+        return {
+          c, seed, bible, plain, withBible, jPlain, jBible,
+          sPlain: score(plain, c, bible), sBible: score(withBible, c, bible),
+        };
       } catch (err) {
         console.log(`  ✗ case ${i + 1} (${c.genre}): ${String(err).slice(0, 160)}`);
         return null;
@@ -154,6 +195,9 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&
   const ok = runs.filter((r): r is NonNullable<typeof r> => !!r);
 
   const agg = (key: "sPlain" | "sBible") => {
+    const jKey = key === "sPlain" ? "jPlain" : "jBible";
+    const avgJ = (f: "consistency" | "idea_fidelity") =>
+      (ok.reduce((a, r) => a + r[jKey][f], 0) / Math.max(1, ok.length)).toFixed(1);
     const sum = (f: (s: ReturnType<typeof score>) => number) => ok.reduce((a, r) => a + f(r[key]), 0);
     const leads = ok.filter((r) => r[key].leadKept !== null);
     return {
@@ -162,6 +206,9 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&
       "seed cast in last 2 levels": `${sum((s) => s.castKept)}/${sum((s) => s.castTotal)}`,
       "POV kept": `${sum((s) => (s.povKept ? 1 : 0))}/${ok.length}`,
       "branches 200–400 words": `${sum((s) => s.lengthOk)}/${sum((s) => s.lengthTotal)}`,
+      "judge: consistency (1-5)": avgJ("consistency"),
+      "judge: idea fidelity (1-5)": avgJ("idea_fidelity"),
+      "judge: contradictions found": String(ok.reduce((a, r) => a + r[jKey].contradictions.length, 0)),
     };
   };
   const summary = { "no bible": agg("sPlain"), bible: agg("sBible") };
@@ -182,6 +229,8 @@ table{border-collapse:collapse;margin:12px 0 32px}th,td{border-bottom:1px solid 
 <table><tr><th>Metric</th><th>No bible</th><th>Bible</th></tr>${Object.keys(summary["no bible"]).map((k) => `<tr><td>${k}</td><td>${(summary["no bible"] as any)[k]}</td><td>${(summary.bible as any)[k]}</td></tr>`).join("")}</table>
 ${ok.map((r, i) => `<div class="case"><h2>${i + 1}. ${esc(r.c.genre)} — ${esc(r.seed.title || "")}</h2><p class="idea">"${esc(r.c.idea)}"</p>
 <details><summary>Seed + bible</summary><pre>${esc(r.seed.content)}\n\n${esc(JSON.stringify(r.bible, null, 2))}</pre></details>
+<p><b>Judge, no bible:</b> consistency ${r.jPlain.consistency}, fidelity ${r.jPlain.idea_fidelity}${r.jPlain.contradictions.length ? " · " + esc(r.jPlain.contradictions.join("; ")) : ""}<br>
+<b>Judge, bible:</b> consistency ${r.jBible.consistency}, fidelity ${r.jBible.idea_fidelity}${r.jBible.contradictions.length ? " · " + esc(r.jBible.contradictions.join("; ")) : ""}</p>
 <div class="grid">${col("No bible", r.plain)}${col("Bible", r.withBible)}</div></div>`).join("")}
 </body></html>`;
   fs.mkdirSync(path.join("scripts", "output"), { recursive: true });
