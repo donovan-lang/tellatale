@@ -34,7 +34,7 @@ import Reactions from "./Reactions";
 import BestPath from "./BestPath";
 import { useToast } from "./Toast";
 import FullPathReader from "./FullPathReader";
-import { authJsonHeaders } from "@/lib/supabase-browser";
+import { authJsonHeaders, authFetch } from "@/lib/supabase-browser";
 
 type BranchSort = "top" | "new" | "discussed";
 
@@ -117,7 +117,7 @@ export default function StoryReader({
   // Auto-track reading progress
   useEffect(() => {
     if (!user) return;
-    fetch("/api/reading-progress", {
+    authFetch("/api/reading-progress", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -129,7 +129,7 @@ export default function StoryReader({
 
   // Load existing vote
   useEffect(() => {
-    fetch(`/api/stories/${story.id}/vote`)
+    authFetch(`/api/stories/${story.id}/vote`)
       .then((r) => r.json())
       .then((d) => { if (d.vote) setUserVote(d.vote); })
       .catch(() => {});
@@ -145,7 +145,7 @@ export default function StoryReader({
     }));
     setUserVote(newVote as 1 | -1 | 0);
     try {
-      const res = await fetch(`/api/stories/${story.id}/vote`, {
+      const res = await authFetch(`/api/stories/${story.id}/vote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ vote: newVote }),
@@ -164,7 +164,7 @@ export default function StoryReader({
   // Check if bookmarked
   useEffect(() => {
     if (!user) return;
-    fetch("/api/bookmarks")
+    authFetch("/api/bookmarks")
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -181,12 +181,12 @@ export default function StoryReader({
   async function toggleBookmark() {
     if (!user) return;
     if (bookmarked && bookmarkId) {
-      await fetch(`/api/bookmarks/${bookmarkId}`, { method: "DELETE" });
+      await authFetch(`/api/bookmarks/${bookmarkId}`, { method: "DELETE" });
       setBookmarked(false);
       setBookmarkId(null);
       toast("Bookmark removed");
     } else {
-      const res = await fetch("/api/bookmarks", {
+      const res = await authFetch("/api/bookmarks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

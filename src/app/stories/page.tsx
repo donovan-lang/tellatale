@@ -25,6 +25,7 @@ import { GENRE_EMOJI, getGenreIconPath } from "@/lib/genre-theme";
 import { toAuthorSlug } from "@/lib/utils";
 import type { Story } from "@/types";
 import OnboardingOverlay from "@/components/OnboardingOverlay";
+import { authFetch } from "@/lib/supabase-browser";
 
 type FeedTab = "trending" | "new" | "foryou" | "reading" | "bookmarks";
 type TrendingPeriod = "day" | "week" | "month" | "all";
@@ -50,6 +51,7 @@ export default function ExplorePage() {
   const [continueStory, setContinueStory] = useState<any>(null);
   const [readingList, setReadingList] = useState<any[]>([]);
   const [bookmarkList, setBookmarkList] = useState<any[]>([]);
+  const [myStories, setMyStories] = useState<Story[]>([]);
   const [activeChallenge, setActiveChallenge] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchInput, setSearchInput] = useState("");
@@ -83,7 +85,7 @@ export default function ExplorePage() {
   // Fetch reading progress + bookmarks for integrated tabs
   useEffect(() => {
     if (!user) return;
-    fetch("/api/reading-progress")
+    authFetch("/api/reading-progress")
       .then(r => r.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -92,9 +94,13 @@ export default function ExplorePage() {
         }
       })
       .catch(() => {});
-    fetch("/api/bookmarks")
+    authFetch("/api/bookmarks")
       .then(r => r.json())
       .then(data => { if (Array.isArray(data)) setBookmarkList(data); })
+      .catch(() => {});
+    fetch(`/api/stories?author_id=${user.id}`)
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setMyStories(data); })
       .catch(() => {});
   }, [user]);
 
@@ -373,13 +379,13 @@ export default function ExplorePage() {
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-500 dark:text-gray-400">Stories</span>
                     <span className="font-bold text-brand-400">
-                      {stories.filter(s => s.author_id === user.id).length}
+                      {myStories.length}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-500 dark:text-gray-400">Votes earned</span>
                     <span className="font-bold text-green-500 dark:text-green-400">
-                      {stories.filter(s => s.author_id === user.id).reduce((sum, s) => sum + s.upvotes, 0)}
+                      {myStories.reduce((sum, s) => sum + s.upvotes, 0)}
                     </span>
                   </div>
                 </div>
@@ -849,10 +855,9 @@ export default function ExplorePage() {
                   <BookOpen size={15} className="text-brand-400" />
                   Your Stories
                 </h3>
-                {stories.filter((s) => s.author_id === user.id).length > 0 ? (
+                {myStories.length > 0 ? (
                   <div className="space-y-2">
-                    {stories
-                      .filter((s) => s.author_id === user.id)
+                    {myStories
                       .slice(0, 3)
                       .map((story) => (
                         <a

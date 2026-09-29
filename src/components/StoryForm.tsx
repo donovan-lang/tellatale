@@ -20,7 +20,8 @@ import {
 import { STORY_CATEGORIES } from "@/lib/demo-data";
 import { GENRE_EMOJI, getGenreIconPath } from "@/lib/genre-theme";
 import { useToast } from "./Toast";
-import { authJsonHeaders } from "@/lib/supabase-browser";
+import { useAuth } from "./AuthProvider";
+import { authJsonHeaders, authFetch } from "@/lib/supabase-browser";
 import type { SeedInput } from "@/types/seed-input";
 
 type AiAction =
@@ -73,6 +74,7 @@ export default function StoryForm({
 }: StoryFormProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { user } = useAuth();
   const isBranch = !!parentId;
   const maxContent = isBranch ? 5000 : 3000;
   const maxTeaser = 300;
@@ -95,6 +97,8 @@ export default function StoryForm({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    // A freshly generated AI tale is newer than any saved draft — don't overwrite it
+    if (initialContent) return;
     const saved = localStorage.getItem(draftKey);
     if (saved) {
       try {
@@ -106,6 +110,7 @@ export default function StoryForm({
         if (draft.authorName) setAuthorName(draft.authorName);
       } catch {}
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftKey]);
 
   const saveDraft = useCallback(() => {
@@ -118,7 +123,7 @@ export default function StoryForm({
   useEffect(() => {
     const timer = setTimeout(saveDraft, 3000);
     return () => clearTimeout(timer);
-  }, [content, title, teaser, saveDraft]);
+  }, [saveDraft]);
 
   function toggleTag(tag: string) {
     setSelectedTags((prev) =>
@@ -225,7 +230,7 @@ export default function StoryForm({
     setSubmitting(true);
 
     try {
-      const res = await fetch("/api/stories", {
+      const res = await authFetch("/api/stories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -383,16 +388,19 @@ export default function StoryForm({
         </>
       ) : (
         <>
-          <div>
-            <input
-              type="text"
-              placeholder="Your name (optional)"
-              value={authorName}
-              onChange={(e) => setAuthorName(e.target.value)}
-              className="input-field py-2"
-              maxLength={50}
-            />
-          </div>
+          {/* Signed-in posts use the account's display name (server-side) */}
+          {!user && (
+            <div>
+              <input
+                type="text"
+                placeholder="Your name (optional)"
+                value={authorName}
+                onChange={(e) => setAuthorName(e.target.value)}
+                className="input-field py-2"
+                maxLength={50}
+              />
+            </div>
+          )}
           <div>
             <input
               type="text"

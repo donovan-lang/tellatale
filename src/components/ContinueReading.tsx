@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { BookOpen, X } from "lucide-react";
+import { authFetch } from "@/lib/supabase-browser";
 
 interface ReadingProgress {
   root_story_id: string;
@@ -41,7 +42,7 @@ export default function ContinueReading() {
       return;
     }
 
-    fetch("/api/reading-progress")
+    authFetch("/api/reading-progress")
       .then((r) => {
         if (!r.ok) return null;
         return r.json();

@@ -36,3 +36,12 @@ person's original idea entirely after the seed is saved, and deep branches only 
 - [ ] BLOCKER for prod scale: GEMINI_API_KEY is on Google's FREE tier (5 RPM gemini-3.6-flash, 15 RPM flash-lite, per project). A few concurrent users + auto-branch cron will 429. Needs billing enabled on the Google Cloud project — Donovan's call.
 - Eval result (2026-09-29, depth 8, 5 cases, Gemini judge): bible vs no bible — idea fidelity 3.6→4.6, consistency 4.0→4.6, contradictions 4→1, branches in 200–400w 24/40→34/40. Small n, single run; re-run to confirm. Without bible: Comedy drifted into a "cat syndicate" plot, Noir changed how the brother died.
 - [ ] Next: measure steering adherence (Phase 3); fix seed length undershoot (target 400–800w, getting ~300–450)
+
+## Account data / drafts fix (started 2026-09-29)
+Root cause: browser session lives in localStorage, but /api/stories POST, bookmarks, chronicles, reading-progress, reports, vote only read cookies → logged-in users post as anonymous (author_id null), and bookmarks/progress/chronicles 401.
+- [x] Shared `getRequestUser()` (Bearer, then cookies) in src/lib/request-user.ts; swap into all cookie-only routes
+- [x] Client fetches to those routes send `authJsonHeaders()`
+- [x] StoryForm drafts: don't clobber AI-generated content with an old draft; autosave tags/name too; hide name field when signed in
+- [x] /stories "Your Stories" sidebar pulls the user's own stories, not the global 50
+- [x] Backfill orphaned stories — not needed: all 45 stories are demo seeds, only 1 real profile (checked 2026-09-29)
+- [ ] Verify in Edge: sign in → plant a seed → it shows under Your Stories on /submit and /stories; bookmark + reading list load on /read

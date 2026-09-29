@@ -20,3 +20,12 @@ export async function authJsonHeaders(): Promise<Record<string, string>> {
     ? { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
     : { "Content-Type": "application/json" };
 }
+
+/** fetch() that attaches the signed-in user's Bearer token, for routes that need to know who's asking. */
+export async function authFetch(input: string, init: RequestInit = {}): Promise<Response> {
+  const { data } = await getSupabase().auth.getSession();
+  const token = data.session?.access_token;
+  const headers = new Headers(init.headers);
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  return fetch(input, { ...init, headers });
+}

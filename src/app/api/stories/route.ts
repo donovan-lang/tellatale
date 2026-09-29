@@ -2,8 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { getRequestUser } from "@/lib/request-user";
 import { createNotification } from "@/lib/notify";
 import { postNewStoryToDiscord } from "@/lib/discord";
 import {
@@ -123,37 +122,7 @@ export async function POST(req: NextRequest) {
     let resolvedAuthorName = (author_name || "Anonymous").slice(0, 50);
 
     try {
-      const cookieStore = cookies();
-      const authClient = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-          cookies: {
-            getAll() {
-              return cookieStore.getAll();
-            },
-            setAll(
-              cookiesToSet: {
-                name: string;
-                value: string;
-                options: Record<string, unknown>;
-              }[]
-            ) {
-              try {
-                cookiesToSet.forEach(({ name, value, options }) =>
-                  cookieStore.set(name, value, options)
-                );
-              } catch {
-                // Read-only in Route Handlers depending on context
-              }
-            },
-          },
-        }
-      );
-
-      const {
-        data: { user },
-      } = await authClient.auth.getUser();
+      const user = await getRequestUser();
 
       if (user) {
         authorId = user.id;

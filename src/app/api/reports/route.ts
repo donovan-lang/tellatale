@@ -2,8 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { getRequestUser } from "@/lib/request-user";
 import { isRateLimited, getClientIp, sanitizeContent } from "@/lib/spam-filter";
 
 export async function POST(req: NextRequest) {
@@ -24,21 +23,8 @@ export async function POST(req: NextRequest) {
 
     // Get reporter ID
     let reporterId: string = "anon";
-    try {
-      const cookieStore = cookies();
-      const authClient = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-          cookies: {
-            getAll() { return cookieStore.getAll(); },
-            setAll(c: any[]) { try { c.forEach(({ name, value, options }) => cookieStore.set(name, value, options)); } catch {} },
-          },
-        }
-      );
-      const { data: { user } } = await authClient.auth.getUser();
-      if (user) reporterId = user.id;
-    } catch {}
+    const user = await getRequestUser();
+    if (user) reporterId = user.id;
 
     if (reporterId === "anon") {
       const forwarded = req.headers.get("x-forwarded-for");

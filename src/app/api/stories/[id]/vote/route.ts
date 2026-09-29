@@ -2,46 +2,13 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { getRequestUser } from "@/lib/request-user";
 import { createNotification } from "@/lib/notify";
 import { isRateLimited, getClientIp } from "@/lib/spam-filter";
 import { checkAutoModeration } from "@/lib/auto-moderation";
 
 async function getUserId(): Promise<string | null> {
-  try {
-    const cookieStore = cookies();
-    const authClient = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(
-            cookiesToSet: {
-              name: string;
-              value: string;
-              options: Record<string, unknown>;
-            }[]
-          ) {
-            try {
-              cookiesToSet.forEach(({ name, value, options }) =>
-                cookieStore.set(name, value, options)
-              );
-            } catch {}
-          },
-        },
-      }
-    );
-    const {
-      data: { user },
-    } = await authClient.auth.getUser();
-    return user?.id || null;
-  } catch {
-    return null;
-  }
+  return (await getRequestUser())?.id ?? null;
 }
 
 export async function POST(

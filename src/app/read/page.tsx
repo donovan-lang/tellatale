@@ -17,6 +17,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import type { ReadingProgress, Bookmark as BookmarkType, Chronicle } from "@/types";
 import { Suspense } from "react";
+import { authFetch } from "@/lib/supabase-browser";
 
 type Tab = "progress" | "bookmarks" | "chronicles";
 
@@ -37,9 +38,9 @@ function ReadContent() {
     if (!user) { router.push("/login"); return; }
 
     Promise.all([
-      fetch("/api/reading-progress").then((r) => r.json()).catch(() => []),
-      fetch("/api/bookmarks").then((r) => r.json()).catch(() => []),
-      fetch("/api/chronicles").then((r) => r.json()).catch(() => []),
+      authFetch("/api/reading-progress").then((r) => r.json()).catch(() => []),
+      authFetch("/api/bookmarks").then((r) => r.json()).catch(() => []),
+      authFetch("/api/chronicles").then((r) => r.json()).catch(() => []),
     ]).then(([p, b, c]) => {
       if (Array.isArray(p)) setProgress(p);
       if (Array.isArray(b)) setBookmarks(b);
@@ -48,12 +49,12 @@ function ReadContent() {
   }, [user, authLoading, router]);
 
   async function deleteBookmark(id: string) {
-    await fetch(`/api/bookmarks/${id}`, { method: "DELETE" });
+    await authFetch(`/api/bookmarks/${id}`, { method: "DELETE" });
     setBookmarks((prev) => prev.filter((b) => b.id !== id));
   }
 
   async function deleteChronicle(id: string) {
-    await fetch(`/api/chronicles/${id}`, { method: "DELETE" });
+    await authFetch(`/api/chronicles/${id}`, { method: "DELETE" });
     setChronicles((prev) => prev.filter((c) => c.id !== id));
   }
 
