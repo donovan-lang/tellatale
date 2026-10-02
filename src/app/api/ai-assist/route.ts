@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { useCredit } from "@/lib/credits";
-import { callGemini } from "@/lib/gemini";
+import { callGemini, isTextGenConfigured } from "@/lib/gemini";
 
-const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
 const SYSTEM_PROMPT = `You are a skilled creative writing assistant for MakeATale, a collaborative choose-your-own-adventure platform.
 
@@ -43,7 +42,7 @@ const ACTION_PROMPTS: Record<string, (content: string, title: string) => string>
 
 export async function POST(req: NextRequest) {
   try {
-    if (!GEMINI_KEY) {
+    if (!isTextGenConfigured()) {
       return NextResponse.json(
         { error: "AI assist not configured" },
         { status: 503 }
@@ -87,7 +86,7 @@ export async function POST(req: NextRequest) {
         maxOutputTokens: 300,
       });
     } catch (err) {
-      console.error("Gemini error:", err);
+      console.error("AI generation error:", err);
       return NextResponse.json(
         { error: "AI service error" },
         { status: 502 }

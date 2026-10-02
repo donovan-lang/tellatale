@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
 import { postNewStoryToDiscord } from "@/lib/discord";
 import { generateChoiceAwareBranches } from "@/lib/story_engine";
-import { GEMINI_MODEL } from "@/lib/gemini";
+import { TEXT_MODEL, isTextGenConfigured } from "@/lib/gemini";
 
-const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
 const SYSTEM_PROMPT = `You are TaleBot, a creative AI storyteller for MakeATale — a collaborative choose-your-own-adventure platform.
 
@@ -42,9 +41,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!GEMINI_KEY) {
+  if (!isTextGenConfigured()) {
     return NextResponse.json(
-      { error: "GEMINI_API_KEY not configured" },
+      { error: "No AI provider configured (RUPERT_API_KEY or GEMINI_API_KEY)" },
       { status: 503 }
     );
   }
@@ -146,7 +145,7 @@ export async function POST(req: NextRequest) {
           downvotes: 0,
           metadata: {
             generated_by: "auto-brancher",
-            model: GEMINI_MODEL,
+            model: TEXT_MODEL,
             choice_aware: true,
             narrative_context_included: true,
           },

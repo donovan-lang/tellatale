@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
-import { callGemini, parseGeminiJSON } from "@/lib/gemini";
+import { callGemini, parseGeminiJSON, isTextGenConfigured } from "@/lib/gemini";
 
-const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
 const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_NEW_STORIES;
 const SITE_URL = "https://makeatale.com";
@@ -99,9 +98,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!GEMINI_KEY) {
+  if (!isTextGenConfigured()) {
     return NextResponse.json(
-      { error: "GEMINI_API_KEY not configured" },
+      { error: "No AI provider configured (RUPERT_API_KEY or GEMINI_API_KEY)" },
       { status: 503 }
     );
   }

@@ -1,3 +1,5 @@
+import { callRupert, RUPERT_MODEL } from "./rupert";
+
 const GEMINI_URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 export const GEMINI_MODEL = "gemini-3.6-flash";
 /** Used when GEMINI_MODEL is overloaded (429/503 after retries). */
@@ -15,6 +17,17 @@ export interface GeminiCallOptions {
   retries?: number;
 }
 
+/** Rupert (free for indie.io) is the main text model when RUPERT_API_KEY is set; Gemini is the fallback. */
+const useRupert = () => !!process.env.RUPERT_API_KEY;
+
+/** The model text generation will try first; stored in story metadata. */
+export const TEXT_MODEL = process.env.RUPERT_API_KEY ? `rupert/${RUPERT_MODEL}` : GEMINI_MODEL;
+
+/** True if any text-generation provider has a key. */
+export function isTextGenConfigured(): boolean {
+  return useRupert() || !!process.env.GEMINI_API_KEY;
+}
+
 const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
 
 function sleep(ms: number) {
@@ -22,11 +35,30 @@ function sleep(ms: number) {
 }
 
 /**
+ * Main text-generation entry point. Uses Rupert when RUPERT_API_KEY is set,
+ * falling back to Gemini if Rupert fails and GEMINI_API_KEY is set.
+ * Passing a gemini-* `model` skips Rupert (used by the eval/compare scripts).
+ */
+export async function callGemini(opts: GeminiCallOptions): Promise<string> {
+  const geminiOnly = opts.model?.startsWith("gemini");
+  if (useRupert() && !geminiOnly) {
+    try {
+      return await callRupert(opts);
+    } catch (err) {
+      if (!process.env.GEMINI_API_KEY) throw err;
+      console.warn("[textgen] Rupert failed, falling back to Gemini:", err instanceof Error ? err.message : err);
+      return callGeminiDirect({ ...opts, model: undefined });
+    }
+  }
+  return callGeminiDirect(opts);
+}
+
+/**
  * Calls Gemini with retry/backoff on transient errors (429/5xx, network failures).
  * If the default model is still overloaded after retries, falls back to GEMINI_FALLBACK_MODEL.
  * Returns the raw text of the first candidate.
  */
-export async function callGemini(opts: GeminiCallOptions): Promise<string> {
+export async function callGeminiDirect(opts: GeminiCallOptions): Promise<string> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) {
     throw new Error("GEMINI_API_KEY not configured");
@@ -106,5 +138,13 @@ async function callGeminiModel(opts: GeminiCallOptions, model: string, key: stri
 /** Strips markdown code fences (if present) and JSON.parses the result. */
 export function parseGeminiJSON<T = unknown>(raw: string): T {
   const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
-  return JSON.parse(cleaned) as T;
+  try {
+    return JSON.parse(cleaned) as T;
+  } catch (err) {
+    // Some models wrap the JSON in a sentence; take the outermost object.
+    const start = cleaned.indexOf("{");
+    const end = cleaned.lastIndexOf("}");
+    if (start === -1 || end <= start) throw err;
+    return JSON.parse(cleaned.slice(start, end + 1)) as T;
+  }
 }

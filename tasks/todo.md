@@ -55,7 +55,28 @@ Report: "sign in feature is broken". Known so far: Supabase auth healthy; Kiana'
 - [x] Code audit: signup fake success, /auth/callback could never work (implicit flow), no reset page, Google dead, credits read wrong project's token, branch delete 401, login ignored ?redirect
 - [x] Rupert review (only qwen3.5-9b still live): kept open-redirect hardening
 - [x] Fixed + 17/17 Playwright checks pass signed-out (scratch: %TEMP%\claude\pwerify.js)
-- [ ] Kiana: Supabase → Authentication → URL Configuration: Site URL https://makeatale.com; redirect URLs https://makeatale.com/auth/callback and http://localhost:3000/auth/callback
-- [ ] Kiana: Supabase → Authentication → Emails/SMTP: confirm custom SMTP is set (built-in mailer only emails team members)
+- [x] (done 2026-10-02) Kiana: Supabase → Authentication → URL Configuration: Site URL https://makeatale.com; redirect URLs https://makeatale.com/auth/callback and http://localhost:3000/auth/callback
+- [x] (done 2026-10-02) Kiana turned on custom SMTP. Confirm delivery via the reset-password round trip
 - [ ] Kiana: signed-in check in Edge (sign in, drafts save, reset password email round trip)
-- [ ] Deploy to Linode — none of 06556ad..HEAD is live yet
+- [ ] Deploy to Linode — none of 06556ad..HEAD is live yet (Kiana owns launch calls now; Donovan only for system breaks)
+
+## Writer profiles, MySpace-style (logged 2026-10-02, Kiana; not started)
+Idea: writers customize their own profile page (custom background, images, look and feel) and each profile should tell a story.
+- Starting point: existing public page `src/app/author/[name]/page.tsx` (+ feed.xml)
+- [ ] Spec it: which customization (background image/color, banner, avatar, fonts, accent colors, music?), what "tells a story" means (bio as a story? pinned tale? a timeline of their tales?)
+- [ ] Storage for uploads (Supabase Storage bucket), size/type limits, moderation for images
+- [ ] Security: no raw user HTML/CSS (XSS). Give curated theme controls/presets instead, sanitized on save
+- [ ] Profile settings editor on /account + live preview
+
+## Move all text generation to Rupert (logged 2026-10-02, from Donovan; not started)
+Donovan: all text gen should go through Rupert (indie.io's LLM, https://rupert.indieio.dev) because it's free for us, instead of Gemini/Anthropic.
+- All gen goes through `src/lib/gemini.ts` → ai-assist, branches/generate, cron/auto-branch, cron/auto-challenge, generate-tale, story_engine (+ scripts/eval-branches, compare-models). Swap is mostly one file: add a Rupert client with the same interface.
+- [x] (2026-10-02) Code: `src/lib/rupert.ts` (Open WebUI /api/v1/chat/completions); `callGemini` now tries Rupert first when RUPERT_API_KEY is set, falls back to Gemini on failure. Routes check `isTextGenConfigured()`; metadata uses `TEXT_MODEL`
+- [x] Prompt check via MCP: seed = valid JSON, ~750 words (in 400-800 range), strong; branches JSON shape correct
+- [ ] Kiana: add RUPERT_API_KEY to .env.local (key from rupert.indieio.dev → Settings → Account → API Keys), restart dev server, generate a tale
+- [ ] Prod: use a dedicated/service Rupert key, not a personal one; add to Linode env
+- [ ] Prod: qwen3.8:27b may take 30-90s for a seed; check nginx proxy_read_timeout on Linode (default 60s) before deploy
+- [ ] Pick model: qwen3.8:27b default; deepseek-v4-flash for quality-heavy gen if latency is OK
+- [ ] Check JSON-output reliability (generate-tale + bible extraction parse JSON) and rate limits/uptime
+- [ ] Re-run scripts/eval-branches.ts Rupert vs Gemini before switching; keep Gemini as fallback?
+- Would remove the Gemini free-tier 429 BLOCKER above

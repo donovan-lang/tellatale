@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { useCredit } from "@/lib/credits";
-import { callGemini, parseGeminiJSON } from "@/lib/gemini";
+import { callGemini, parseGeminiJSON, isTextGenConfigured } from "@/lib/gemini";
 import { buildGenreCraftBlock } from "@/lib/genre-craft";
 import { formatParagraphs } from "@/lib/utils";
 
-const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
 const VALID_TAGS = [
   "Fantasy", "Sci-Fi", "Horror", "Mystery", "Romance", "Adventure",
@@ -45,7 +44,7 @@ The tags array should contain 1-3 genre tags from this list ONLY: Fantasy, Sci-F
 
 export async function POST(req: NextRequest) {
   try {
-    if (!GEMINI_KEY) {
+    if (!isTextGenConfigured()) {
       return NextResponse.json(
         { error: "AI not configured" },
         { status: 503 }
@@ -114,7 +113,7 @@ export async function POST(req: NextRequest) {
         },
       });
     } catch (err) {
-      console.error("Gemini error:", err);
+      console.error("AI generation error:", err);
       return NextResponse.json(
         { error: "AI service error" },
         { status: 502 }
