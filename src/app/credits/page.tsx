@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Sparkles, Zap, Crown, Check, Loader2 } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
+import { getSupabase, authFetch, authJsonHeaders } from "@/lib/supabase-browser";
 
 interface Tier {
   id: string;
@@ -31,6 +33,7 @@ const TIER_LABELS: Record<string, string> = {
 };
 
 export default function CreditsPage() {
+  const { user } = useAuth();
   const [tiers, setTiers] = useState<Tier[]>([]);
   const [balance, setBalance] = useState<Balance | null>(null);
   const [loading, setLoading] = useState<string | null>(null);
@@ -49,45 +52,34 @@ export default function CreditsPage() {
       .then((r) => r.json())
       .then((d) => setTiers(d.tiers || []))
       .catch(() => {});
-
-    // Fetch balance (if logged in)
-    const session = localStorage.getItem("sb-pnufyhorwltjagbklpwx-auth-token");
-    if (session) {
-      try {
-        const parsed = JSON.parse(session);
-        const token = parsed?.[0] || parsed?.access_token;
-        if (token) {
-          fetch("/api/credits/balance", {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-            .then((r) => r.json())
-            .then((d) => {
-              if (d.total_available !== undefined) setBalance(d);
-            })
-            .catch(() => {});
-        }
-      } catch {}
-    }
   }, []);
+
+  // Fetch balance (if logged in); re-runs on sign-in/out
+  useEffect(() => {
+    if (!user) {
+      setBalance(null);
+      return;
+    }
+    authFetch("/api/credits/balance")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.total_available !== undefined) setBalance(d);
+      })
+      .catch(() => {});
+  }, [user?.id]);
 
   async function handlePurchase(tierId: string) {
     setLoading(tierId);
     try {
-      const session = localStorage.getItem("sb-pnufyhorwltjagbklpwx-auth-token");
-      const parsed = session ? JSON.parse(session) : null;
-      const token = parsed?.[0] || parsed?.access_token;
-
-      if (!token) {
+      const { data: sessionData } = await getSupabase().auth.getSession();
+      if (!sessionData.session) {
         window.location.href = "/login?redirect=/credits";
         return;
       }
 
       const res = await fetch("/api/credits/purchase", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        headers: await authJsonHeaders(),
         body: JSON.stringify({ tier: tierId }),
       });
 

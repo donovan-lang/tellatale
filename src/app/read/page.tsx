@@ -35,7 +35,7 @@ function ReadContent() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user) { router.push("/login"); return; }
+    if (!user) { router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`); return; }
 
     Promise.all([
       authFetch("/api/reading-progress").then((r) => r.json()).catch(() => []),

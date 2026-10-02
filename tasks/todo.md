@@ -48,3 +48,14 @@ Root cause: browser session lives in localStorage, but /api/stories POST, bookma
 - [x] Drafts saved to account: `story_drafts` table + /api/drafts (GET/PUT/DELETE), StoryForm syncs (newest of local/account wins), "Discard" on restored drafts, "Your Drafts" list on /account → Story Settings
 - [x] story_drafts migration applied in Supabase (verified 2026-10-02)
 - [ ] Later: "Post as Anonymous by default" + "mature content" toggles on /account don't persist anywhere
+
+## Sign-in audit (started 2026-10-02)
+Report: "sign in feature is broken". Known so far: Supabase auth healthy; Kiana's account confirmed (last sign-in 2026-09-28); Google provider DISABLED in Supabase but UI shows Google button.
+- [x] Browser repro: local break was a corrupted .next (Claude ran a 2nd `next dev` in the same folder); prod password login fine, Google = raw JSON error
+- [x] Code audit: signup fake success, /auth/callback could never work (implicit flow), no reset page, Google dead, credits read wrong project's token, branch delete 401, login ignored ?redirect
+- [x] Rupert review (only qwen3.5-9b still live): kept open-redirect hardening
+- [x] Fixed + 17/17 Playwright checks pass signed-out (scratch: %TEMP%\claude\pwerify.js)
+- [ ] Kiana: Supabase → Authentication → URL Configuration: Site URL https://makeatale.com; redirect URLs https://makeatale.com/auth/callback and http://localhost:3000/auth/callback
+- [ ] Kiana: Supabase → Authentication → Emails/SMTP: confirm custom SMTP is set (built-in mailer only emails team members)
+- [ ] Kiana: signed-in check in Edge (sign in, drafts save, reset password email round trip)
+- [ ] Deploy to Linode — none of 06556ad..HEAD is live yet

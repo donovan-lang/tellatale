@@ -10,3 +10,5 @@
 ## What Worked
 
 ## What Didn't
+- NEVER start a second `next dev` in this folder while Kiana's is running — both write `.next`, and killing one leaves empty chunk dirs: pages render but never hydrate (buttons dead, login does a native GET to `/login?website=`). Fix: stop server, delete `.next`, restart. Test against her server, or build to a separate distDir.
+- Supabase browser client is implicit flow: email links come back with tokens in the #hash, so `/auth/callback` must be a client page (server route never sees the hash).

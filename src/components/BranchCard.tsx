@@ -145,7 +145,7 @@ export default function BranchCard({
                 onClick={async (e) => {
                   e.stopPropagation();
                   if (!confirm("Delete this branch? This cannot be undone.")) return;
-                  const res = await fetch(`/api/stories/${story.id}/edit`, { method: "DELETE" });
+                  const res = await authFetch(`/api/stories/${story.id}/edit`, { method: "DELETE" });
                   if (res.ok) {
                     setDeleted(true);
                     window.location.reload();
