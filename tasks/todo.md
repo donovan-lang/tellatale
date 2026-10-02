@@ -73,9 +73,10 @@ Donovan: all text gen should go through Rupert (indie.io's LLM, https://rupert.i
 - All gen goes through `src/lib/gemini.ts` → ai-assist, branches/generate, cron/auto-branch, cron/auto-challenge, generate-tale, story_engine (+ scripts/eval-branches, compare-models). Swap is mostly one file: add a Rupert client with the same interface.
 - [x] (2026-10-02) Code: `src/lib/rupert.ts` (Open WebUI /api/v1/chat/completions); `callGemini` now tries Rupert first when RUPERT_API_KEY is set, falls back to Gemini on failure. Routes check `isTextGenConfigured()`; metadata uses `TEXT_MODEL`
 - [x] Prompt check via MCP: seed = valid JSON, ~750 words (in 400-800 range), strong; branches JSON shape correct
-- [ ] Kiana: add RUPERT_API_KEY to .env.local (key from rupert.indieio.dev → Settings → Account → API Keys), restart dev server, generate a tale
+- [x] (2026-10-02) RUPERT_API_KEY in .env.local (Kiana's personal key, browser login is rupert.indie.io). Smoke test through src/lib code: seed 793 words in 55s, bible JSON 17s, no Gemini fallback
+- [ ] Kiana: restart dev server so :3000 picks up the key, then a signed-in Generate in Edge
 - [ ] Prod: use a dedicated/service Rupert key, not a personal one; add to Linode env
-- [ ] Prod: qwen3.8:27b may take 30-90s for a seed; check nginx proxy_read_timeout on Linode (default 60s) before deploy
+- [ ] Prod: qwen3.8:27b took 55s for a seed in testing; check nginx proxy_read_timeout on Linode (default 60s) before deploy
 - [ ] Pick model: qwen3.8:27b default; deepseek-v4-flash for quality-heavy gen if latency is OK
 - [ ] Check JSON-output reliability (generate-tale + bible extraction parse JSON) and rate limits/uptime
 - [ ] Re-run scripts/eval-branches.ts Rupert vs Gemini before switching; keep Gemini as fallback?
