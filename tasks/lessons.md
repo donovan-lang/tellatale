@@ -12,3 +12,5 @@
 ## What Didn't
 - NEVER start a second `next dev` in this folder while Kiana's is running — both write `.next`, and killing one leaves empty chunk dirs: pages render but never hydrate (buttons dead, login does a native GET to `/login?website=`). Fix: stop server, delete `.next`, restart. Test against her server, or build to a separate distDir.
 - Supabase browser client is implicit flow: email links come back with tokens in the #hash, so `/auth/callback` must be a client page (server route never sees the hash).
+- Restarting Kiana's dev server: stop the `next dev` process tree on :3000, confirm the port is free, then `Start-Process powershell -ArgumentList '-NoExit','-Command','Set-Location C:\Users\Kiana\tellatale; npm run dev'` so she owns the window. Check that `_next/static` chunks return 200 afterwards.
+- Rupert: the browser login is rupert.indie.io; the API is rupert.indieio.dev/api/v1. Generation routes need a signed-in user, so smoke-test via a tsx script importing src/lib.
