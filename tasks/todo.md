@@ -46,5 +46,5 @@ Root cause: browser session lives in localStorage, but /api/stories POST, bookma
 - [x] Backfill orphaned stories — not needed: all 45 stories are demo seeds, only 1 real profile (checked 2026-09-29)
 - [ ] Verify in Edge: sign in → plant a seed → it shows under Your Stories on /submit and /stories; bookmark + reading list load on /read
 - [x] Drafts saved to account: `story_drafts` table + /api/drafts (GET/PUT/DELETE), StoryForm syncs (newest of local/account wins), "Discard" on restored drafts, "Your Drafts" list on /account → Story Settings
-- [ ] Kiana: apply supabase/migrations/20260929120000_story_drafts.sql in Supabase SQL editor (until then drafts fall back to "Saved on this device")
+- [x] story_drafts migration applied in Supabase (verified 2026-10-02)
 - [ ] Later: "Post as Anonymous by default" + "mature content" toggles on /account don't persist anywhere
