@@ -58,7 +58,7 @@ Report: "sign in feature is broken". Known so far: Supabase auth healthy; Kiana'
 - [x] (done 2026-10-02) Kiana: Supabase → Authentication → URL Configuration: Site URL https://makeatale.com; redirect URLs https://makeatale.com/auth/callback and http://localhost:3000/auth/callback
 - [x] (done 2026-10-02) Kiana turned on custom SMTP. Confirm delivery via the reset-password round trip
 - [ ] Kiana: signed-in check in Edge (sign in, drafts save, reset password email round trip)
-- [ ] Deploy to Linode — none of 06556ad..HEAD is live yet (Kiana owns launch calls now; Donovan only for system breaks)
+- [x] Deploy to Linode (done 2026-10-16) (Kiana owns launch calls now; Donovan only for system breaks)
 
 ## Writer profiles, MySpace-style (logged 2026-10-02, Kiana; not started)
 Idea: writers customize their own profile page (custom background, images, look and feel) and each profile should tell a story.
@@ -87,7 +87,8 @@ Context: prod (makeatale.com) still runs pre-September code; newest prod seed is
 Local `.env.local` Supabase project (eaadogrkpxjjnmvzeffl) was paused (Kiana unpaused 2026-10-16). Prod uses its own self-hosted Supabase on the Linode box.
 - [x] auto-branch cron: was top-5 seeds + top-5 leaves by upvotes, THEN skip already-branched → near-zero output once popular stories were branched. Now: pool of 100 open nodes (upvotes ≥ AUTO_BRANCH_MIN_UPVOTES, depth < AUTO_BRANCH_MAX_DEPTH=10), one query to drop branched ones, `?limit=` (default 3) + `?budget=` seconds (default 240)
 - [x] deploy/makeatale.cron already exists on selfhost/linode (Donovan); auto-branch line bumped to -m 900 + ?limit=3 (branch deploy/2026-10-16)
-- [ ] Deploy (branch deploy/2026-10-16 = selfhost/linode + master, worktree C:\Users\Kiana\tellatale-deploy): needs SSH to root@173.255.204.127. Kiana's key made 2026-10-16 at ~/.ssh/claudebot-key (push-build.sh default path); pubkey DMed to Donovan to add, waiting. Then on the box: apply supabase/migrations/20260929120000_story_drafts.sql (prod 404s on story_drafts), add RUPERT_API_KEY (service key) to /opt/apps/makeatale-shared/.env.local, install /etc/cron.d/makeatale (strip CRLF), confirm cron.env has CRON_SECRET
+- [x] DEPLOYED 2026-10-16 (release 20261016-135207, build of 86e1087; selfhost/linode fast-forwarded to f705695). Applied story_drafts on prod DB, added RUPERT_API_KEY (Kiana personal key) to /opt/apps/makeatale-shared/.env.local (backup .env.local.bak-20261016), installed /etc/cron.d/makeatale (auto-branch 6h, auto-seed daily 15:00 UTC, drips/digests)
+- [ ] Swap prod RUPERT_API_KEY to a service key when one exists
 - [ ] At volume, auto-branch posts every TaleBot branch to Discord (2 per story) — consider one post per story or a digest
 - [x] eval-branches: Rupert-aware (no 6s gap for Rupert), judge pinned to Gemini, `bible-only` flag, seed word counts, steering-adherence check
 - [x] Daily TaleBot seeds (2026-10-16): POST /api/cron/auto-seed?count=1 (max 3). Idea from Rupert (least-covered genre over 14 days, random tone, avoids last 30 TaleBot titles) → seed via shared `src/lib/seed-gen.ts` (same prompt as /api/generate-tale, now one source of truth) → insert as TaleBot → ensureStoryBible → one Discord post. Smoke test: idea 21s, seed 227s (Rupert busy with eval), 542 words. Not run against a DB yet.
