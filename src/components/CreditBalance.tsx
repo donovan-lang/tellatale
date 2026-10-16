@@ -2,29 +2,26 @@
 
 import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
+import { authFetch } from "@/lib/supabase-browser";
 
 export default function CreditBalance() {
+  const { user } = useAuth();
   const [credits, setCredits] = useState<number | null>(null);
 
   useEffect(() => {
-    const session = localStorage.getItem("sb-pnufyhorwltjagbklpwx-auth-token");
-    if (!session) return;
+    if (!user) {
+      setCredits(null);
+      return;
+    }
 
-    try {
-      const parsed = JSON.parse(session);
-      const token = parsed?.[0] || parsed?.access_token;
-      if (!token) return;
-
-      fetch("/api/credits/balance", {
-        headers: { Authorization: `Bearer ${token}` },
+    authFetch("/api/credits/balance")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.total_available !== undefined) setCredits(d.total_available);
       })
-        .then((r) => (r.ok ? r.json() : null))
-        .then((d) => {
-          if (d?.total_available !== undefined) setCredits(d.total_available);
-        })
-        .catch(() => {});
-    } catch {}
-  }, []);
+      .catch(() => {});
+  }, [user?.id]);
 
   if (credits === null) return null;
 

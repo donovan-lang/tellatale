@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Loader2, ChevronRight, Flag } from "lucide-react";
-import { toAuthorSlug } from "@/lib/utils";
+import { toAuthorSlug, toParagraphs } from "@/lib/utils";
 import type { Story } from "@/types";
 import BranchCard from "./BranchCard";
 import { useRouter } from "next/navigation";
@@ -111,9 +111,11 @@ export default function FullPathReader({
               </div>
 
               {/* Content */}
-              <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap text-[15px]">
-                {story.content}
-              </p>
+              <div className="text-gray-700 dark:text-gray-300 leading-relaxed text-[15px] space-y-3">
+                {toParagraphs(story.content).map((para, i) => (
+                  <p key={i}>{para}</p>
+                ))}
+              </div>
 
               {/* Author line */}
               <div className="mt-3 flex items-center gap-2 pt-2 border-t border-gray-200/40 dark:border-gray-800/40">

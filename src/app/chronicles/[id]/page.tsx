@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { BookMarked, ArrowLeft, Loader2, Flag, FileText } from "lucide-react";
 import type { Story } from "@/types";
+import { authFetch } from "@/lib/supabase-browser";
 
 interface ChronicleDetail {
   id: string;
@@ -26,11 +27,11 @@ export default function ChroniclePlaybackPage({
   useEffect(() => {
     if (authLoading) return;
     if (!user) {
-      router.push("/login");
+      router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
       return;
     }
 
-    fetch(`/api/chronicles/${params.id}`)
+    authFetch(`/api/chronicles/${params.id}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.id) setChronicle(data);

@@ -48,6 +48,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(s?.user ?? null);
       setLoading(false);
 
+      // A password-reset link signs the user in; send them to set a new password
+      if (event === "PASSWORD_RECOVERY" && window.location.pathname !== "/reset-password") {
+        window.location.href = "/reset-password";
+        return;
+      }
+
       // On sign-in, try to claim referral (no-op if no mat_ref cookie)
       if (event === "SIGNED_IN" && s?.access_token) {
         fetch("/api/referral/claim", {

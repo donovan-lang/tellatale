@@ -21,7 +21,7 @@ import {
   Loader2,
 } from "lucide-react";
 import type { Story } from "@/types";
-import { toAuthorSlug } from "@/lib/utils";
+import { toAuthorSlug, toParagraphs } from "@/lib/utils";
 import { getGenreEmoji, getGenreIcon, getGenreIconPath, GENRE_EMOJI } from "@/lib/genre-theme";
 import BranchCard from "./BranchCard";
 import StoryForm from "./StoryForm";
@@ -34,6 +34,7 @@ import Reactions from "./Reactions";
 import BestPath from "./BestPath";
 import { useToast } from "./Toast";
 import FullPathReader from "./FullPathReader";
+import { authJsonHeaders, authFetch } from "@/lib/supabase-browser";
 
 type BranchSort = "top" | "new" | "discussed";
 
@@ -67,6 +68,7 @@ export default function StoryReader({
   });
 
   const [generatingBranches, setGeneratingBranches] = useState(false);
+  const [pathDirection, setPathDirection] = useState("");
 
   async function generateAIPaths() {
     if (generatingBranches) return;
@@ -74,8 +76,12 @@ export default function StoryReader({
     try {
       const res = await fetch("/api/branches/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ story_id: story.id, auto_insert: true }),
+        headers: await authJsonHeaders(),
+        body: JSON.stringify({
+          story_id: story.id,
+          auto_insert: true,
+          direction: pathDirection.trim() || undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -111,7 +117,7 @@ export default function StoryReader({
   // Auto-track reading progress
   useEffect(() => {
     if (!user) return;
-    fetch("/api/reading-progress", {
+    authFetch("/api/reading-progress", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -123,7 +129,7 @@ export default function StoryReader({
 
   // Load existing vote
   useEffect(() => {
-    fetch(`/api/stories/${story.id}/vote`)
+    authFetch(`/api/stories/${story.id}/vote`)
       .then((r) => r.json())
       .then((d) => { if (d.vote) setUserVote(d.vote); })
       .catch(() => {});
@@ -139,7 +145,7 @@ export default function StoryReader({
     }));
     setUserVote(newVote as 1 | -1 | 0);
     try {
-      const res = await fetch(`/api/stories/${story.id}/vote`, {
+      const res = await authFetch(`/api/stories/${story.id}/vote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ vote: newVote }),
@@ -158,7 +164,7 @@ export default function StoryReader({
   // Check if bookmarked
   useEffect(() => {
     if (!user) return;
-    fetch("/api/bookmarks")
+    authFetch("/api/bookmarks")
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data)) {
@@ -175,12 +181,12 @@ export default function StoryReader({
   async function toggleBookmark() {
     if (!user) return;
     if (bookmarked && bookmarkId) {
-      await fetch(`/api/bookmarks/${bookmarkId}`, { method: "DELETE" });
+      await authFetch(`/api/bookmarks/${bookmarkId}`, { method: "DELETE" });
       setBookmarked(false);
       setBookmarkId(null);
       toast("Bookmark removed");
     } else {
-      const res = await fetch("/api/bookmarks", {
+      const res = await authFetch("/api/bookmarks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -333,9 +339,11 @@ export default function StoryReader({
           </div>
         </div>
 
-        <p className={`text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap ${fontSizes[fontSize]}`}>
-          {story.content}
-        </p>
+        <div className={`text-gray-700 dark:text-gray-300 leading-relaxed space-y-4 ${fontSizes[fontSize]}`}>
+          {toParagraphs(story.content).map((para, i) => (
+            <p key={i}>{para}</p>
+          ))}
+        </div>
 
         {/* Vote bar */}
         <div className="mt-4 flex items-center gap-3 pt-3 border-t border-amber-200/60 dark:border-gray-800/60">
@@ -559,6 +567,17 @@ export default function StoryReader({
               <p className="text-sm text-gray-500 text-center">
                 No paths yet. Let AI suggest some, or write your own below.
               </p>
+              <input
+                type="text"
+                value={pathDirection}
+                onChange={(e) => setPathDirection(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && generateAIPaths()}
+                maxLength={200}
+                disabled={generatingBranches}
+                placeholder="Optional: where should the story go? (e.g. she refuses and runs)"
+                aria-label="Optional direction for AI paths"
+                className="w-full max-w-md px-3 py-2 rounded-lg text-sm bg-white/5 border border-purple-500/30 placeholder:text-gray-500 focus:outline-none focus:border-purple-400"
+              />
               <button
                 onClick={generateAIPaths}
                 disabled={generatingBranches}

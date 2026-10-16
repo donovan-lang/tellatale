@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
 import { generateChoiceAwareBranches, getStoryWithContext } from "@/lib/story_engine";
 import { useCredit } from "@/lib/credits";
+import { TEXT_MODEL } from "@/lib/gemini";
 
 const SYSTEM_PROMPT = `You are TaleBot, a creative AI storyteller for MakeATale — a collaborative choose-your-own-adventure platform.
 
@@ -53,7 +54,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { story_id, auto_insert = true } = await req.json();
+    const { story_id, auto_insert = true, direction } = await req.json();
+    // Optional reader steering ("where should it go?"); branch 1 follows it.
+    const readerDirection =
+      typeof direction === "string" && direction.trim() ? direction.trim().slice(0, 200) : undefined;
 
     if (!story_id) {
       return NextResponse.json(
@@ -109,7 +113,7 @@ export async function POST(req: NextRequest) {
     // Generate branches with choice awareness
     let branches;
     try {
-      branches = await generateChoiceAwareBranches(story_id, SYSTEM_PROMPT);
+      branches = await generateChoiceAwareBranches(story_id, SYSTEM_PROMPT, { direction: readerDirection });
     } catch (err) {
       console.error("Failed to generate branches:", err);
       return NextResponse.json(
@@ -149,7 +153,7 @@ export async function POST(req: NextRequest) {
             downvotes: 0,
             metadata: {
               generated_by: "api-branches-generate",
-              model: "gemini-2.5-flash",
+              model: TEXT_MODEL,
               choice_aware: true,
               narrative_context_included: true,
             },

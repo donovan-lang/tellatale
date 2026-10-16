@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "./AuthProvider";
 import { useToast } from "./Toast";
-import { getSupabase } from "@/lib/supabase-browser";
+import { getSupabase, authFetch } from "@/lib/supabase-browser";
 import { toAuthorSlug } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import type { Comment } from "@/types";
@@ -85,7 +85,7 @@ function CommentItem({
 
   async function handleReport() {
     if (reported) return;
-    await fetch("/api/reports", {
+    await authFetch("/api/reports", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ story_id: storyId, reason: `Reported comment by ${comment.author_name}: "${comment.content.slice(0, 100)}"` }),

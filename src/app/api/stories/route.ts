@@ -1,10 +1,8 @@
-import { supabaseServerUrl } from "@/lib/supabase-url";
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { getRequestUser } from "@/lib/request-user";
 import { createNotification } from "@/lib/notify";
 import { postNewStoryToDiscord } from "@/lib/discord";
 import {
@@ -53,6 +51,7 @@ export async function POST(req: NextRequest) {
       parent_id,
       is_ending,
       tags,
+      seed_input,
       _hp,
       _ts,
     } = body;
@@ -123,37 +122,7 @@ export async function POST(req: NextRequest) {
     let resolvedAuthorName = (author_name || "Anonymous").slice(0, 50);
 
     try {
-      const cookieStore = cookies();
-      const authClient = createServerClient(
-        supabaseServerUrl(),
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-          cookies: {
-            getAll() {
-              return cookieStore.getAll();
-            },
-            setAll(
-              cookiesToSet: {
-                name: string;
-                value: string;
-                options: Record<string, unknown>;
-              }[]
-            ) {
-              try {
-                cookiesToSet.forEach(({ name, value, options }) =>
-                  cookieStore.set(name, value, options)
-                );
-              } catch {
-                // Read-only in Route Handlers depending on context
-              }
-            },
-          },
-        }
-      );
-
-      const {
-        data: { user },
-      } = await authClient.auth.getUser();
+      const user = await getRequestUser();
 
       if (user) {
         authorId = user.id;
@@ -224,6 +193,18 @@ export async function POST(req: NextRequest) {
       story_type: isBranch ? "branch" : "seed",
       is_ending: isBranch ? !!is_ending : false,
       tags: Array.isArray(tags) ? tags.slice(0, 5) : null,
+      // Original Generate-tab input, so branch generation can honor the author's intent
+      ...(!isBranch && typeof seed_input?.idea === "string" && seed_input.idea.trim()
+        ? {
+            metadata: {
+              seed_input: {
+                idea: sanitizeContent(seed_input.idea).slice(0, 500),
+                genre: typeof seed_input.genre === "string" ? seed_input.genre.slice(0, 40) : undefined,
+                tone: typeof seed_input.tone === "string" ? seed_input.tone.slice(0, 40) : undefined,
+              },
+            },
+          }
+        : {}),
     };
 
     let result = await supabase

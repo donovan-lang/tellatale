@@ -9,6 +9,7 @@ import { toAuthorSlug } from "@/lib/utils";
 import { getGenreEmoji, getGenreIcon, getGenreIconPath, GENRE_EMOJI } from "@/lib/genre-theme";
 import DonateButton from "./DonateButton";
 import ReportButton from "./ReportButton";
+import { authFetch } from "@/lib/supabase-browser";
 
 export default function StoryCard({ story }: { story: Story }) {
   const [votes, setVotes] = useState({ up: story.upvotes, down: story.downvotes });
@@ -28,7 +29,7 @@ export default function StoryCard({ story }: { story: Story }) {
     }));
     setUserVote(newVote as 1 | -1 | 0);
     try {
-      const res = await fetch(`/api/stories/${story.id}/vote`, {
+      const res = await authFetch(`/api/stories/${story.id}/vote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ vote: newVote }),

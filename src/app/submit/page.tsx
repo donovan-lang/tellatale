@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import StoryForm from "@/components/StoryForm";
 import TaleGenerator from "@/components/TaleGenerator";
+import type { SeedInput } from "@/types/seed-input";
 import {
   BookOpen,
   GitFork,
@@ -43,6 +44,7 @@ export default function SubmitPage() {
     title: string;
     content: string;
     tags: string[];
+    seed_input?: SeedInput;
   } | null>(null);
 
   useEffect(() => {
@@ -63,6 +65,7 @@ export default function SubmitPage() {
     title: string;
     content: string;
     tags: string[];
+    seed_input?: SeedInput;
   }) {
     setGeneratedTale(tale);
     setTab("write");
@@ -136,6 +139,7 @@ export default function SubmitPage() {
               initialTitle={generatedTale?.title}
               initialContent={generatedTale?.content}
               initialTags={generatedTale?.tags}
+              seedInput={generatedTale?.seed_input}
             />
           ) : (
             <TaleGenerator onGenerated={handleGenerated} initialPrompt={initialIdea} />

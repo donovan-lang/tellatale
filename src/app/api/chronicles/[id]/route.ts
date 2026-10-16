@@ -1,40 +1,8 @@
-import { supabaseServerUrl } from "@/lib/supabase-url";
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase-server";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { getRequestUser } from "@/lib/request-user";
 
-async function getUser() {
-  const cookieStore = cookies();
-  const authClient = createServerClient(
-    supabaseServerUrl(),
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(
-          cookiesToSet: {
-            name: string;
-            value: string;
-            options: Record<string, unknown>;
-          }[]
-        ) {
-          try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            );
-          } catch {}
-        },
-      },
-    }
-  );
-  const {
-    data: { user },
-  } = await authClient.auth.getUser();
-  return user;
-}
+const getUser = getRequestUser;
 
 export async function GET(
   _req: NextRequest,

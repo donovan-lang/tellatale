@@ -8,3 +8,6 @@ next-env.d.ts
 
 .vercel
 .env
+
+# model comparison reports
+scripts/output/

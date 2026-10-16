@@ -22,7 +22,7 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user) { router.push("/login"); return; }
+    if (!user) { router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`); return; }
     getHeaders().then((h) =>
       fetch("/api/notifications", { headers: h })
         .then((r) => r.json())

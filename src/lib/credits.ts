@@ -2,7 +2,7 @@ import { supabaseServerUrl } from "@/lib/supabase-url";
 /**
  * MakeATale Credit System
  *
- * Free tier: 5 AI generations per day (resets midnight UTC)
+ * Free tier: 20 AI generations per day (resets midnight UTC)
  * Purchased credits: persist forever, used after daily credits exhausted
  *
  * Usage in API routes:
@@ -14,7 +14,7 @@ import { NextRequest } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createServiceClient } from "./supabase-server";
 
-const FREE_DAILY_CREDITS = 50;
+export const FREE_DAILY_CREDITS = 20;
 
 export interface CreditResult {
   allowed: boolean;

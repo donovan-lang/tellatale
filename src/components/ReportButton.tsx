@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Flag, X, Loader2, Check } from "lucide-react";
+import { authFetch } from "@/lib/supabase-browser";
 
 export default function ReportButton({ storyId }: { storyId: string }) {
   const [open, setOpen] = useState(false);
@@ -13,7 +14,7 @@ export default function ReportButton({ storyId }: { storyId: string }) {
     if (!reason.trim() || sending) return;
     setSending(true);
     try {
-      await fetch("/api/reports", {
+      await authFetch("/api/reports", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ story_id: storyId, reason: reason.trim() }),

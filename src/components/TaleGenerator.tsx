@@ -11,6 +11,9 @@ import {
 } from "lucide-react";
 import { STORY_CATEGORIES } from "@/lib/demo-data";
 import { GENRE_EMOJI, getGenreIconPath } from "@/lib/genre-theme";
+import { authJsonHeaders } from "@/lib/supabase-browser";
+import { toParagraphs } from "@/lib/utils";
+import type { SeedInput } from "@/types/seed-input";
 
 const TONES = [
   { value: "dark", label: "Dark" },
@@ -68,6 +71,7 @@ interface GeneratedTale {
   title: string;
   content: string;
   tags: string[];
+  seed_input?: SeedInput;
 }
 
 interface TaleGeneratorProps {
@@ -93,7 +97,7 @@ export default function TaleGenerator({ onGenerated, initialPrompt = "" }: TaleG
     try {
       const res = await fetch("/api/generate-tale", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await authJsonHeaders(),
         body: JSON.stringify({
           prompt: prompt.trim(),
           genre: genre || undefined,
@@ -108,7 +112,10 @@ export default function TaleGenerator({ onGenerated, initialPrompt = "" }: TaleG
         return;
       }
 
-      setGenerated(data);
+      setGenerated({
+        ...data,
+        seed_input: { idea: prompt.trim(), genre: genre || undefined, tone: tone || undefined },
+      });
     } catch {
       setError("Something went wrong. Try again.");
     } finally {
@@ -298,9 +305,11 @@ export default function TaleGenerator({ onGenerated, initialPrompt = "" }: TaleG
           </div>
 
           <div className="px-4 py-4 bg-white dark:bg-gray-900 max-h-[300px] overflow-y-auto">
-            <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-              {generated.content}
-            </p>
+            <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed space-y-3">
+              {toParagraphs(generated.content).map((para, i) => (
+                <p key={i}>{para}</p>
+              ))}
+            </div>
           </div>
 
           <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border-t border-purple-200 dark:border-purple-800 flex gap-2">

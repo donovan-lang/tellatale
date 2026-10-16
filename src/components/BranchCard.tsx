@@ -6,6 +6,7 @@ import { useAuth } from "@/components/AuthProvider";
 import type { Story } from "@/types";
 import { toAuthorSlug } from "@/lib/utils";
 import DonateButton from "./DonateButton";
+import { authFetch } from "@/lib/supabase-browser";
 
 const RANK_BORDERS = [
   "border-l-yellow-500",
@@ -56,7 +57,7 @@ export default function BranchCard({
     }));
     setUserVote(newVote as 1 | -1 | 0);
     try {
-      const res = await fetch(`/api/stories/${story.id}/vote`, {
+      const res = await authFetch(`/api/stories/${story.id}/vote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ vote: newVote }),
@@ -144,7 +145,7 @@ export default function BranchCard({
                 onClick={async (e) => {
                   e.stopPropagation();
                   if (!confirm("Delete this branch? This cannot be undone.")) return;
-                  const res = await fetch(`/api/stories/${story.id}/edit`, { method: "DELETE" });
+                  const res = await authFetch(`/api/stories/${story.id}/edit`, { method: "DELETE" });
                   if (res.ok) {
                     setDeleted(true);
                     window.location.reload();

@@ -5,6 +5,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { useRouter } from "next/navigation";
 import { BookOpen, GitFork, ThumbsUp, Loader2, Share2 } from "lucide-react";
 import { useToast } from "@/components/Toast";
+import { authFetch } from "@/lib/supabase-browser";
 
 export default function ReadStatsPage() {
   const { user, loading: authLoading } = useAuth();
@@ -15,9 +16,9 @@ export default function ReadStatsPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user) { router.push("/login"); return; }
+    if (!user) { router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`); return; }
     Promise.all([
-      fetch("/api/reading-progress").then(r => r.json()),
+      authFetch("/api/reading-progress").then(r => r.json()),
       fetch(`/api/stories?author_id=${user.id}`).then(r => r.json()),
     ]).then(([progress, stories]) => {
       setStats({
