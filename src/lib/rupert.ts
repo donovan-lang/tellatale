@@ -42,6 +42,38 @@ function describeSchema(schema: Record<string, any>): string {
   }
 }
 
+/** Converts a Gemini-style schema (uppercase types) to standard JSON Schema for response_format. */
+function toJsonSchema(schema: Record<string, any>): Record<string, unknown> {
+  const type = String(schema.type).toLowerCase();
+  const out: Record<string, unknown> = { type };
+  if (schema.enum) out.enum = schema.enum;
+  if (type === "object") {
+    out.properties = Object.fromEntries(
+      Object.entries(schema.properties || {}).map(([k, v]) => [k, toJsonSchema(v as Record<string, any>)])
+    );
+    out.required = schema.required || Object.keys(schema.properties || {});
+  }
+  if (type === "array") out.items = toJsonSchema(schema.items || { type: "STRING" });
+  return out;
+}
+
+/** Same tolerance as parseGeminiJSON: optional code fences, or JSON wrapped in a sentence. */
+function looksLikeJSON(text: string): boolean {
+  const cleaned = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+  try {
+    JSON.parse(cleaned);
+    return true;
+  } catch {
+    const start = cleaned.indexOf("{");
+    const end = cleaned.lastIndexOf("}");
+    try {
+      return start !== -1 && end > start && (JSON.parse(cleaned.slice(start, end + 1)), true);
+    } catch {
+      return false;
+    }
+  }
+}
+
 /** Removes reasoning blocks some Rupert models emit before the answer. */
 function stripThink(text: string): string {
   return text.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
@@ -80,6 +112,12 @@ export async function callRupert(opts: RupertCallOptions): Promise<string> {
             { role: "user", content: opts.userPrompt },
           ],
           options: { num_ctx: 16384 },
+          // Constrained decoding: without it, long dialogue-heavy JSON sometimes comes back unparseable.
+          ...(opts.responseSchema
+            ? { response_format: { type: "json_schema", json_schema: { name: "response", schema: toJsonSchema(opts.responseSchema) } } }
+            : opts.jsonMode
+              ? { response_format: { type: "json_object" } }
+              : {}),
         }),
       });
 
@@ -102,6 +140,10 @@ export async function callRupert(opts: RupertCallOptions): Promise<string> {
           continue;
         }
         throw lastError;
+      }
+      if ((opts.responseSchema || opts.jsonMode) && !looksLikeJSON(text)) {
+        // Thrown here so the catch below retries it like any other transient failure.
+        throw new Error(`Rupert returned invalid JSON (${text.length} chars)`);
       }
       return text;
     } catch (err) {
