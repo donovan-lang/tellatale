@@ -10,4 +10,5 @@ SHELL=/bin/bash
 0 14 * * 1   root  . /opt/apps/makeatale-shared/cron.env && curl -s -m 300 -X POST -H "Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3002/api/cron/weekly-digest  >> /var/log/makeatale-cron.log 2>&1
 0 */6 * * *  root  . /opt/apps/makeatale-shared/cron.env && curl -s -m 900 -X POST -H "Authorization: Bearer $CRON_SECRET" "http://127.0.0.1:3002/api/cron/auto-branch?limit=3"   >> /var/log/makeatale-cron.log 2>&1
 0 13 * * 1   root  . /opt/apps/makeatale-shared/cron.env && curl -s -m 300 -X POST -H "Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3002/api/cron/auto-challenge >> /var/log/makeatale-cron.log 2>&1
+0 15 * * *   root  . /opt/apps/makeatale-shared/cron.env && curl -s -m 600 -X POST -H "Authorization: Bearer $CRON_SECRET" "http://127.0.0.1:3002/api/cron/auto-seed?count=1"  >> /var/log/makeatale-cron.log 2>&1
 0 17 * * *   root  . /opt/apps/makeatale-shared/cron.env && curl -s -m 300 -X POST -H "Authorization: Bearer $CRON_SECRET" http://127.0.0.1:3002/api/cron/discord-digest >> /var/log/makeatale-cron.log 2>&1
