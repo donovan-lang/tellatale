@@ -389,7 +389,7 @@ ${currentContent}
 
 For each branch provide:
 - "teaser": A 1-2 sentence choice line that readers see BEFORE clicking (like "Open the mysterious door" or "Follow the stranger into the alley"). This should be compelling and hint at what's ahead without spoiling it.
-- "content": A 200-400 word continuation of the story from that choice point. Write it as the next scene, picking up seamlessly from where the current scene left off. Use short paragraphs of 1-4 sentences separated by a blank line (a "\\n\\n" escape in the JSON string), with each line of dialogue in its own paragraph.
+- "content": A continuation of about 250-350 words (never more than 400) from that choice point. Write it as the next scene, picking up seamlessly from where the current scene left off. Use short paragraphs of 1-4 sentences separated by a blank line (a "\\n\\n" escape in the JSON string), with each line of dialogue in its own paragraph.
 
 ${
   storyPath.nodes.length > 1

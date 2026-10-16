@@ -147,7 +147,7 @@ async function judge(seed: StoryNode, idea: string, nodes: StoryNode[]) {
 
 const STEER_SCHEMA = {
   type: "OBJECT",
-  properties: { follows: { type: "INTEGER" }, alternative_differs: { type: "BOOLEAN" }, note: { type: "STRING" } },
+  properties: { follows: { type: "BOOLEAN" }, alternative_differs: { type: "BOOLEAN" }, note: { type: "STRING" } },
   required: ["follows", "alternative_differs", "note"],
 };
 
@@ -160,10 +160,10 @@ async function steer(seed: StoryNode, bible: StoryBible | null, request: string)
   );
   const raw = await callGemini({ systemPrompt: BRANCH_SYSTEM, userPrompt, temperature: 0.9, maxOutputTokens: 2000, responseSchema: BRANCH_SCHEMA });
   const [a, b] = parseBranches(raw);
-  const v = parseGeminiJSON<{ follows: number; alternative_differs: boolean; note: string }>(await callGemini({
+  const v = parseGeminiJSON<{ follows: boolean; alternative_differs: boolean; note: string }>(await callGemini({
     systemPrompt:
       "You check whether an interactive-fiction generator followed a reader's request. Score honestly. " +
-      "follows (1-5): does BRANCH 1 clearly deliver what the reader asked for? " +
+      "follows (true/false): does BRANCH 1 clearly deliver what the reader asked for? " +
       "alternative_differs: does BRANCH 2 go a meaningfully different way than the request? note: one short sentence.",
     userPrompt: `Reader's request: "${request}"
 
@@ -259,7 +259,7 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&
   const overall = {
     "seed words (target 400-800)": seedWords.join(", "),
     "seeds in range": `${seedWords.filter((w) => w >= 400 && w <= 800).length}/${ok.length}`,
-    "steering: follows (1-5)": (ok.reduce((a, r) => a + r.steering.follows, 0) / Math.max(1, ok.length)).toFixed(1),
+    "steering: branch 1 follows request": `${ok.filter((r) => r.steering.follows).length}/${ok.length}`,
     "steering: alternative differs": `${ok.filter((r) => r.steering.alternative_differs).length}/${ok.length}`,
   };
   console.log(`\nSUMMARY (${ok.length}/${CASES.length} cases completed, generator ${TEXT_MODEL})`);
@@ -283,7 +283,7 @@ ${ok.map((r, i) => `<div class="case"><h2>${i + 1}. ${esc(r.c.genre)} — ${esc(
 <details><summary>Seed + bible</summary><pre>${esc(r.seed.content)}\n\n${esc(JSON.stringify(r.bible, null, 2))}</pre></details>
 <p><b>Judge, no bible:</b> consistency ${r.jPlain.consistency}, fidelity ${r.jPlain.idea_fidelity}${r.jPlain.contradictions.length ? " · " + esc(r.jPlain.contradictions.join("; ")) : ""}<br>
 <b>Judge, bible:</b> consistency ${r.jBible.consistency}, fidelity ${r.jBible.idea_fidelity}${r.jBible.contradictions.length ? " · " + esc(r.jBible.contradictions.join("; ")) : ""}</p>
-<p><b>Steering</b> "${esc(r.steering.request)}": follows ${r.steering.follows}/5, alternative differs: ${r.steering.alternative_differs ? "yes" : "no"} · ${esc(r.steering.note)}<br>
+<p><b>Steering</b> "${esc(r.steering.request)}": follows: ${r.steering.follows ? "yes" : "no"}, alternative differs: ${r.steering.alternative_differs ? "yes" : "no"} · ${esc(r.steering.note)}<br>
 Branch 1: ${esc(r.steering.a.teaser)}<br>Branch 2: ${esc(r.steering.b?.teaser || "")}</p>
 <div class="grid">${BIBLE_ONLY ? "" : col("No bible", r.plain)}${col("Bible", r.withBible)}</div></div>`).join("")}
 </body></html>`;
