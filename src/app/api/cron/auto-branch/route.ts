@@ -27,6 +27,7 @@ const MAX_DEPTH = Number(process.env.AUTO_BRANCH_MAX_DEPTH ?? 10);
 const DEFAULT_STORIES_PER_RUN = 3;
 // Don't start a new story after this long; one story can still take ~2 min to finish.
 const DEFAULT_BUDGET_SECONDS = 240;
+const CHILD_LOOKUP_BATCH = 25;
 
 function clampInt(raw: string | null, fallback: number, min: number, max: number): number {
   const n = raw ? parseInt(raw, 10) : NaN;
@@ -88,11 +89,23 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Batched: one in() with 100 ids makes a ~4KB URL that the self-hosted gateway 502s on.
+  // A failed lookup must abort, or every story looks unbranched and gets duplicate branches.
   const poolIds = (pool || []).map((s) => s.id);
-  const { data: children } = poolIds.length
-    ? await sb.from("stories").select("parent_id").in("parent_id", poolIds)
-    : { data: [] as { parent_id: string }[] };
-  const branched = new Set((children || []).map((c) => c.parent_id));
+  const branched = new Set<string>();
+  for (let i = 0; i < poolIds.length; i += CHILD_LOOKUP_BATCH) {
+    const { data: children, error } = await sb
+      .from("stories")
+      .select("parent_id")
+      .in("parent_id", poolIds.slice(i, i + CHILD_LOOKUP_BATCH));
+    if (error) {
+      return NextResponse.json(
+        { error: "Failed to check existing branches", detail: error.message },
+        { status: 500 }
+      );
+    }
+    (children || []).forEach((c) => branched.add(c.parent_id));
+  }
   const candidates = (pool || []).filter((s) => !branched.has(s.id)).slice(0, maxStories);
 
   if (candidates.length === 0) {
