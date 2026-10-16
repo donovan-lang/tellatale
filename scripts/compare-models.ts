@@ -24,7 +24,7 @@ const HAS_CLAUDE = !!process.env.ANTHROPIC_API_KEY;
 if (!HAS_CLAUDE) console.log("ANTHROPIC_API_KEY not set — running Gemini only.");
 
 // ── production prompt (read from the route so this never drifts) ───────────
-const routeSrc = fs.readFileSync("src/app/api/generate-tale/route.ts", "utf8");
+const routeSrc = fs.readFileSync("src/lib/seed-gen.ts", "utf8");
 const SYSTEM_PROMPT = routeSrc.match(/const SYSTEM_PROMPT = `([\s\S]*?)`;/)![1];
 
 function buildUserPrompt(idea: string, genre: string, tone: string) {

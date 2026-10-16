@@ -46,7 +46,7 @@ async function callGemini(opts: Parameters<typeof rawCallGemini>[0]) {
 
 const readConst = (file: string, name: string) =>
   fs.readFileSync(file, "utf8").match(new RegExp(`const ${name} = \`([\\s\\S]*?)\`;`))![1];
-const SEED_SYSTEM = readConst("src/app/api/generate-tale/route.ts", "SYSTEM_PROMPT");
+const SEED_SYSTEM = readConst("src/lib/seed-gen.ts", "SYSTEM_PROMPT");
 const BRANCH_SYSTEM = readConst("src/app/api/branches/generate/route.ts", "SYSTEM_PROMPT");
 
 const CASES = [
