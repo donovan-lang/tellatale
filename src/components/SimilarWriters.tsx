@@ -4,7 +4,8 @@ import { Users } from "lucide-react";
 import { toAuthorSlug } from "@/lib/utils";
 import type { Story } from "@/types";
 
-export default function SimilarWriters({ tag, currentAuthor }: { tag: string; currentAuthor: string }) {
+/** `themed` draws with the writer profile theme vars (see profile-theme.ts). */
+export default function SimilarWriters({ tag, currentAuthor, themed = false }: { tag: string; currentAuthor: string; themed?: boolean }) {
   const [writers, setWriters] = useState<string[]>([]);
 
   useEffect(() => {
@@ -23,6 +24,26 @@ export default function SimilarWriters({ tag, currentAuthor }: { tag: string; cu
   }, [tag, currentAuthor]);
 
   if (writers.length === 0) return null;
+
+  if (themed) {
+    return (
+      <section>
+        <h2 className="profile-heading text-2xl sm:text-3xl mb-4">Writers who also love {tag}</h2>
+        <ul className="flex flex-wrap gap-2">
+          {writers.map((name) => (
+            <li key={name}>
+              <a href={`/author/${toAuthorSlug(name)}`} className="profile-chip inline-flex items-center gap-2 px-3 py-1.5 text-sm" style={{ color: "var(--p-text)" }}>
+                <span className="profile-avatar w-6 h-6 rounded-full inline-flex items-center justify-center text-xs" style={{ boxShadow: "none" }} aria-hidden>
+                  {name.charAt(0).toUpperCase()}
+                </span>
+                {name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    );
+  }
 
   return (
     <section className="mb-8">
