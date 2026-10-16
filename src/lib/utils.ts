@@ -33,6 +33,11 @@ export function toParagraphs(text: string): string[] {
   return paragraphs;
 }
 
+/** URL slug for a seed story: the title slugified plus a random suffix to avoid collisions. */
+export function toStorySlug(title: string): string {
+  return toAuthorSlug(title) + "-" + Math.random().toString(36).slice(2, 6);
+}
+
 /** toParagraphs joined back with blank lines, for storing generated text. */
 export function formatParagraphs(text: string): string {
   return toParagraphs(text).join("\n\n");
