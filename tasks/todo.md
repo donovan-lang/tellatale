@@ -81,3 +81,13 @@ Donovan: all text gen should go through Rupert (indie.io's LLM, https://rupert.i
 - [ ] Check JSON-output reliability (generate-tale + bible extraction parse JSON) and rate limits/uptime
 - [ ] Re-run scripts/eval-branches.ts Rupert vs Gemini before switching; keep Gemini as fallback?
 - Would remove the Gemini free-tier 429 BLOCKER above
+
+## Scale up: better stories + more volume (started 2026-10-16, Kiana)
+Context: prod (makeatale.com) still runs pre-September code; newest prod seed is 2026-04-11, no prod story has a bible.
+Local `.env.local` Supabase project (eaadogrkpxjjnmvzeffl) returns 521 (paused?) while prod's DB is fine, so prod uses a different project.
+- [x] auto-branch cron: was top-5 seeds + top-5 leaves by upvotes, THEN skip already-branched → near-zero output once popular stories were branched. Now: pool of 100 open nodes (upvotes ≥ AUTO_BRANCH_MIN_UPVOTES, depth < AUTO_BRANCH_MAX_DEPTH=10), one query to drop branched ones, `?limit=` (default 3) + `?budget=` seconds (default 240)
+- [ ] Linode: vercel.json crons do NOT run there. Add a crontab on the box calling localhost (skips nginx's 60s timeout), e.g. every 6h:
+      `0 */6 * * * curl -s -m 900 -X POST "http://127.0.0.1:<port>/api/cron/auto-branch?limit=3" -H "Authorization: Bearer $CRON_SECRET"`
+- [ ] At volume, auto-branch posts every TaleBot branch to Discord (2 per story) — consider one post per story or a digest
+- [x] eval-branches: Rupert-aware (no 6s gap for Rupert), judge pinned to Gemini, `bible-only` flag, seed word counts, steering-adherence check
+- [ ] Kiana: Supabase dashboard → restore the local project (or point .env.local at the prod project)

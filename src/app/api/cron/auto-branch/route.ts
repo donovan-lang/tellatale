@@ -20,6 +20,19 @@ Rules:
 
 You MUST respond with valid JSON only. No markdown, no code fences, no explanation.`;
 
+// Stories need at least this many upvotes before TaleBot grows them.
+const MIN_UPVOTES = Number(process.env.AUTO_BRANCH_MIN_UPVOTES ?? 2);
+// Paths stop growing automatically at this depth; readers and writers can still extend them.
+const MAX_DEPTH = Number(process.env.AUTO_BRANCH_MAX_DEPTH ?? 10);
+const DEFAULT_STORIES_PER_RUN = 3;
+// Don't start a new story after this long; one story can still take ~2 min to finish.
+const DEFAULT_BUDGET_SECONDS = 240;
+
+function clampInt(raw: string | null, fallback: number, min: number, max: number): number {
+  const n = raw ? parseInt(raw, 10) : NaN;
+  return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
+}
+
 interface BranchOutput {
   teaser: string;
   content: string;
@@ -50,15 +63,23 @@ export async function POST(req: NextRequest) {
 
   const sb = createServiceClient();
 
-  // Find seed stories with upvotes >= 2, ordered by popularity
-  const { data: seedCandidates, error: queryError } = await sb
+  // Grow the library: pick open nodes (seeds or leaves) that have no branches yet, most
+  // upvoted first. Rupert takes 30-60s per call, so each run is capped by count and time.
+  const params = req.nextUrl.searchParams;
+  const maxStories = clampInt(params.get("limit"), DEFAULT_STORIES_PER_RUN, 1, 20);
+  const budgetMs = clampInt(params.get("budget"), DEFAULT_BUDGET_SECONDS, 30, 900) * 1000;
+  const startedAt = Date.now();
+
+  const { data: pool, error: queryError } = await sb
     .from("stories")
     .select("id, title, content, tags, depth, slug, author_name")
-    .is("parent_id", null)
     .eq("is_hidden", false)
-    .gte("upvotes", 2)
+    .eq("is_ending", false)
+    .gte("upvotes", MIN_UPVOTES)
+    .lt("depth", MAX_DEPTH)
     .order("upvotes", { ascending: false })
-    .limit(5);
+    .order("created_at", { ascending: true })
+    .limit(100);
 
   if (queryError) {
     return NextResponse.json(
@@ -67,24 +88,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Also find popular leaf branches (non-seeds with upvotes >= 2) to grow trees deeper
-  const { data: leafCandidates } = await sb
-    .from("stories")
-    .select("id, title, content, tags, depth, slug, author_name")
-    .not("parent_id", "is", null)
-    .eq("is_hidden", false)
-    .eq("is_ending", false)
-    .gte("upvotes", 2)
-    .order("upvotes", { ascending: false })
-    .limit(5);
-
-  // Merge: seeds first, then leaves (deduped)
-  const seenIds = new Set<string>();
-  const candidates = [...(seedCandidates || []), ...(leafCandidates || [])].filter((s) => {
-    if (seenIds.has(s.id)) return false;
-    seenIds.add(s.id);
-    return true;
-  });
+  const poolIds = (pool || []).map((s) => s.id);
+  const { data: children } = poolIds.length
+    ? await sb.from("stories").select("parent_id").in("parent_id", poolIds)
+    : { data: [] as { parent_id: string }[] };
+  const branched = new Set((children || []).map((c) => c.parent_id));
+  const candidates = (pool || []).filter((s) => !branched.has(s.id)).slice(0, maxStories);
 
   if (candidates.length === 0) {
     return NextResponse.json({
@@ -98,15 +107,7 @@ export async function POST(req: NextRequest) {
   const results: { story_id: string; title: string | null; branches: number }[] = [];
 
   for (const story of candidates) {
-    // Check if story already has branches
-    const { count } = await sb
-      .from("stories")
-      .select("id", { count: "exact", head: true })
-      .eq("parent_id", story.id);
-
-    if (count && count > 0) {
-      continue; // Already has branches, skip
-    }
+    if (Date.now() - startedAt > budgetMs) break;
 
     // Generate branches with choice-aware context
     let branches: BranchOutput[];

@@ -1,12 +1,15 @@
 /**
  * Branch-generation eval: does deep-path generation still honor the person's input?
  *
- *   npx tsx scripts/eval-branches.ts [depth=4]
+ *   npx tsx scripts/eval-branches.ts [depth=4] [bible-only]
  *
  * For each case: generate one seed with the production generate-tale prompt, then walk
  * `depth` branch levels (always taking branch 1) twice from the same seed:
  *   - "no bible":   branch prompt as it was before the story bible existed
  *   - "bible":      same, plus the story bible + author's original idea
+ * Also checks reader steering: one "where should it go?" request per case off the seed.
+ * Generation uses whatever callGemini routes to (Rupert when RUPERT_API_KEY is set); the
+ * judge is pinned to Gemini so scores stay comparable across generator models.
  * Scores the deepest levels and writes scripts/output/eval-branches-<ts>.html.
  */
 import * as fs from "fs";
@@ -17,7 +20,7 @@ for (const line of fs.readFileSync(".env.local", "utf8").split(/\r?\n/)) {
   if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^"|"$/g, "");
 }
 
-import { callGemini as rawCallGemini, parseGeminiJSON } from "../src/lib/gemini";
+import { callGemini as rawCallGemini, parseGeminiJSON, GEMINI_MODEL, TEXT_MODEL } from "../src/lib/gemini";
 import { buildGenreCraftBlock } from "../src/lib/genre-craft";
 import {
   buildBranchPromptWithContext,
@@ -29,11 +32,13 @@ import {
 } from "../src/lib/story_engine";
 
 const DEPTH = Number(process.argv[2]) || 4;
+const BIBLE_ONLY = process.argv.includes("bible-only");
 
-// The API key is on Google's free tier (~5 RPM flash / 15 RPM lite), so space calls out.
+// The Gemini key is on Google's free tier (~5 RPM flash / 15 RPM lite), so space Gemini calls out.
 const MIN_GAP_MS = 6000;
 let nextSlot = 0;
 async function callGemini(opts: Parameters<typeof rawCallGemini>[0]) {
+  if (!TEXT_MODEL.startsWith("gemini") && !opts.model?.startsWith("gemini")) return rawCallGemini({ retries: 1, ...opts });
   const wait = Math.max(0, nextSlot - Date.now());
   nextSlot = Math.max(nextSlot, Date.now()) + MIN_GAP_MS;
   if (wait) await new Promise((r) => setTimeout(r, wait));
@@ -46,11 +51,11 @@ const SEED_SYSTEM = readConst("src/app/api/generate-tale/route.ts", "SYSTEM_PROM
 const BRANCH_SYSTEM = readConst("src/app/api/branches/generate/route.ts", "SYSTEM_PROMPT");
 
 const CASES = [
-  { idea: "A lighthouse keeper named Maren finds a letter in her own handwriting dated tomorrow, warning her not to light the lamp.", genre: "Mystery", tone: "mysterious", details: ["Maren", "letter", "lamp", "lighthouse"] },
-  { idea: "A retired dragon runs a bakery in a small mountain town and a knight shows up demanding a duel over a burnt croissant.", genre: "Comedy", tone: "whimsical", details: ["dragon", "bakery", "knight", "croissant"] },
-  { idea: "On a generation ship, 14-year-old Idris discovers the 'stars' outside the viewport are a screen, and one pixel is dead.", genre: "Sci-Fi", tone: "tense", details: ["Idris", "screen", "pixel", "ship"] },
-  { idea: "A 1920s jazz singer in Chicago realizes the mobster who owns her club is the ghost of her murdered brother.", genre: "Noir", tone: "gritty", details: ["jazz", "club", "brother", "ghost"] },
-  { idea: "Two rival botanists are snowed in at an Antarctic research station with one seed vault key between them.", genre: "Romance", tone: "romantic", details: ["botanist", "station", "seed", "key"] },
+  { idea: "A lighthouse keeper named Maren finds a letter in her own handwriting dated tomorrow, warning her not to light the lamp.", genre: "Mystery", tone: "mysterious", details: ["Maren", "letter", "lamp", "lighthouse"], steer: "She lights the lamp anyway." },
+  { idea: "A retired dragon runs a bakery in a small mountain town and a knight shows up demanding a duel over a burnt croissant.", genre: "Comedy", tone: "whimsical", details: ["dragon", "bakery", "knight", "croissant"], steer: "The knight turns out to be a terrible baker who wants lessons." },
+  { idea: "On a generation ship, 14-year-old Idris discovers the 'stars' outside the viewport are a screen, and one pixel is dead.", genre: "Sci-Fi", tone: "tense", details: ["Idris", "screen", "pixel", "ship"], steer: "Idris tells their best friend instead of the adults." },
+  { idea: "A 1920s jazz singer in Chicago realizes the mobster who owns her club is the ghost of her murdered brother.", genre: "Noir", tone: "gritty", details: ["jazz", "club", "brother", "ghost"], steer: "She confronts him onstage in the middle of a song." },
+  { idea: "Two rival botanists are snowed in at an Antarctic research station with one seed vault key between them.", genre: "Romance", tone: "romantic", details: ["botanist", "station", "seed", "key"], steer: "They agree to split the vault and the blizzard gets worse." },
 ];
 
 const BRANCH_SCHEMA = {
@@ -75,6 +80,8 @@ const SEED_SCHEMA = {
 
 type Variant = "no bible" | "bible";
 
+const parseBranches = (raw: string) => parseGeminiJSON<{ branches: { teaser: string; content: string }[] }>(raw).branches;
+
 async function walk(seed: StoryNode, bible: StoryBible | null, variant: Variant): Promise<StoryNode[]> {
   const nodes: StoryNode[] = [seed];
   for (let level = 1; level <= DEPTH; level++) {
@@ -88,8 +95,7 @@ async function walk(seed: StoryNode, bible: StoryBible | null, variant: Variant)
       bibleBlock
     );
     const raw = await callGemini({ systemPrompt: BRANCH_SYSTEM, userPrompt, temperature: 0.9, maxOutputTokens: 2000, responseSchema: BRANCH_SCHEMA });
-    const { branches } = parseGeminiJSON<{ branches: { teaser: string; content: string }[] }>(raw);
-    const b = branches[0];
+    const b = parseBranches(raw)[0];
     nodes.push({
       id: `${variant}-${level}`, title: null, content: b.content, teaser: b.teaser,
       parent_id: current.id, tags: seed.tags, author_name: "TaleBot", story_type: "branch",
@@ -135,8 +141,45 @@ async function judge(seed: StoryNode, idea: string, nodes: StoryNode[]) {
     temperature: 0,
     maxOutputTokens: 800,
     responseSchema: JUDGE_SCHEMA,
+    model: GEMINI_MODEL,
   });
   return parseGeminiJSON<{ consistency: number; idea_fidelity: number; contradictions: string[] }>(raw);
+}
+
+const STEER_SCHEMA = {
+  type: "OBJECT",
+  properties: { follows: { type: "INTEGER" }, alternative_differs: { type: "BOOLEAN" }, note: { type: "STRING" } },
+  required: ["follows", "alternative_differs", "note"],
+};
+
+/** Generates branches off the seed with a reader request, then has Gemini judge adherence. */
+async function steer(seed: StoryNode, bible: StoryBible | null, request: string) {
+  const userPrompt = buildBranchPromptWithContext(
+    seed.title || "Untitled", seed.content,
+    { nodes: [seed], full_context: buildNarrativeContext([seed]), choices_made: [] },
+    seed.tags || [], formatBible(bible, seed.metadata?.seed_input), request
+  );
+  const raw = await callGemini({ systemPrompt: BRANCH_SYSTEM, userPrompt, temperature: 0.9, maxOutputTokens: 2000, responseSchema: BRANCH_SCHEMA });
+  const [a, b] = parseBranches(raw);
+  const v = parseGeminiJSON<{ follows: number; alternative_differs: boolean; note: string }>(await callGemini({
+    systemPrompt:
+      "You check whether an interactive-fiction generator followed a reader's request. Score honestly. " +
+      "follows (1-5): does BRANCH 1 clearly deliver what the reader asked for? " +
+      "alternative_differs: does BRANCH 2 go a meaningfully different way than the request? note: one short sentence.",
+    userPrompt: `Reader's request: "${request}"
+
+BRANCH 1 (${a.teaser}):
+"""
+${a.content}
+"""
+
+BRANCH 2 (${b?.teaser}):
+"""
+${b?.content || ""}
+"""`,
+    temperature: 0, maxOutputTokens: 400, responseSchema: STEER_SCHEMA, model: GEMINI_MODEL,
+  }));
+  return { request, a, b, ...v };
 }
 
 function score(nodes: StoryNode[], c: (typeof CASES)[number], bible: StoryBible | null) {
@@ -159,7 +202,7 @@ function score(nodes: StoryNode[], c: (typeof CASES)[number], bible: StoryBible 
 const esc = (s: string) => s.replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]!);
 
 (async () => {
-  console.log(`Depth ${DEPTH}, ${CASES.length} cases, 2 variants each…`);
+  console.log(`Generator ${TEXT_MODEL}, judge ${GEMINI_MODEL}. Depth ${DEPTH}, ${CASES.length} cases${BIBLE_ONLY ? ", bible only" : ", 2 variants each"}…`);
   const runs = [];
   for (let i = 0; i < CASES.length; i++) {
     const c = CASES[i];
@@ -177,13 +220,14 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&
           metadata: { seed_input: { idea: c.idea, genre: c.genre, tone: c.tone } },
         };
         const bible = await generateStoryBible(seed);
-        const plain = await walk(seed, bible, "no bible");
         const withBible = await walk(seed, bible, "bible");
-        const jPlain = await judge(seed, c.idea, plain);
+        const plain = BIBLE_ONLY ? withBible : await walk(seed, bible, "no bible");
         const jBible = await judge(seed, c.idea, withBible);
+        const jPlain = BIBLE_ONLY ? jBible : await judge(seed, c.idea, plain);
+        const steering = await steer(seed, bible, c.steer);
         console.log(`  ✓ case ${i + 1} (${c.genre})`);
         return {
-          c, seed, bible, plain, withBible, jPlain, jBible,
+          c, seed, bible, plain, withBible, jPlain, jBible, steering,
           sPlain: score(plain, c, bible), sBible: score(withBible, c, bible),
         };
       } catch (err) {
@@ -212,8 +256,16 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&
     };
   };
   const summary = { "no bible": agg("sPlain"), bible: agg("sBible") };
-  console.log(`\nSUMMARY (${ok.length}/${CASES.length} cases completed)`);
-  console.table(summary);
+  const seedWords = ok.map((r) => wordCount(r.seed.content));
+  const overall = {
+    "seed words (target 400-800)": seedWords.join(", "),
+    "seeds in range": `${seedWords.filter((w) => w >= 400 && w <= 800).length}/${ok.length}`,
+    "steering: follows (1-5)": (ok.reduce((a, r) => a + r.steering.follows, 0) / Math.max(1, ok.length)).toFixed(1),
+    "steering: alternative differs": `${ok.filter((r) => r.steering.alternative_differs).length}/${ok.length}`,
+  };
+  console.log(`\nSUMMARY (${ok.length}/${CASES.length} cases completed, generator ${TEXT_MODEL})`);
+  console.table(BIBLE_ONLY ? { bible: summary.bible } : summary);
+  console.table(overall);
 
   const col = (label: string, nodes: StoryNode[]) =>
     `<div class="col"><h3>${label}</h3>${nodes.slice(1).map((n, k) => `<div class="lvl"><div class="teaser">Level ${k + 1}: ${esc(n.teaser || "")}</div>${n.content.split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</div>`).join("")}</div>`;
@@ -225,13 +277,16 @@ table{border-collapse:collapse;margin:12px 0 32px}th,td{border-bottom:1px solid 
 .case{margin-bottom:40px}.idea{color:var(--muted);font-style:italic}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
 .col{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}.col h3{margin:0 0 8px}.lvl{border-top:1px solid var(--line);padding-top:8px;margin-top:8px}
 .teaser{font-size:13px;color:var(--muted);font-weight:600}details{margin:8px 0}pre{white-space:pre-wrap;font-size:13px}
-</style></head><body><h1>Branch eval — depth ${DEPTH}</h1>
+</style></head><body><h1>Branch eval — depth ${DEPTH}</h1><p>Generator ${esc(TEXT_MODEL)} · judge ${GEMINI_MODEL}</p>
+<table>${Object.entries(overall).map(([k, v]) => `<tr><td>${k}</td><td>${esc(v)}</td></tr>`).join("")}</table>
 <table><tr><th>Metric</th><th>No bible</th><th>Bible</th></tr>${Object.keys(summary["no bible"]).map((k) => `<tr><td>${k}</td><td>${(summary["no bible"] as any)[k]}</td><td>${(summary.bible as any)[k]}</td></tr>`).join("")}</table>
 ${ok.map((r, i) => `<div class="case"><h2>${i + 1}. ${esc(r.c.genre)} — ${esc(r.seed.title || "")}</h2><p class="idea">"${esc(r.c.idea)}"</p>
 <details><summary>Seed + bible</summary><pre>${esc(r.seed.content)}\n\n${esc(JSON.stringify(r.bible, null, 2))}</pre></details>
 <p><b>Judge, no bible:</b> consistency ${r.jPlain.consistency}, fidelity ${r.jPlain.idea_fidelity}${r.jPlain.contradictions.length ? " · " + esc(r.jPlain.contradictions.join("; ")) : ""}<br>
 <b>Judge, bible:</b> consistency ${r.jBible.consistency}, fidelity ${r.jBible.idea_fidelity}${r.jBible.contradictions.length ? " · " + esc(r.jBible.contradictions.join("; ")) : ""}</p>
-<div class="grid">${col("No bible", r.plain)}${col("Bible", r.withBible)}</div></div>`).join("")}
+<p><b>Steering</b> "${esc(r.steering.request)}": follows ${r.steering.follows}/5, alternative differs: ${r.steering.alternative_differs ? "yes" : "no"} · ${esc(r.steering.note)}<br>
+Branch 1: ${esc(r.steering.a.teaser)}<br>Branch 2: ${esc(r.steering.b?.teaser || "")}</p>
+<div class="grid">${BIBLE_ONLY ? "" : col("No bible", r.plain)}${col("Bible", r.withBible)}</div></div>`).join("")}
 </body></html>`;
   fs.mkdirSync(path.join("scripts", "output"), { recursive: true });
   const out = path.join("scripts", "output", `eval-branches-${new Date().toISOString().replace(/[:.]/g, "-")}.html`);
