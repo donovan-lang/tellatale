@@ -5,6 +5,7 @@ import { createServiceClient } from "@/lib/supabase-server";
 import { getRequestUser } from "@/lib/request-user";
 import { createNotification } from "@/lib/notify";
 import { postNewStoryToDiscord } from "@/lib/discord";
+import { toStorySlug } from "@/lib/utils";
 import {
   isSpamContent,
   isHoneypotFilled,
@@ -160,14 +161,7 @@ export async function POST(req: NextRequest) {
     // Generate slug for seeds
     let slug: string | null = null;
     if (!isBranch && title) {
-      slug = title
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9 ]/g, "")
-        .replace(/ +/g, "-")
-        .slice(0, 80);
-      // Append random suffix to avoid collisions
-      slug += "-" + Math.random().toString(36).slice(2, 6);
+      slug = toStorySlug(title);
     }
 
     // Base row (sanitize all user text)

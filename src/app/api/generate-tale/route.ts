@@ -1,46 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { useCredit } from "@/lib/credits";
-import { callGemini, parseGeminiJSON, isTextGenConfigured } from "@/lib/gemini";
-import { buildGenreCraftBlock } from "@/lib/genre-craft";
-import { formatParagraphs } from "@/lib/utils";
-
-
-const VALID_TAGS = [
-  "Fantasy", "Sci-Fi", "Horror", "Mystery", "Romance", "Adventure",
-  "Thriller", "Comedy", "Drama", "Surreal", "Historical", "Dystopia",
-  "Steampunk", "Cyberpunk", "Mythology", "Noir", "Gothic",
-  "Cosmic Horror", "Slice-of-Life", "Alternate History",
-];
-
-const TONES = [
-  "dark",
-  "lighthearted",
-  "humorous",
-  "epic",
-  "mysterious",
-  "romantic",
-  "tense",
-  "whimsical",
-  "gritty",
-  "dreamlike",
-] as const;
-
-const SYSTEM_PROMPT = `You are the tale generation engine for MakeATale, a collaborative choose-your-own-adventure platform. Your job is to create compelling story seeds that hook readers and invite branching.
-
-Rules:
-- Generate a story seed: an opening that sets a scene, introduces tension, and ends with a clear question, choice, or cliffhanger that begs for multiple continuations.
-- The content must be 400-800 words. Rich enough to establish world/character/conflict, short enough to leave room for the community to branch.
-- End with a moment of decision — a fork in the road. Make it obvious there are multiple paths forward.
-- Match the requested genre and tone precisely.
-- Write in second person ("you") OR third person — pick whichever fits the genre better.
-- No meta-commentary, no author notes, no "what do you do?" prompts. Just end at the decision point naturally.
-- Be vivid, atmospheric, and specific. No generic fantasy/sci-fi cliches unless the user asks for them.
-- Format for easy reading: short paragraphs of 1-4 sentences separated by a blank line (a "\\n\\n" escape in the JSON string). Every line of dialogue starts its own paragraph. Never return one unbroken block of text.
-
-Respond in EXACTLY this JSON format (no markdown fences, no extra text):
-{"title":"Story Title Here","content":"The full story seed text here...","tags":["Genre1","Genre2"]}
-
-The tags array should contain 1-3 genre tags from this list ONLY: Fantasy, Sci-Fi, Horror, Mystery, Romance, Adventure, Thriller, Comedy, Drama, Surreal, Historical, Dystopia, Steampunk, Cyberpunk, Mythology, Noir, Gothic, Cosmic Horror, Slice-of-Life, Alternate History.`;
+import { isTextGenConfigured } from "@/lib/gemini";
+import { generateSeed, SeedGenError } from "@/lib/seed-gen";
 
 export async function POST(req: NextRequest) {
   try {
@@ -76,74 +37,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Build the generation prompt
-    let userPrompt = `Generate a story seed based on this idea:\n\n"${prompt.trim()}"`;
-
-    if (genre) {
-      userPrompt += `\n\nGenre: ${genre}`;
-    }
-
-    if (tone && TONES.includes(tone)) {
-      userPrompt += `\nTone: ${tone}`;
-    }
-
-    userPrompt +=
-      "\n\nRemember: respond with ONLY the JSON object, no markdown fences.";
-
-    // Anchor the model to a concrete genre voice/style sample rather than
-    // relying on the generic rules alone.
-    const genreCraft = VALID_TAGS.includes(genre) ? buildGenreCraftBlock(genre) : "";
-    const systemPrompt = SYSTEM_PROMPT + genreCraft;
-
-    let raw: string;
     try {
-      raw = await callGemini({
-        systemPrompt,
-        userPrompt,
-        temperature: 0.9,
-        maxOutputTokens: 2048,
-        responseSchema: {
-          type: "OBJECT",
-          properties: {
-            title: { type: "STRING" },
-            content: { type: "STRING" },
-            tags: { type: "ARRAY", items: { type: "STRING" } },
-          },
-          required: ["title", "content", "tags"],
-        },
-      });
+      return NextResponse.json(await generateSeed({ idea: prompt, genre, tone }));
     } catch (err) {
+      if (err instanceof SeedGenError) {
+        return NextResponse.json({ error: err.message }, { status: 502 });
+      }
       console.error("AI generation error:", err);
       return NextResponse.json(
         { error: "AI service error" },
         { status: 502 }
       );
     }
-
-    // Parse JSON from response (strip markdown fences if present)
-    let parsed: { title: string; content: string; tags: string[] };
-    try {
-      parsed = parseGeminiJSON(raw);
-    } catch {
-      return NextResponse.json(
-        { error: "Failed to parse AI response" },
-        { status: 502 }
-      );
-    }
-
-    // Validate
-    if (!parsed.title || !parsed.content) {
-      return NextResponse.json(
-        { error: "AI generated an incomplete story" },
-        { status: 502 }
-      );
-    }
-
-    return NextResponse.json({
-      title: parsed.title.slice(0, 200),
-      content: formatParagraphs(parsed.content).slice(0, 3000),
-      tags: (parsed.tags || []).filter((t: string) => VALID_TAGS.includes(t)).slice(0, 3),
-    });
   } catch (err: any) {
     console.error("Generate tale error:", err);
     return NextResponse.json(
