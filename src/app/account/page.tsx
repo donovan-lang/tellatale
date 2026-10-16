@@ -266,6 +266,19 @@ export default function AccountPage() {
       {/* ====== PROFILE TAB ====== */}
       {tab === "profile" && (
         <div className="space-y-6">
+          <a
+            href="/account/profile"
+            className="card flex items-center gap-4 hover:border-brand-500/40 transition-colors"
+          >
+            <span className="text-3xl" aria-hidden>{"\u{1F3A8}"}</span>
+            <span className="flex-1 min-w-0">
+              <span className="block font-semibold">Customize your profile page</span>
+              <span className="block text-xs text-gray-500 mt-0.5">
+                Pick a theme, colors, fonts and effects, pin a featured tale, and arrange what readers see.
+              </span>
+            </span>
+          </a>
+
           <div className="card space-y-4">
             <h2 className="font-semibold flex items-center gap-2">
               <Pen size={16} className="text-brand-400" />

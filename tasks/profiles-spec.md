@@ -21,13 +21,13 @@ colors:     { bg, surface, text, accent, link }   hex only
 font:       { heading, body }                      from a curated Google Fonts list
 background: { kind: solid | gradient | pattern, value }  patterns from a built-in set (stars, paper, grid, waves...)
 banner:     { kind: gradient | pattern | image, value }  image = Rupert-generated (Phase 4) or upload once Storage exists
-layout:     [{ block, visible }] ordered; block ∈ header, featured, chapters, map, badges, top8, guestbook, stories
+layout:     [{ block, visible }] ordered; block ∈ featured, chapters, stats, badges, stories, map, top8, guestbook (header is always first)
 cursor/sparkle effects: optional fun toggles (reduced-motion respected)
 status:     "currently writing…" line (≤ 80 chars)
 ```
 
 ## Phases
-1. **Foundation.** Migration, validated `PUT /api/profile/customization`, a theme engine (CSS variables from presets plus overrides), block-based profile rendering, header, featured tale, chapters timeline, badges and stories blocks, and a Profile editor on /account with live preview and drag-to-reorder blocks.
+1. ✅ **Foundation** (built 2026-10-16; migration not applied yet). Migration, validated `PUT /api/profile/customization`, a theme engine (CSS variables from presets plus overrides), block-based profile rendering, header, featured tale, chapters timeline, badges and stories blocks, and a Profile editor on /account with live preview and drag-to-reorder blocks.
 2. **Social.** Top 8 (choose and order from follows), guestbook (post, hide, report).
 3. **Writer's map.** An SVG tree of every path the writer has contributed to, with their nodes highlighted.
 4. **Images.** Either enable Supabase Storage on the Linode box (the gateway currently exposes only auth and rest) for banner and background uploads with size/type limits, or have Rupert generate banners with klein-4b from a prompt.

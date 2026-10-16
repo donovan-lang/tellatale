@@ -103,7 +103,7 @@ export const THEMES: Record<ThemeId, ThemePreset> = {
   gothic: {
     label: "Gothic",
     blurb: "Candlelit crypt, velvet and blood",
-    colors: { bg: "#120D14", surface: "#1E1620", text: "#EBDDEE", muted: "#A08AA6", accent: "#C0143F", link: "#CBA6DA" },
+    colors: { bg: "#120D14", surface: "#1E1620", text: "#EBDDEE", muted: "#A08AA6", accent: "#C0143F", link: "#B07CC6" },
     font: { heading: "pirata", body: "cormorant" },
     background: { kind: "pattern", pattern: "diamonds" },
     banner: { kind: "pattern", pattern: "diamonds" },

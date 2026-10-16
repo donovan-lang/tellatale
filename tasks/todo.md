@@ -60,13 +60,15 @@ Report: "sign in feature is broken". Known so far: Supabase auth healthy; Kiana'
 - [ ] Kiana: signed-in check in Edge (sign in, drafts save, reset password email round trip)
 - [x] Deploy to Linode (done 2026-10-16) (Kiana owns launch calls now; Donovan only for system breaks)
 
-## Writer profiles, MySpace-style (logged 2026-10-02, Kiana; not started)
-Idea: writers customize their own profile page (custom background, images, look and feel) and each profile should tell a story.
-- Starting point: existing public page `src/app/author/[name]/page.tsx` (+ feed.xml)
-- [ ] Spec it: which customization (background image/color, banner, avatar, fonts, accent colors, music?), what "tells a story" means (bio as a story? pinned tale? a timeline of their tales?)
-- [ ] Storage for uploads (Supabase Storage bucket), size/type limits, moderation for images
-- [ ] Security: no raw user HTML/CSS (XSS). Give curated theme controls/presets instead, sanitized on save
-- [ ] Profile settings editor on /account + live preview
+## Writer profiles, MySpace-style (logged 2026-10-02, Kiana; Phase 1 built 2026-10-16)
+Spec + decisions: tasks/profiles-spec.md (pinned tale, chapters timeline, writer's map; full customization via structured controls; Top 8, guestbook, badges).
+- [x] Spec it (2026-10-16)
+- [x] Security: no raw user HTML/CSS. `sanitizeCustomization()` whitelists every field (src/lib/profile-theme.ts, tests/profile-theme.test.ts)
+- [x] Phase 1: 8 themes, fonts, patterns, effects, block layout, header/featured/chapters/stats/badges/stories on /author/[name]; GET/PUT /api/profile/customization; editor + live preview at /account/profile (linked from /account)
+- [ ] Apply migration supabase/migrations/20261016000000_profile_customization.sql: Supabase SQL editor for the cloud/dev project, and on the Linode box for prod (part of the next deploy). Until then the page uses the default theme and the editor's Save is disabled with a notice
+- [ ] Kiana: signed-in check of /account/profile in Edge (pick a theme, change colors, pin a tale, reorder sections, save, open your /author page). Editor not yet tested signed in
+- [ ] Phase 2: Top 8 + guestbook. Phase 3: writer's map. Phase 4: images (Storage isn't exposed on the Linode gateway, only auth + rest)
+- [ ] Bun tests: bun isn't installed on Kiana's PC; profile-theme tests were run through a node shim (12/12)
 
 ## Move all text generation to Rupert (logged 2026-10-02, from Donovan; not started)
 Donovan: all text gen should go through Rupert (indie.io's LLM, https://rupert.indieio.dev) because it's free for us, instead of Gemini/Anthropic.
