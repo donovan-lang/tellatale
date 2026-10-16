@@ -9,18 +9,15 @@
  *   - "bible":      same, plus the story bible + author's original idea
  * Also checks reader steering: one "where should it go?" request per case off the seed.
  * Generation uses whatever callGemini routes to (Rupert when RUPERT_API_KEY is set); the
- * judge is pinned to Gemini so scores stay comparable across generator models.
+ * judge is JUDGE_MODEL (default Rupert deepseek-v4-flash, or a gemini-* name).
  * Scores the deepest levels and writes scripts/output/eval-branches-<ts>.html.
  */
+import "./load-env";
 import * as fs from "fs";
 import * as path from "path";
 
-for (const line of fs.readFileSync(".env.local", "utf8").split(/\r?\n/)) {
-  const m = line.match(/^([A-Z_]+)=(.*)$/);
-  if (m && !process.env[m[1]]) process.env[m[1]] = m[2].replace(/^"|"$/g, "");
-}
 
-import { callGemini as rawCallGemini, parseGeminiJSON, GEMINI_MODEL, TEXT_MODEL } from "../src/lib/gemini";
+import { callGemini as rawCallGemini, parseGeminiJSON, TEXT_MODEL } from "../src/lib/gemini";
 import { buildGenreCraftBlock } from "../src/lib/genre-craft";
 import {
   buildBranchPromptWithContext,
@@ -33,6 +30,8 @@ import {
 
 const DEPTH = Number(process.argv[2]) || 4;
 const BIBLE_ONLY = process.argv.includes("bible-only");
+// A different model family than the generator, so it isn't grading its own writing.
+const JUDGE_MODEL = process.env.JUDGE_MODEL || "deepseek-v4-flash";
 
 // The Gemini key is on Google's free tier (~5 RPM flash / 15 RPM lite), so space Gemini calls out.
 const MIN_GAP_MS = 6000;
@@ -139,9 +138,9 @@ async function judge(seed: StoryNode, idea: string, nodes: StoryNode[]) {
       `FINAL SCENES (after ${nodes.length - 1} choices: ${nodes.slice(1).map((n) => n.teaser).join(" -> ")}):\n` +
       `"""\n${nodes.slice(-2).map((n) => n.content).join("\n\n---\n\n")}\n"""`,
     temperature: 0,
-    maxOutputTokens: 800,
+    maxOutputTokens: 2000, // judge model reasons first
     responseSchema: JUDGE_SCHEMA,
-    model: GEMINI_MODEL,
+    model: JUDGE_MODEL,
   });
   return parseGeminiJSON<{ consistency: number; idea_fidelity: number; contradictions: string[] }>(raw);
 }
@@ -177,7 +176,7 @@ BRANCH 2 (${b?.teaser}):
 """
 ${b?.content || ""}
 """`,
-    temperature: 0, maxOutputTokens: 400, responseSchema: STEER_SCHEMA, model: GEMINI_MODEL,
+    temperature: 0, maxOutputTokens: 2000, responseSchema: STEER_SCHEMA, model: JUDGE_MODEL,
   }));
   return { request, a, b, ...v };
 }
@@ -202,7 +201,7 @@ function score(nodes: StoryNode[], c: (typeof CASES)[number], bible: StoryBible 
 const esc = (s: string) => s.replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]!);
 
 (async () => {
-  console.log(`Generator ${TEXT_MODEL}, judge ${GEMINI_MODEL}. Depth ${DEPTH}, ${CASES.length} cases${BIBLE_ONLY ? ", bible only" : ", 2 variants each"}…`);
+  console.log(`Generator ${TEXT_MODEL}, judge ${JUDGE_MODEL}. Depth ${DEPTH}, ${CASES.length} cases${BIBLE_ONLY ? ", bible only" : ", 2 variants each"}…`);
   const runs = [];
   for (let i = 0; i < CASES.length; i++) {
     const c = CASES[i];
@@ -277,7 +276,7 @@ table{border-collapse:collapse;margin:12px 0 32px}th,td{border-bottom:1px solid 
 .case{margin-bottom:40px}.idea{color:var(--muted);font-style:italic}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
 .col{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}.col h3{margin:0 0 8px}.lvl{border-top:1px solid var(--line);padding-top:8px;margin-top:8px}
 .teaser{font-size:13px;color:var(--muted);font-weight:600}details{margin:8px 0}pre{white-space:pre-wrap;font-size:13px}
-</style></head><body><h1>Branch eval — depth ${DEPTH}</h1><p>Generator ${esc(TEXT_MODEL)} · judge ${GEMINI_MODEL}</p>
+</style></head><body><h1>Branch eval — depth ${DEPTH}</h1><p>Generator ${esc(TEXT_MODEL)} · judge ${JUDGE_MODEL}</p>
 <table>${Object.entries(overall).map(([k, v]) => `<tr><td>${k}</td><td>${esc(v)}</td></tr>`).join("")}</table>
 <table><tr><th>Metric</th><th>No bible</th><th>Bible</th></tr>${Object.keys(summary["no bible"]).map((k) => `<tr><td>${k}</td><td>${(summary["no bible"] as any)[k]}</td><td>${(summary.bible as any)[k]}</td></tr>`).join("")}</table>
 ${ok.map((r, i) => `<div class="case"><h2>${i + 1}. ${esc(r.c.genre)} — ${esc(r.seed.title || "")}</h2><p class="idea">"${esc(r.c.idea)}"</p>
